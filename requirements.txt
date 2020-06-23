@@ -1,0 +1,7 @@
+numpy==1.16.4
+opencv-python==4.1.0.25
+six==1.12.0
+tqdm==4.32.2
+imageio==2.5.0
+gevent==1.4.0
+imutils==0.5.3
