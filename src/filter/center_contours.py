@@ -1,4 +1,5 @@
-from grbl import GCode
+import numpy as np
+import cv2
 
 class Filter:
     def __init__(self):
@@ -9,8 +10,8 @@ class Filter:
     def meta(self):
         return {
             "filter": self.config_section,
-            "name":" Outline GRBL",
-            "description":"Generates GRBL Code of the contour",
+            "name":"Center Contour",
+            "description":"Place the contour in the center of the image",
             "parameter": False,
             "visible":True,
             "icon": self.icon
@@ -21,23 +22,24 @@ class Filter:
         self.conf_file = conf_file
 
     def process(self, image, cnt, code):
-        code = GCode()
-        height, width, channel = image.shape
+        # Concatenate all contours
         if len(cnt)>0:
+            cnt2 = np.concatenate(cnt)
+            # Determine the bounding rectangle
+            x, y, w, h = cv2.boundingRect(cnt2)
+            image_height, image_width, _ = image.shape
+
+            shift_x = (x+(w/2)) - image_width/2
+            shift_y = (y+(h/2)) - image_height/2
 
             for c in cnt:
                 i = 0
                 while i < len(c):
                     p = c[i]
-                    if i == 0:
-                        code.feed_rapid({"x":p[0]-width/2 , "y":(height - p[1])})
-                        code.drop_mill()
-                    else:
-                        code.feed_linear({"x":p[0]-width/2, "y":(height - p[1])})
-
+                    p[0] -= shift_x
+                    p[1] -= shift_y
                     i+=1
 
-                code.feed_linear({"x":(c[0][0]) ,"y": (height - c[0][1])})
-                code.raise_mill()
+            cv2.drawContours(image, cnt, -1, (0,255,0), 1)
 
         return image, cnt, code

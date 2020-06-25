@@ -2,31 +2,126 @@ body {
     color: red;
     padding:0;
     margin:0;
+    overflow: hidden;
 }
 
+.raspiScreen{
+    position: absolute;
+    width:800px;
+    height:480px;
+    border:1px solid red;
+    pointer-events: none;
+}
 
 .screen{
     position:absolute;
-    border:1px solid black;
-    width: 100%;
-    height: 100%;
+    left:0;
+    top:0;
+    bottom:0;
+    right:0;
 }
 
 .filter{
     position: absolute;
     left:0;
     top:0;
-    border:1px solid green;
+    bottom:0;
+    right:0;
+    overflow:auto;
+}
+
+.tabordion{
     height:100%;
-    width:50%;
-    overflow:scroll;
+    width: 100%;
 }
 
 .preview{
     position: absolute;
-    left:50%;
-    top:0;
-    border:1px solid red;
-    height:100%;
-    width:50%;
+    top: 50px;
+    left: 0;
+    bottom: 50px;
+    right: 0px;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center top;
+}
+
+.parameter{
+    position: absolute;
+    bottom:0;
+    padding-left:10px;
+    padding-right:10px;
+    width:calc(100% - 20px);
+}
+
+article img {
+    max-width: 100%;
+    display: block;
+    width: 100vw;
+    height: 100vh;
+    object-fit: contain;
+    border-radius: 3px;
+    box-shadow: 0 3px 6px rgba(0,0,0,0.9);
+}
+
+.tabordion {
+    color: #333;
+    display: block;
+    font-family: arial, sans-serif;
+    margin: auto;
+    position: relative;
+    width: 100%;
+}
+
+.tabordion input[name="sections"] {
+    left: -9999px;
+    position: absolute;
+    top: -9999px;
+}
+
+.tabordion section {
+    display: block;
+}
+
+.tabordion section label {
+    background: #ccc;
+    border:1px solid #fff;
+    cursor: pointer;
+    display: block;
+    font-size: 1.2em;
+    font-weight: bold;
+    padding: 15px 20px;
+    position: relative;
+    width: 180px;
+    z-index:100;
+}
+
+.tabordion section article {
+    display: none;
+    left: 230px;
+    position: absolute;
+    top: 0;
+    right:0;
+    bottom:0;
+}
+
+.tabordion section article:after {
+    background-color: #ccc;
+    bottom: 0;
+    content: "";
+    display: block;
+    left:-229px;
+    position: absolute;
+    top: 0;
+    width: 220px;
+    z-index:1;
+}
+
+.tabordion input[name="sections"]:checked + label {
+    background: #eee;
+    color: #bbb;
+}
+
+.tabordion input[name="sections"]:checked ~ article {
+    display: block;
 }

@@ -9,13 +9,18 @@ class Camera:
     def __init__(self):
         self.config_section = None
         self.conf_file = None
+        self.icon = None
+        self.zoom = 1
 
     def meta(self):
         return {
             "filter": self.config_section,
             "name":"Camera",
             "description":"Reads the image from your camera",
-            "params": []
+            "parameter": True,
+            "value": self.zoom,
+            "visible":True,
+            "icon": self.icon
         }
 
     def configure(self, config_section, conf_file):
@@ -28,3 +33,8 @@ class Camera:
         image = self.capture.read()
 
         return image, cnt, code
+
+    def set_parameter(self, val):
+        self.zoom = val
+        self.conf_file.set("zoom", self.config_section, str(val))
+

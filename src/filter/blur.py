@@ -9,13 +9,17 @@ class Filter:
         self.factor = 75
         self.config_section = None
         self.conf_file = None
+        self.icon = None
 
     def meta(self):
         return {
             "filter": self.config_section,
             "name":"Blur",
             "description":"Remove noise from the image",
-            "params": ["factor"]
+            "parameter": True,
+            "value": self.factor,
+            "visible":True,
+            "icon": self.icon
         }
 
     def configure(self, config_section, conf_file):
@@ -27,7 +31,7 @@ class Filter:
         image = cv2.bilateralFilter(image,9,self.factor,self.factor)
         return image, cnt, code
 
-    def set_factor(self, val):
+    def set_parameter(self, val):
         self.factor = val
         self.conf_file.set("factor", self.config_section, str(self.factor))
 

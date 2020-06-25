@@ -1,6 +1,9 @@
 import utils.clazz as clazz
 
 from file.configuration import Configuration
+import base64
+import os.path
+import inspect
 
 class Pipeline:
     def __init__(self, config_file ):
@@ -8,8 +11,16 @@ class Pipeline:
         self.filters = []
         self.pipeline = self.conf.sections()
         for filter in self.pipeline:
+            print(filter)
             instance = clazz.instance_by_name(filter)
             instance.configure(filter, self.conf)
+            # try to load an image/icon for the give filter
+            python_file = inspect.getfile(instance.__class__)
+            png_file = python_file.replace(".py", ".png")
+            if os.path.isfile(png_file):
+                with open(png_file, "rb") as image_file:
+                    encoded_string = base64.b64encode(image_file.read()).decode('utf-8')
+                    instance.icon = encoded_string
             self.filters.append(instance)
 
     def meta(self):
@@ -20,6 +31,9 @@ class Pipeline:
 
     def filter_count(self):
         return len(self.pipeline)
+
+    def set_parameter(self, index, value):
+        self.filters[index].set_parameter(value)
 
     def process(self):
         result = []

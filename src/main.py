@@ -6,10 +6,14 @@ from flask import Flask, render_template, make_response, send_from_directory
 from pipeline import Pipeline
 import json
 
-POOL_TIME = 1 #Seconds
+POOL_TIME = 0.5 #Seconds
 
 app = Flask(__name__)
 pipeline = Pipeline("config/outline_gcode.ini")
+
+import logging
+log = logging.getLogger('werkzeug')
+log.setLevel(logging.ERROR)
 
 
 # variables that are accessible from anywhere
@@ -35,12 +39,28 @@ def create_app():
     @app.route('/image/<index>', methods=['GET'])
     def input(index):
         global previewImage
-        global pipelineThread
+        global dataLock
         with dataLock:
-            retval, buffer = cv2.imencode('.png', previewImage[int(index)]["image"])
-            response = make_response(buffer.tobytes())
-            response.headers['Content-Type'] = 'image/png'
-            return response
+            try:
+                retval, buffer = cv2.imencode('.png', previewImage[int(index)]["image"])
+                response = make_response(buffer.tobytes())
+                response.headers['Content-Type'] = 'image/png'
+                return response
+            except:
+                return make_response("temporarly unavailable", 503)
+
+
+    @app.route('/parameter/<index>/<value>', methods=['POST'])
+    def parameter(index, value):
+        global pipeline
+        global dataLock
+        with dataLock:
+            try:
+                pipeline.set_parameter(int(index),int(value))
+                return make_response("ok",200)
+            except Exception as exc:
+                print(exc)
+                return make_response("temporarly unavailable", 503)
 
     def interrupt():
         global pipelineThread
@@ -50,9 +70,11 @@ def create_app():
         global previewImage
         global pipelineThread
         with dataLock:
-            result = pipeline.process()
-            previewImage = result
-            print("step...")
+            try:
+                result = pipeline.process()
+                previewImage = result
+            except:
+                print("error during image processing...ignored")
 
         # Set the next thread to happen
         pipelineThread = threading.Timer(POOL_TIME, processPipeline, ())
@@ -72,5 +94,5 @@ def create_app():
     return app
 
 app = create_app()
-app.run(debug=True)
+app.run(host="0.0.0.0", port=8080, debug=True)
 

@@ -1,5 +1,4 @@
 import cv2
-import numpy as np
 
 
 class Filter:
@@ -8,13 +7,17 @@ class Filter:
         self.threshold = 75
         self.config_section = None
         self.conf_file = None
+        self.icon = None
 
     def meta(self):
         return {
             "filter": self.config_section,
             "name":"Black & White",
             "description":"Adjust the threshold until you see only your parts",
-            "params": ["threshold"]
+            "parameter": True,
+            "value": self.threshold,
+            "visible":True,
+            "icon": self.icon
         }
 
     def configure(self, config_section, conf_file):
@@ -25,11 +28,9 @@ class Filter:
     def process(self, image, cnt, code):
         (thresh, blackAndWhiteImage) = cv2.threshold(image, self.threshold, 255, cv2.THRESH_BINARY)
 
-        thumb = cv2.resize(blackAndWhiteImage, (0, 0), None, .3, .3)
-
         return blackAndWhiteImage, cnt, code
 
-    def set_threshold(self, val):
+    def set_parameter(self, val):
         self.threshold = val
         self.conf_file.set("threshold", self.config_section, str(val))
 

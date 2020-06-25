@@ -6,13 +6,16 @@ class Filter:
     def __init__(self):
         self.config_section = None
         self.conf_file = None
+        self.icon = None
 
     def meta(self):
         return {
             "filter": self.config_section,
             "name": "Outline",
             "description":"Generates the outline of your black-white image",
-            "params": []
+            "parameter": False,
+            "visible":False,
+            "icon": self.icon
         }
 
     def configure(self, config_section, conf_file):
