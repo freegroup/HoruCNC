@@ -13,7 +13,7 @@ class Filter:
         return {
             "filter": self.config_section,
             "name":"Black & White",
-            "description":"Adjust the threshold until you see only your parts",
+            "description":"Adjust the slider until you see only the parts your want carve",
             "parameter": True,
             "value": self.threshold,
             "visible":True,
@@ -26,7 +26,12 @@ class Filter:
         self.threshold = self.conf_file.get_int("threshold", self.config_section)
 
     def process(self, image, cnt, code):
-        (thresh, blackAndWhiteImage) = cv2.threshold(image, self.threshold, 255, cv2.THRESH_BINARY)
+        try:
+            image = image.copy()
+            (thresh, blackAndWhiteImage) = cv2.threshold(image, self.threshold, 255, cv2.THRESH_BINARY)
+            cv2.imwrite("bw.png", blackAndWhiteImage)
+        except Exception as exc:
+            print(self.config_section, exc)
 
         return blackAndWhiteImage, cnt, code
 

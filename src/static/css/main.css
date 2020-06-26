@@ -3,6 +3,7 @@ body {
     padding:0;
     margin:0;
     overflow: hidden;
+    background-color:#007EFE;
 }
 
 .raspiScreen{
@@ -11,6 +12,7 @@ body {
     height:480px;
     border:1px solid red;
     pointer-events: none;
+    display:block;
 }
 
 .screen{
@@ -40,11 +42,24 @@ body {
     top: 50px;
     left: 0;
     bottom: 50px;
-    right: 0px;
+    right: 0;
     background-size: contain;
     background-repeat: no-repeat;
     background-position: center top;
 }
+
+
+.output{
+    position: absolute;
+    top: 50px;
+    left: 0;
+    bottom: 150px;
+    right: 0;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center top;
+}
+
 
 .parameter{
     position: absolute;
@@ -52,6 +67,13 @@ body {
     padding-left:10px;
     padding-right:10px;
     width:calc(100% - 20px);
+}
+
+.description{
+    color:white;
+    line-height: 50px;
+    font-weight: 700;
+    text-align: center;
 }
 
 article img {
@@ -73,6 +95,15 @@ article img {
     width: 100%;
 }
 
+.tabordion-background{
+    position: absolute;
+    left:0;
+    top:0;
+    background-color:rgb(104, 79, 248);;
+    bottom:0;
+    box-shadow: 0 3px 14px 5px rgba(0,0,0,.2);
+    width:98px;
+}
 .tabordion input[name="sections"] {
     left: -9999px;
     position: absolute;
@@ -81,44 +112,49 @@ article img {
 
 .tabordion section {
     display: block;
+    height:94px;
+    width:94px;
+    overflow:hidden;
 }
 
 .tabordion section label {
-    background: #ccc;
-    border:1px solid #fff;
     cursor: pointer;
-    display: block;
-    font-size: 1.2em;
-    font-weight: bold;
-    padding: 15px 20px;
+    display: inline-block;
+    padding: 0;
     position: relative;
-    width: 180px;
     z-index:100;
+    border: 1px solid white;
+    margin-left:2px;
+    border-radius: 4px;
+    background-color: rgba(255,255,255,0.1);
+}
+
+
+.tabordion section label {
+   width:88px;
+   height:88px;
+}
+
+.tabordion section .step {
+    color: white;
+    position: absolute;
+    top: 0;
+    left: 0;
 }
 
 .tabordion section article {
     display: none;
-    left: 230px;
+    left: 120px;
     position: absolute;
     top: 0;
     right:0;
     bottom:0;
+    background-color:#007EFE;
 }
 
-.tabordion section article:after {
-    background-color: #ccc;
-    bottom: 0;
-    content: "";
-    display: block;
-    left:-229px;
-    position: absolute;
-    top: 0;
-    width: 220px;
-    z-index:1;
-}
 
 .tabordion input[name="sections"]:checked + label {
-    background: #eee;
+    background-color:#007EFE;
     color: #bbb;
 }
 

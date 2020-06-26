@@ -23,12 +23,17 @@ class Filter:
         self.conf_file = conf_file
 
     def process(self, image, cnt, code):
-        kernel = np.ones((3,3),np.uint8)
+        try:
+            image = image.copy()
+            kernel = np.ones((3,3),np.uint8)
 
-        # remove white single pixels
-        image = cv2.morphologyEx(image, cv2.MORPH_OPEN, kernel)
+            # remove white single pixels
+            image = cv2.morphologyEx(image, cv2.MORPH_OPEN, kernel)
 
-        # outline
-        image = cv2.morphologyEx(image, cv2.MORPH_GRADIENT, kernel)
+            # outline
+            image = cv2.morphologyEx(image, cv2.MORPH_GRADIENT, kernel)
+
+        except Exception as exc:
+            print(self.config_section, exc)
 
         return image, cnt, code

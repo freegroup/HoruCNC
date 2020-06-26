@@ -28,7 +28,13 @@ class Filter:
         self.factor = self.conf_file.get_int("factor", self.config_section)
 
     def process(self, image, cnt, code):
-        image = cv2.bilateralFilter(image,9,self.factor,self.factor)
+        try:
+            image = image.copy()
+            image = cv2.bilateralFilter(image,9,self.factor,self.factor)
+        except Exception as exc:
+            print(self.config_section, exc)
+
+
         return image, cnt, code
 
     def set_parameter(self, val):

@@ -1,15 +1,17 @@
 import cv2
 import threading
 import atexit
+import sys
+import json
 from flask import Flask, render_template, make_response, send_from_directory
 
 from pipeline import Pipeline
-import json
 
 POOL_TIME = 0.5 #Seconds
+PIPELINE_CONFIG =  sys.argv[1]
 
 app = Flask(__name__)
-pipeline = Pipeline("config/outline_gcode.ini")
+pipeline = Pipeline(PIPELINE_CONFIG)
 
 import logging
 log = logging.getLogger('werkzeug')
@@ -28,20 +30,24 @@ def create_app():
 
     @app.route('/')
     def index():
+        global pipeline
         return render_template('index.html', filter_count=pipeline.filter_count())
 
     @app.route('/meta')
     def meta():
+        global pipeline
         response = make_response(json.dumps(pipeline.meta()))
         response.headers['Content-Type'] = 'application/json'
         return response
 
     @app.route('/image/<index>', methods=['GET'])
     def input(index):
+        global pipeline
         global previewImage
         global dataLock
         with dataLock:
             try:
+                print("reading image from", previewImage[int(index)]["filter"])
                 retval, buffer = cv2.imencode('.png', previewImage[int(index)]["image"])
                 response = make_response(buffer.tobytes())
                 response.headers['Content-Type'] = 'image/png'
@@ -67,13 +73,15 @@ def create_app():
         pipelineThread.cancel()
 
     def processPipeline():
+        global pipeline
         global previewImage
         global pipelineThread
         with dataLock:
             try:
                 result = pipeline.process()
                 previewImage = result
-            except:
+            except Exception as exc:
+                print(exc)
                 print("error during image processing...ignored")
 
         # Set the next thread to happen
@@ -94,5 +102,5 @@ def create_app():
     return app
 
 app = create_app()
-app.run(host="0.0.0.0", port=8080, debug=True)
+app.run(host="0.0.0.0", port=8080, debug=False,  threaded=False, use_reloader=False)
 

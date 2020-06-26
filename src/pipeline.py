@@ -7,6 +7,7 @@ import inspect
 
 class Pipeline:
     def __init__(self, config_file ):
+        print("init pipeline")
         self.conf = Configuration(config_file)
         self.filters = []
         self.pipeline = self.conf.sections()
