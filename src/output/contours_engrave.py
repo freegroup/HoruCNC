@@ -8,6 +8,7 @@ class Filter:
         self.conf_file = None
         self.icon = None
         self.width_in_mm = None
+        self.cnt = None
 
     def meta(self):
         return {
@@ -15,6 +16,7 @@ class Filter:
             "name":" Outline GRBL",
             "description":"Generates GRBL Code of the contour",
             "parameter": False,
+            "value": self.width_in_mm,
             "visible":True,
             "icon": self.icon
         }
@@ -27,6 +29,7 @@ class Filter:
     def process(self, image, cnt, code):
         try:
             if len(cnt)>0:
+                self.cnt = cnt
                 cnt2 = np.concatenate(cnt)
                 # Determine the bounding rectangle
                 x, y, w, h = cv2.boundingRect(cnt2)
@@ -63,23 +66,33 @@ class Filter:
         self.conf_file.set("width_in_mm", self.config_section, str(val))
 
 
-    def gcode(self, image, cnt, code):
+    def gcode(self):
         code = GCode()
-        height, width, channel = image.shape
-        if len(cnt)>0:
-            for c in cnt:
+        if len(self.cnt)>0:
+            cnt2 = np.concatenate(self.cnt)
+            # Determine the bounding rectangle
+            x, y, w, h = cv2.boundingRect(cnt2)
+            offset_x = w/2+x
+            offset_y = h/2-y
+            scale_factor = self.width_in_mm / w
+            for c in self.cnt:
                 i = 0
                 while i < len(c):
                     p = c[i]
+                    x = '{:06.4f}'.format((p[0]-offset_x)*scale_factor )
+                    y = '{:06.4f}'.format(((h - p[1])-offset_y)*scale_factor)
+                    position = {"x":x, "y":y}
                     if i == 0:
-                        code.feed_rapid({"x":p[0]-width/2 , "y":(height - p[1])})
+                        code.feed_rapid(position)
                         code.drop_mill()
                     else:
-                        code.feed_linear({"x":p[0]-width/2, "y":(height - p[1])})
+                        code.feed_linear(position)
 
                     i+=1
 
-                code.feed_linear({"x":(c[0][0]) ,"y": (height - c[0][1])})
+                x = '{:06.4f}'.format((c[0][0]-offset_x)*scale_factor)
+                y = '{:06.4f}'.format(((h - c[0][1])-offset_y)*scale_factor)
+                code.feed_linear({"x":x ,"y": y})
                 code.raise_mill()
 
-        return image, cnt, code
+        return code.to_string()

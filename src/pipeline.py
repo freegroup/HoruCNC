@@ -36,6 +36,9 @@ class Pipeline:
     def set_parameter(self, index, value):
         self.filters[index].set_parameter(value)
 
+    def gcode(self, index):
+        return self.filters[index].gcode()
+
     def process(self):
         result = []
         image = None

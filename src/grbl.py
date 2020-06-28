@@ -9,7 +9,6 @@ class GCode:
     self.name = "0001"
     self.unit = 'mm'
     self.positioning = "absolute"
-    self.scale_factor = 0.05
 
     # Define the clearance (10mm default)
     self.clearance = 10
@@ -55,7 +54,7 @@ class GCode:
   # Apply the scale based on the units
   def scale(self, number):
     # Return the number as scale is mm or inches
-    return self.scale_factor * number
+    return number
 
 
   # Derive the coordinate words from a position { x, y, z }
@@ -82,7 +81,7 @@ class GCode:
   # Derive the feed_rate word from a feed_rate (mm/minute)
   def feed_rate_code(self, feed_rate = 50):
     # Return the feed_rate word
-    return 'F' + str(self.scale(feed_rate))
+    return 'F' + str(feed_rate)
 
 
   # Drop the mill to a specified depth (0 by default)
@@ -156,7 +155,7 @@ class GCode:
       self.raise_mill()
 
     # Force stop or rewind the program
-    self.add('M' + "00" if force else '30')
+    self.add('M00' if force else 'M30')
 
     # Toggle the state to off
     self.toggle_state()

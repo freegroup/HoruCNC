@@ -40,6 +40,20 @@ def create_app():
         response.headers['Content-Type'] = 'application/json'
         return response
 
+    @app.route('/gcode/<index>')
+    def gcode(index):
+        global pipeline
+        global dataLock
+        with dataLock:
+            try:
+                gcode = pipeline.gcode(int(index))
+                response = make_response(gcode,200)
+                response.headers['Content-Type'] = 'application/txt'
+                return response
+            except Exception as exc:
+                print(exc)
+                return make_response("temporarly unavailable", 503)
+
     @app.route('/image/<index>', methods=['GET'])
     def input(index):
         global pipeline
@@ -47,7 +61,7 @@ def create_app():
         global dataLock
         with dataLock:
             try:
-                print("reading image from", previewImage[int(index)]["filter"])
+                # print("reading image from", previewImage[int(index)]["filter"])
                 retval, buffer = cv2.imencode('.png', previewImage[int(index)]["image"])
                 response = make_response(buffer.tobytes())
                 response.headers['Content-Type'] = 'image/png'

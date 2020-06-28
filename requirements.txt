@@ -6,4 +6,4 @@ imageio==2.5.0
 gevent==1.4.0
 imutils==0.5.3
 opencv-contrib-python==4.2.0.34
-
+pyserial==3.4
