@@ -1,6 +1,6 @@
 import utils.clazz as clazz
 
-from file.configuration import Configuration
+from utils.configuration import Configuration
 import base64
 import os.path
 import inspect

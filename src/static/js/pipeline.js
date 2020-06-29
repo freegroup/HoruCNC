@@ -20,40 +20,33 @@ function slider(filter, index){
 }
 
 function previewScreen(filter, index, step){
-    console.log(filter.filter)
-    if (filter.filter.startsWith("output.")){
-        return `<div
-               data-image="/image/${index}"  
-               class="output update"
-               style="background-image:url(/image/${index})" 
-               id="preview${index}" 
-               ></div>
-            <div class="description">${filter.description}</div>
-            <input 
-                     class="parameter" 
-                     id="slider${index}"  
-                     data-index="${index}" 
-                     type="range"
-                      min="0" 
-                      max="255" 
-                      value="${filter.value}" step="1">`
-    }
-    else {
-        return `<div
-               data-image="/image/${index}"  
-               class="preview update"
-               style="background-image:url(/image/${index})" 
-               id="preview${index}" 
-               ></div>
-            <div class="description">${filter.description}</div>
-            ${slider(filter, index)}`
-    }
+    return `<div
+           data-image="/image/${index}"  
+           class="preview update"
+           style="background-image:url(/image/${index})" 
+           id="preview${index}" 
+           ></div>
+        <div class="description">${filter.description}</div>
+        ${slider(filter, index)}`
+}
+
+function finalSection(){
+    let finalScreen = document.getElementById("finalScreen").innerHTML
+
+    return  `<section id="sectionFiNAL">
+                <input type="radio" name="sections" id="optionFiNAL">
+                <label for="optionFiNAL">ssssss</label>
+                <article>
+                ${finalScreen}
+                </article>
+             </section>`
 }
 
 fetch('/meta')
     .then(response => response.json())
     .then(data => {
         let step =1
+        let element = document.querySelector("#filters");
         data.forEach( (filter, index) => {
             if(filter.menu) {
                 let html = `<section id="section${index}">
@@ -63,12 +56,11 @@ fetch('/meta')
                             ${previewScreen(filter, index, step)}
                             </article>
                         </section>`
-
-                let element = document.querySelector("#filters");
                 element.insertAdjacentHTML('beforeend', html);
                 step++;
             }
         })
+        element.insertAdjacentHTML('beforeend', finalSection())
 
         function updateImage() {
             setTimeout(() => {

@@ -3,11 +3,20 @@ import threading
 import atexit
 import json
 import logging
+import time
 from flask import Flask, render_template, make_response, send_file
+import serial
 
 from pipeline import Pipeline
 
 POOL_TIME = 0.5 #Seconds
+
+# Open grbl serial port
+tty = serial.Serial('/dev/ttyAMA0',115200)
+tty.flushInput()  # Flush startup text in serial input
+
+readyToSend = False
+readyString = "ok\r\n"
 
 app = Flask(__name__)
 app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
@@ -24,6 +33,24 @@ dataLock = threading.Lock()
 # thread handler
 pipelineThread = threading.Thread()
 
+def outputLineAndWaitForReady(lineToSend):
+    readString = ""
+    readAChar = True
+    tty.write(str.encode(lineToSend + '\n'))
+    while (readAChar) :
+        readString = readString + tty.read().decode()
+        readyStringLength = len(readyString)
+
+        #print("read string:" + readString)
+        #print("last part of read string: " + readString[-readyStringLength:])
+        if (readString[-readyStringLength:] == readyString):
+            #print("ready")
+            print(readyString)
+            readAChar = False
+        if (readString[-1] == '\n'):
+            #do reporting & flushing here
+            print(readString[:-1])
+            readString = ""
 
 
 def create_app():
@@ -93,17 +120,14 @@ def create_app():
             except:
                 return make_response("temporarly unavailable", 503)
 
-    @app.route('/machine/<axis>/<direction>', methods=['POST'])
-    def machine_axis(axis, direction):
+    @app.route('/machine/<axis>/<amount>', methods=['POST'])
+    def machine_axis(axis, amount):
         global previewImage
         global dataLock
         with dataLock:
             try:
-                # print("reading image from", previewImage[int(index)]["filter"])
-                retval, buffer = cv2.imencode('.png', previewImage[int(index)]["image"])
-                response = make_response(buffer.tobytes())
-                response.headers['Content-Type'] = 'image/png'
-                return response
+                print(axis, amount)
+                return make_response("ok", 200)
             except:
                 return make_response("temporarly unavailable", 503)
 
@@ -152,7 +176,11 @@ def create_app():
     startPipeline()
     # When you kill Flask (SIGTERM), clear the trigger for the next thread
     atexit.register(interrupt)
-    return app
+    tty.write(str.encode('\n'))
+    time.sleep(4)   # Wait for grbl to initialize
+    tty.flushInput()  # Flush startup text in serial input
+
+return app
 
 app = create_app()
 app.run(host="0.0.0.0", port=8080, debug=False,  threaded=False, use_reloader=False)
