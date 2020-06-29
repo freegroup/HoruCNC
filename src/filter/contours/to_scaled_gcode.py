@@ -13,8 +13,8 @@ class Filter:
     def meta(self):
         return {
             "filter": self.config_section,
-            "name":"Contours to  GCode",
-            "description":"Generates GCode from your contours data",
+            "name":"Scale your Contours",
+            "description":"Resize your shape until it fits your needs",
             "parameter": True,
             "icon": self.icon
         }

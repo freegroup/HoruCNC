@@ -17,7 +17,7 @@ class Camera:
         return {
             "filter": self.config_section,
             "name":"Camera",
-            "description":"Place your image below the camera and zoom in to focus your part to mill",
+            "description":"Place the image in front of your camera and zoom in to focus",
             "parameter": True,
             "value": self.factor,
             "icon": self.icon

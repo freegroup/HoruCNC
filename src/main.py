@@ -93,6 +93,21 @@ def create_app():
             except:
                 return make_response("temporarly unavailable", 503)
 
+    @app.route('/machine/<axis>/<direction>', methods=['POST'])
+    def machine_axis(axis, direction):
+        global previewImage
+        global dataLock
+        with dataLock:
+            try:
+                # print("reading image from", previewImage[int(index)]["filter"])
+                retval, buffer = cv2.imencode('.png', previewImage[int(index)]["image"])
+                response = make_response(buffer.tobytes())
+                response.headers['Content-Type'] = 'image/png'
+                return response
+            except:
+                return make_response("temporarly unavailable", 503)
+
+
 
     @app.route('/parameter/<index>/<value>', methods=['POST'])
     def parameter(index, value):
