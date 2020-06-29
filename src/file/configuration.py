@@ -1,4 +1,4 @@
-from configparser import ConfigParser
+from configobj import ConfigObj
 import sys
 import os
 
@@ -10,8 +10,7 @@ class Configuration:
             sys.exit(1)
 
         self.file = inifile
-        self.config = ConfigParser()
-        self.config.read(self.file)
+        self.config = ConfigObj(self.file)
 
 
     def get_boolean(self, key, section="common"):
@@ -29,11 +28,10 @@ class Configuration:
 
     def set(self, key, section, value):
         self.config[section][key] = value
-        with open(self.file, 'w') as configfile:
-            self.config.write(configfile)
+        self.config.write()
 
     def section(self, section="common"):
         return dict(self.config.items(section))
 
     def sections(self):
-        return self.config.sections()
+        return self.config.sections

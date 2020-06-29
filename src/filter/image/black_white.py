@@ -16,7 +16,6 @@ class Filter:
             "description":"Adjust the slider until you see only the parts your want carve",
             "parameter": True,
             "value": self.threshold,
-            "visible":True,
             "icon": self.icon
         }
 
@@ -38,4 +37,8 @@ class Filter:
     def set_parameter(self, val):
         self.threshold = val
         self.conf_file.set("threshold", self.config_section, str(val))
+
+
+    def stop(self):
+        pass
 

@@ -1,19 +1,18 @@
 import cv2
 import threading
 import atexit
-import sys
 import json
-from flask import Flask, render_template, make_response, send_from_directory
+import logging
+from flask import Flask, render_template, make_response, send_file
 
 from pipeline import Pipeline
 
 POOL_TIME = 0.5 #Seconds
-PIPELINE_CONFIG =  sys.argv[1]
 
 app = Flask(__name__)
-pipeline = Pipeline(PIPELINE_CONFIG)
+app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
+pipeline = None
 
-import logging
 log = logging.getLogger('werkzeug')
 log.setLevel(logging.ERROR)
 
@@ -25,19 +24,45 @@ dataLock = threading.Lock()
 # thread handler
 pipelineThread = threading.Thread()
 
+
+
 def create_app():
     app = Flask(__name__)
 
     @app.route('/')
     def index():
+        return send_file('static/html/index.html', cache_timeout=-1)
+
+    @app.route('/pipeline/<name>')
+    def pipeline(name):
         global pipeline
-        return render_template('index.html', filter_count=pipeline.filter_count())
+        global dataLock
+        print("Pipeline:", name)
+        with dataLock:
+            if pipeline:
+                pipeline.stop()
+            pipeline = Pipeline("./config/"+name+".ini")
+            return send_file('static/html/pipeline.html', cache_timeout=-1)
+
+    @app.route('/pipelines')
+    def pipelines():
+        from os import listdir
+        from os.path import isfile, join, basename, splitext
+        onlyfiles = [splitext(basename(f))[0] for f in listdir("./config") if isfile(join("./config", f))]
+        print(onlyfiles)
+        response = make_response(json.dumps(onlyfiles))
+        response.headers['Content-Type'] = 'application/json'
+        return response
+
 
     @app.route('/meta')
     def meta():
         global pipeline
         response = make_response(json.dumps(pipeline.meta()))
         response.headers['Content-Type'] = 'application/json'
+        response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
+        response.headers['Pragma'] = 'no-cache'
+        response.headers['Expires'] = '0'
         return response
 
     @app.route('/gcode/<index>')
@@ -46,7 +71,7 @@ def create_app():
         global dataLock
         with dataLock:
             try:
-                gcode = pipeline.gcode(int(index))
+                gcode = pipeline.gcode(int(index)).to_string()
                 response = make_response(gcode,200)
                 response.headers['Content-Type'] = 'application/txt'
                 return response
@@ -56,7 +81,6 @@ def create_app():
 
     @app.route('/image/<index>', methods=['GET'])
     def input(index):
-        global pipeline
         global previewImage
         global dataLock
         with dataLock:
@@ -92,8 +116,8 @@ def create_app():
         global pipelineThread
         with dataLock:
             try:
-                result = pipeline.process()
-                previewImage = result
+                if pipeline:
+                    previewImage = pipeline.process()
             except Exception as exc:
                 print(exc)
                 print("error during image processing...ignored")

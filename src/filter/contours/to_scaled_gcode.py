@@ -7,16 +7,15 @@ class Filter:
         self.config_section = None
         self.conf_file = None
         self.icon = None
-        self.width_in_mm = None
         self.cnt = None
+        self.width_in_mm = 20
 
     def meta(self):
         return {
             "filter": self.config_section,
-            "name":" Outline GRBL",
-            "description":"Generates GRBL Code of the contour",
+            "name":"Contours to  GCode",
+            "description":"Generates GCode from your contours data",
             "parameter": True,
-            "value": self.width_in_mm,
             "icon": self.icon
         }
 
@@ -29,6 +28,11 @@ class Filter:
         try:
             if len(cnt)>0:
                 self.cnt = cnt
+                unit = self.conf_file.get("display_unit", self.config_section)
+                # only "cm" and "mm" are allowed
+                unit = "cm" if unit == "cm" else "mm"
+                display_factor = 1 if unit == "mm" else 0.1
+
                 cnt2 = np.concatenate(cnt)
                 # Determine the bounding rectangle
                 x, y, w, h = cv2.boundingRect(cnt2)
@@ -45,19 +49,19 @@ class Filter:
                 cv2.line(newimage, (x,y+int(h/2)),(x+w,y+int(h/2)), (255, 0, 0), 5)
                 cv2.circle(newimage, (x,y+int(h/2)), 15, (255, 0, 0), -1)
                 cv2.circle(newimage, (x+w,y+int(h/2)), 15, (255, 0, 0), -1)
-                cv2.putText(newimage, "{:.1f} mm".format(self.width_in_mm),(x+20,y+int(h/2)-30), cv2.FONT_HERSHEY_SIMPLEX, 1.65, (255, 0, 0), 4)
+                cv2.putText(newimage, "{:.1f} {}".format(self.width_in_mm*display_factor, unit),(x+20,y+int(h/2)-30), cv2.FONT_HERSHEY_SIMPLEX, 1.65, (255, 0, 0), 4)
 
                 # draw the height dimension
                 cv2.line(newimage, (x+int(w/2),y),(x+int(w/2),y+h), (255, 0, 0), 5)
                 cv2.circle(newimage, (x+int(w/2),y), 15, (255, 0, 0), -1)
                 cv2.circle(newimage, (x+int(w/2),y+h), 15, (255, 0, 0), -1)
-                cv2.putText(newimage, "{:.1f} mm".format(height_in_mm),(x+int(w/2)+20,y+50), cv2.FONT_HERSHEY_SIMPLEX, 1.65, (255, 0, 0), 4)
+                cv2.putText(newimage, "{:.1f} {}".format(height_in_mm*display_factor, unit),(x+int(w/2)+20,y+50), cv2.FONT_HERSHEY_SIMPLEX, 1.65, (255, 0, 0), 4)
 
                 image = newimage
         except Exception as exc:
             print(exc)
 
-        return image, cnt, code
+        return image, cnt, self.gcode()
 
 
     def set_parameter(self, val):
@@ -71,14 +75,25 @@ class Filter:
             cnt2 = np.concatenate(self.cnt)
             # Determine the bounding rectangle
             x, y, w, h = cv2.boundingRect(cnt2)
+
+            # the offset to move the center of the gcode to [0,0]
             offset_x = w/2+x
             offset_y = h/2-y
+
+            # the scale factor to fulfill the required width in [mm]
             scale_factor = self.width_in_mm / w
+
+            # transform all coordinates and generate gcode
+            # for this we must apply:
+            #    - the scale factor
+            #    - the x/y translation
+            #    - flip them upside down (gcode coordinate system vs. openCV coordinate system)
+            #
             for c in self.cnt:
                 i = 0
                 while i < len(c):
                     p = c[i]
-                    x = '{:06.4f}'.format((p[0]-offset_x)*scale_factor )
+                    x = '{:06.4f}'.format((     p[0] -offset_x)*scale_factor)
                     y = '{:06.4f}'.format(((h - p[1])-offset_y)*scale_factor)
                     position = {"x":x, "y":y}
                     if i == 0:
@@ -89,12 +104,12 @@ class Filter:
 
                     i+=1
 
-                x = '{:06.4f}'.format((c[0][0]-offset_x)*scale_factor)
+                x = '{:06.4f}'.format((     c[0][0] -offset_x)*scale_factor)
                 y = '{:06.4f}'.format(((h - c[0][1])-offset_y)*scale_factor)
                 code.feed_linear({"x":x ,"y": y})
                 code.raise_mill()
 
-        return code.to_string()
+        return code
 
 
     def stop(self):

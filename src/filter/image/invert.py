@@ -11,7 +11,6 @@ class Filter:
             "name":"Invers Black&White",
             "description":"The filter inverts a Black&White image",
             "parameter": False,
-            "visible":False,
             "icon": self.icon
         }
 
@@ -21,3 +20,8 @@ class Filter:
 
     def process(self, image, cnt, code):
         return (255-image), cnt, code
+
+
+    def stop(self):
+        pass
+

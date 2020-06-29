@@ -8,7 +8,7 @@ s = serial.Serial('/dev/tty.usbserial-AM004QFS',115200)
 f = open('test.nc','r')
 s.flushInput()  # Flush startup text in serial input
 readyToSend = False
-readyString = "\n"
+readyString = "ok\r\n"
 
 def outputLineAndWaitForReady(lineToSend):
     readString = ""

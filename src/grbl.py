@@ -48,7 +48,7 @@ class GCode:
   # Applying the positioning (absolute or relative)
   def set_absolute(self, absolute):
     # Add the positioning code
-    self.add('G' + "90" if absolute else '91')
+    self.add('G90' if absolute else 'G91')
 
 
   # Apply the scale based on the units
@@ -102,7 +102,7 @@ class GCode:
   # Start the spindle in a direction (clockwise by default)
   def start_spindle(self, clockwise = True):
     # Add the code to the stack to start the spindle in a specified direction
-    self.add('M' + "03" if clockwise else '04')
+    self.add('M03' if clockwise else 'M04')
 
 
   # Stop the spindle
@@ -114,7 +114,7 @@ class GCode:
   # Start the coolant with a certain intensity (false by default)
   def start_coolant(self, flood = False):
     # Add the code to the stack to start the coolant
-    self.add('M' + "08" if flood else '07')
+    self.add('M08' if flood else 'M07')
 
 
   # Stop the coolant

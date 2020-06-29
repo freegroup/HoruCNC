@@ -11,9 +11,8 @@ class Filter:
         return {
             "filter": self.config_section,
             "name":"Contours",
-            "description":"Generates the contour of your outline",
+            "description":"Generates the contour of your outline image",
             "parameter": False,
-            "visible":False,
             "icon": self.icon
         }
 
@@ -42,3 +41,7 @@ class Filter:
             print(self.config_section, exc)
 
         return image, cnt, code
+
+    def stop(self):
+        pass
+

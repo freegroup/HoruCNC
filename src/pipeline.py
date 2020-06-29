@@ -12,6 +12,10 @@ class Pipeline:
         self.filters = []
         self.pipeline = self.conf.sections()
         for filter in self.pipeline:
+            # ignore the common section
+            if filter == "common":
+                continue
+
             print(filter)
             instance = clazz.instance_by_name(filter)
             instance.configure(filter, self.conf)
@@ -27,7 +31,10 @@ class Pipeline:
     def meta(self):
         meta_info = []
         for instance in self.filters:
-            meta_info.append(instance.meta())
+            menu = self.conf.get_boolean("menu", instance.config_section)
+            meta  =instance.meta()
+            meta["menu"]= menu
+            meta_info.append(meta)
         return meta_info
 
     def filter_count(self):
@@ -49,3 +56,7 @@ class Pipeline:
             result.append({"filter": instance.config_section, "image":image, "contour": cnt, "gcode": gcode})
 
         return result
+
+    def stop(self):
+        for instance in self.filters:
+            instance.stop()

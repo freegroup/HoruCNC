@@ -12,7 +12,6 @@ class Filter:
             "name":"grayscale",
             "description":"Grayscale a color image",
             "parameter": False,
-            "visible":False,
             "icon": self.icon
         }
 
@@ -30,3 +29,8 @@ class Filter:
             print(self.config_section, exc)
 
         return image, cnt, code
+
+
+    def stop(self):
+        pass
+

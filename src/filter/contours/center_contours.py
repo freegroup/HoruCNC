@@ -13,7 +13,6 @@ class Filter:
             "name":"Center Contour",
             "description":"Control the red contour before you start carving or exporting your CNC data",
             "parameter": False,
-            "visible":True,
             "icon": self.icon
         }
 
@@ -53,3 +52,7 @@ class Filter:
 
 
         return image, cnt, code
+
+    def stop(self):
+        pass
+

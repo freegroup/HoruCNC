@@ -1,6 +1,4 @@
 import cv2
-import numpy as np
-
 
 class Filter:
     def __init__(self):
@@ -11,10 +9,9 @@ class Filter:
     def meta(self):
         return {
             "filter": self.config_section,
-            "name": "Outline",
-            "description":"Generates the outline of your black-white image",
+            "name":"Thinning",
+            "description":"Thinning the outline of the found contour",
             "parameter": False,
-            "visible":False,
             "icon": self.icon
         }
 
@@ -25,15 +22,15 @@ class Filter:
     def process(self, image, cnt, code):
         try:
             image = image.copy()
-            kernel = np.ones((3,3),np.uint8)
-
-            # remove white single pixels
-            image = cv2.morphologyEx(image, cv2.MORPH_OPEN, kernel)
-
-            # outline
-            image = cv2.morphologyEx(image, cv2.MORPH_GRADIENT, kernel)
-
+            single_channel =  cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
+            print(single_channel.shape)
+            image = cv2.ximgproc.thinning(single_channel)
+            image = cv2.cvtColor(image, cv2.COLOR_GRAY2RGB)
         except Exception as exc:
-            print(self.config_section, exc)
+            print(exc)
 
         return image, cnt, code
+
+    def stop(self):
+        pass
+

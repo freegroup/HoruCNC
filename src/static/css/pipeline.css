@@ -1,0 +1,169 @@
+body {
+    color: red;
+    padding:0;
+    margin:0;
+    overflow: hidden;
+    background-color:#007EFE;
+}
+
+.screen{
+    position:absolute;
+    left:0;
+    top:0;
+    bottom:0;
+    right:0;
+}
+
+.filter{
+    position: absolute;
+    left:0;
+    top:0;
+    bottom:0;
+    right:0;
+    overflow:auto;
+}
+
+.tabordion{
+    height:100%;
+    width: 100%;
+}
+
+.preview{
+    position: absolute;
+    top: 50px;
+    left: 0;
+    bottom: 50px;
+    right: 0;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center top;
+}
+
+#index_button {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 64px;
+    height: 64px;
+    background-image: url(/static/images/index_button.png);
+    background-position: center;
+    background-size: contain;
+}
+
+
+.output{
+    position: absolute;
+    top: 50px;
+    left: 0;
+    bottom: 150px;
+    right: 0;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center top;
+}
+
+
+.parameter{
+    position: absolute;
+    bottom:0;
+    padding-left:10px;
+    padding-right:10px;
+    width:calc(100% - 20px);
+}
+
+.description{
+    color:white;
+    line-height: 50px;
+    font-weight: 700;
+    text-align: center;
+}
+
+article img {
+    max-width: 100%;
+    display: block;
+    width: 100vw;
+    height: 100vh;
+    object-fit: contain;
+    border-radius: 3px;
+    box-shadow: 0 3px 6px rgba(0,0,0,0.9);
+}
+
+.tabordion {
+    color: #333;
+    display: block;
+    font-family: arial, sans-serif;
+    margin: auto;
+    position: relative;
+    width: 100%;
+}
+
+.tabordion-background{
+    position: absolute;
+    left:0;
+    top:0;
+    background-color:rgb(104, 79, 248);;
+    bottom:0;
+    box-shadow: 0 3px 14px 5px rgba(0,0,0,.2);
+    width:98px;
+}
+.tabordion input[name="sections"] {
+    left: -9999px;
+    position: absolute;
+    top: -9999px;
+}
+
+#sectionINDEX{
+    height:0;
+}
+
+.tabordion section {
+    display: block;
+    height:94px;
+    width:94px;
+    overflow:hidden;
+}
+
+.tabordion section label {
+    cursor: pointer;
+    display: inline-block;
+    padding: 0;
+    position: relative;
+    z-index:100;
+    border: 1px solid white;
+    margin-left:2px;
+    border-radius: 4px;
+    background-color: rgba(255,255,255,0.1);
+}
+
+
+.tabordion section label {
+   width:88px;
+   height:88px;
+}
+
+.tabordion section .step {
+    color: white;
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
+.tabordion section article {
+    display: none;
+    left: 120px;
+    position: absolute;
+    top: 0;
+    right:0;
+    bottom:0;
+    background-color:#007EFE;
+}
+
+
+.tabordion input[name="sections"]:checked + label {
+    background-color:#007EFE;
+    color: #bbb;
+}
+
+.tabordion input[name="sections"]:checked ~ article {
+    display: block;
+}

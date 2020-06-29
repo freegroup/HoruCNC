@@ -20,7 +20,6 @@ class Camera:
             "description":"Place your image below the camera and zoom in to focus your part to mill",
             "parameter": True,
             "value": self.factor,
-            "visible":True,
             "icon": self.icon
         }
 
@@ -60,4 +59,8 @@ class Camera:
     def set_parameter(self, val):
         self.factor = val
         self.conf_file.set("zoom", self.config_section, str(val))
+
+
+    def stop(self):
+        self.capture.stop()
 
