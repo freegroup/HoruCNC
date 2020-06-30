@@ -129,7 +129,7 @@ def create_app():
                 print("start milling")
                 print(pipelineJob.filter_count()-1)
                 gcode = pipelineJob.gcode(pipelineJob.filter_count()-1).to_string()
-                with open("job.nc") as out:
+                with open("job.nc","w") as out:
                     out.write(gcode)
 
                 # reset the work coordinate system to 0/0/0 before start milling.
