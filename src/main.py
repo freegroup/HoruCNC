@@ -138,7 +138,7 @@ def create_app():
                 return make_response("temporarly unavailable", 503)
 
 
-    @app.route('/machine/probe/depth/speed', methods=['POST'])
+    @app.route('/machine/probe/<depth>/<speed>', methods=['POST'])
     def machine_probe(depth, speed):
         global dataLock
         with dataLock:
