@@ -46,7 +46,7 @@ def create_app():
             return send_file('static/html/pipelineJob.html', cache_timeout=-1)
 
     @app.route('/pipelines')
-    def pipeline():
+    def pipelines():
         from os import listdir
         from os.path import isfile, join, basename, splitext
         onlyfiles = [splitext(basename(f))[0] for f in listdir("./config") if isfile(join("./config", f))]
