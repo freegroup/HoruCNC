@@ -12,8 +12,12 @@ from pipeline import Pipeline
 POOL_TIME = 0.5 #Seconds
 
 # Open grbl serial port
-tty = serial.Serial('/dev/ttyAMA0',115200)
-tty.flushInput()  # Flush startup text in serial input
+tty = None
+try:
+    tty = serial.Serial('/dev/ttyAMA0',115200)
+    tty.flushInput()  # Flush startup text in serial input
+except:
+    pass
 
 readyToSend = False
 readyString = "ok\r\n"
@@ -177,9 +181,10 @@ def create_app():
     startPipeline()
     # When you kill Flask (SIGTERM), clear the trigger for the next thread
     atexit.register(interrupt)
-    tty.write(str.encode('\n'))
-    time.sleep(4)   # Wait for grbl to initialize
-    tty.flushInput()  # Flush startup text in serial input
+    if tty:
+        tty.write(str.encode('\n'))
+        time.sleep(4)   # Wait for grbl to initialize
+        tty.flushInput()  # Flush startup text in serial input
 
     return app
 

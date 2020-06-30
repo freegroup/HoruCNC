@@ -141,6 +141,12 @@ article img {
    height:88px;
 }
 
+
+.tabordion section label img{
+    height:100%;
+}
+
+
 .tabordion section .step {
     color: white;
     position: absolute;
@@ -166,4 +172,46 @@ article img {
 
 .tabordion input[name="sections"]:checked ~ article {
     display: block;
+}
+
+
+#arrow-east{
+    width:15vw;
+    height:auto;
+    box-shadow: none;
+    position: absolute;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+
+#arrow-south{
+    width:28vw;
+    height:auto;
+    box-shadow: none;
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+#arrow-west{
+    width:15vw;
+    height:auto;
+    box-shadow: none;
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+#arrow-north{
+    width:20vw;
+    height:auto;
+    box-shadow: none;
+    position: absolute;
+    left: 50%;
+    top: 0;
+    transform: translateX(-50%);
 }

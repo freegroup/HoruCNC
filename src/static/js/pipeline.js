@@ -30,12 +30,12 @@ function previewScreen(filter, index, step){
         ${slider(filter, index)}`
 }
 
-function finalSection(){
+function finalSection(step){
     let finalScreen = document.getElementById("finalScreen").innerHTML
 
     return  `<section id="sectionFiNAL">
                 <input type="radio" name="sections" id="optionFiNAL">
-                <label for="optionFiNAL">ssssss</label>
+                <label for="optionFiNAL"><img src="/static/images/engrave.png"/><div class="step">${step}.</div></label>
                 <article>
                 ${finalScreen}
                 </article>
@@ -60,7 +60,7 @@ fetch('/meta')
                 step++;
             }
         })
-        element.insertAdjacentHTML('beforeend', finalSection())
+        element.insertAdjacentHTML('beforeend', finalSection(step))
 
         function updateImage() {
             setTimeout(() => {
