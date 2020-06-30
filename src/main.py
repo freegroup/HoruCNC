@@ -119,7 +119,7 @@ def create_app():
             except:
                 return make_response("temporarly unavailable", 503)
 
-    @app.route('/machine/milling/start', methods=['POST'])
+    @app.route('/machine/carve/start', methods=['POST'])
     def machine_milling_start():
         global dataLock
         with dataLock:
