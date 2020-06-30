@@ -43,7 +43,7 @@ def create_app():
             if pipelineJob:
                 pipelineJob.stop()
             pipelineJob = VideoPipeline("./config/"+name+".ini")
-            return send_file('static/html/pipelineJob.html', cache_timeout=-1)
+            return send_file('static/html/pipeline.html', cache_timeout=-1)
 
     @app.route('/pipelines')
     def pipelines():
