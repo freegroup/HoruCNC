@@ -12,7 +12,8 @@ POOL_TIME = 0.5 #Seconds
 
 app = Flask(__name__)
 app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
-pipeline = None
+
+pipelineJob = None
 
 log = logging.getLogger('werkzeug')
 log.setLevel(logging.ERROR)
@@ -23,7 +24,7 @@ previewImage = None
 # lock to control access to variable
 dataLock = threading.Lock()
 # thread handler
-pipelineThread = threading.Thread()
+jobThread = threading.Thread()
 
 
 def create_app():
@@ -33,19 +34,19 @@ def create_app():
     def index():
         return send_file('static/html/index.html', cache_timeout=-1)
 
-    @app.route('/pipeline/<name>')
-    def pipeline(name):
-        global pipeline
+    @app.route('/pipelineJob/<name>')
+    def pipelineJob(name):
+        global pipelineJob
         global dataLock
         print("Pipeline:", name)
         with dataLock:
-            if pipeline:
-                pipeline.stop()
-            pipeline = VideoPipeline("./config/"+name+".ini")
-            return send_file('static/html/pipeline.html', cache_timeout=-1)
+            if pipelineJob:
+                pipelineJob.stop()
+            pipelineJob = VideoPipeline("./config/"+name+".ini")
+            return send_file('static/html/pipelineJob.html', cache_timeout=-1)
 
-    @app.route('/pipelines')
-    def pipelines():
+    @app.route('/pipelineJobs')
+    def pipelineJobs():
         from os import listdir
         from os.path import isfile, join, basename, splitext
         onlyfiles = [splitext(basename(f))[0] for f in listdir("./config") if isfile(join("./config", f))]
@@ -57,8 +58,8 @@ def create_app():
 
     @app.route('/meta')
     def meta():
-        global pipeline
-        response = make_response(json.dumps(pipeline.meta()))
+        global pipelineJob
+        response = make_response(json.dumps(pipelineJob.meta()))
         response.headers['Content-Type'] = 'application/json'
         response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
         response.headers['Pragma'] = 'no-cache'
@@ -67,11 +68,11 @@ def create_app():
 
     @app.route('/gcode/<index>')
     def gcode(index):
-        global pipeline
+        global pipelineJob
         global dataLock
         with dataLock:
             try:
-                gcode = pipeline.gcode(int(index)).to_string()
+                gcode = pipelineJob.gcode(int(index)).to_string()
                 response = make_response(gcode,200)
                 response.headers['Content-Type'] = 'application/txt'
                 return response
@@ -124,6 +125,10 @@ def create_app():
         with dataLock:
             try:
                 print("start milling")
+                gcode = pipelineJob.gcode(pipelineJob.filter_count()-1).to_string()
+                with open("job.nc") as out:
+                    out.write(gcode)
+
                 # reset the work coordinate system to 0/0/0 before start milling.
                 # The method expect the the user has already place the milling head and did probing
                 #
@@ -148,45 +153,45 @@ def create_app():
 
     @app.route('/parameter/<index>/<value>', methods=['POST'])
     def parameter(index, value):
-        global pipeline
+        global pipelineJob
         global dataLock
         with dataLock:
             try:
-                pipeline.set_parameter(int(index),int(value))
+                pipelineJob.set_parameter(int(index),int(value))
                 return make_response("ok",200)
             except Exception as exc:
                 print(exc)
                 return make_response("temporarly unavailable", 503)
 
     def interrupt():
-        global pipelineThread
-        pipelineThread.cancel()
+        global jobThread
+        jobThread.cancel()
 
-    def processPipeline():
-        global pipeline
+    def processJob():
+        global pipelineJob
         global previewImage
-        global pipelineThread
+        global jobThread
         with dataLock:
             try:
-                if pipeline:
-                    previewImage = pipeline.process()
+                if pipelineJob:
+                    previewImage = pipelineJob.process()
             except Exception as exc:
                 print(exc)
                 print("error during image processing...ignored")
 
         # Set the next thread to happen
-        pipelineThread = threading.Timer(POOL_TIME, processPipeline, ())
-        pipelineThread.start()
+        jobThread = threading.Timer(POOL_TIME, processJob, ())
+        jobThread.start()
 
-    def startPipeline():
+    def startJob():
         # Do initialisation stuff here
-        global pipelineThread
+        global jobThread
         # Create your thread
-        pipelineThread = threading.Timer(POOL_TIME, processPipeline, ())
-        pipelineThread.start()
+        jobThread = threading.Timer(POOL_TIME, processJob, ())
+        jobThread.start()
 
     # Initiate
-    startPipeline()
+    startJob()
     # When you kill Flask (SIGTERM), clear the trigger for the next thread
     atexit.register(interrupt)
     return app

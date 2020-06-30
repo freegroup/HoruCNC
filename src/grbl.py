@@ -40,3 +40,26 @@ if serial_port:
     serial_port.write(str.encode('\n'))
     time.sleep(5)             # Wait for grbl to initialize
     serial_port.flushInput()  # Flush startup text in serial input
+
+
+# Inherting the base class 'Thread'
+class AsyncWrite(threading.Thread):
+
+    def __init__(self, text):
+
+        # calling superclass init
+        threading.Thread.__init__(self)
+        self.text = text
+        self.out = out
+
+    def run(self):
+
+        f = open(self.out, "a")
+        f.write(self.text + '\n')
+        f.close()
+
+        # waiting for 2 seconds after writing
+        # the file
+        time.sleep(2)
+        print("Finished background file write to",
+              self.out)
