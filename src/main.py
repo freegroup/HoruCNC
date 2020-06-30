@@ -3,24 +3,12 @@ import threading
 import atexit
 import json
 import logging
-import time
 from flask import Flask, render_template, make_response, send_file
-import serial
 
-from pipeline import Pipeline
+from grbl import outputLineAndWaitForReady
+from jobs.video import VideoPipeline
 
 POOL_TIME = 0.5 #Seconds
-
-# Open grbl serial port
-tty = None
-try:
-    tty = serial.Serial('/dev/ttyAMA0',115200)
-    tty.flushInput()  # Flush startup text in serial input
-except:
-    pass
-
-readyToSend = False
-readyString = "ok\r\n"
 
 app = Flask(__name__)
 app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
@@ -36,25 +24,6 @@ previewImage = None
 dataLock = threading.Lock()
 # thread handler
 pipelineThread = threading.Thread()
-
-def outputLineAndWaitForReady(lineToSend):
-    readString = ""
-    readAChar = True
-    tty.write(str.encode(lineToSend + '\n'))
-    while (readAChar) :
-        readString = readString + tty.read().decode()
-        readyStringLength = len(readyString)
-
-        #print("read string:" + readString)
-        #print("last part of read string: " + readString[-readyStringLength:])
-        if (readString[-readyStringLength:] == readyString):
-            #print("ready")
-            print(readyString)
-            readAChar = False
-        if (readString[-1] == '\n'):
-            #do reporting & flushing here
-            print(readString[:-1])
-            readString = ""
 
 
 def create_app():
@@ -72,7 +41,7 @@ def create_app():
         with dataLock:
             if pipeline:
                 pipeline.stop()
-            pipeline = Pipeline("./config/"+name+".ini")
+            pipeline = VideoPipeline("./config/"+name+".ini")
             return send_file('static/html/pipeline.html', cache_timeout=-1)
 
     @app.route('/pipelines')
@@ -149,6 +118,33 @@ def create_app():
             except:
                 return make_response("temporarly unavailable", 503)
 
+    @app.route('/machine/milling/start', methods=['POST'])
+    def machine_milling_start():
+        global dataLock
+        with dataLock:
+            try:
+                print("start milling")
+                # reset the work coordinate system to 0/0/0 before start milling.
+                # The method expect the the user has already place the milling head and did probing
+                #
+                outputLineAndWaitForReady("G10 P0 L20 X0 Y0 Z0".format(depth,speed))
+
+                #
+                return make_response("ok", 200)
+            except:
+                return make_response("temporarly unavailable", 503)
+
+    @app.route('/machine/milling/stop', methods=['POST'])
+    def machine_milling_stop():
+        global dataLock
+        with dataLock:
+            try:
+                print("probe")
+                outputLineAndWaitForReady("G38.2 Z{} F{}".format(depth,speed))
+                return make_response("ok", 200)
+            except:
+                return make_response("temporarly unavailable", 503)
+
 
     @app.route('/parameter/<index>/<value>', methods=['POST'])
     def parameter(index, value):
@@ -193,11 +189,6 @@ def create_app():
     startPipeline()
     # When you kill Flask (SIGTERM), clear the trigger for the next thread
     atexit.register(interrupt)
-    if tty:
-        tty.write(str.encode('\n'))
-        time.sleep(4)   # Wait for grbl to initialize
-        tty.flushInput()  # Flush startup text in serial input
-
     return app
 
 app = create_app()

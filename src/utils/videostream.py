@@ -26,12 +26,13 @@ class VideoStream:
         # initialize the variable used to indicate if the thread should
         # be stopped
         self.stopped = False
+        self.thread = None
 
     def start(self):
         # start the thread to read frames from the video stream
-        t = Thread(target=self.update, name=self.name, args=())
-        t.setDaemon(True)
-        t.start()
+        self.thread = Thread(target=self.update, name=self.name, args=())
+        self.thread.setDaemon(True)
+        self.thread.start()
         return self
 
     def update(self):
@@ -53,3 +54,5 @@ class VideoStream:
     def stop(self):
         # indicate that the thread should be stopped
         self.stopped = True
+        self.thread.join()
+

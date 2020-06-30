@@ -5,7 +5,7 @@ import base64
 import os.path
 import inspect
 
-class Pipeline:
+class VideoPipeline:
     def __init__(self, config_file ):
         print("init pipeline")
         self.conf = Configuration(config_file)
