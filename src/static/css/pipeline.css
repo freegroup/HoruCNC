@@ -39,6 +39,22 @@ body {
     background-position: center top;
 }
 
+#pendantScreen{
+    bottom: 0;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+}
+
+#pendantScreen .description{
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    -webkit-transform: translate(-50%, -50%);
+    transform: translate(-50%, -50%);
+}
+
 #index_button {
     position: absolute;
     top: 0;
@@ -214,4 +230,35 @@ article img {
     left: 50%;
     top: 0;
     transform: translateX(-50%);
+}
+
+
+#pendant-next{
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    height: 10vw;
+    width: auto;
+    box-shadow: none;
+}
+
+#probe-next{
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    height: 10vw;
+    width: auto;
+    box-shadow: none;
+}
+
+#carve-start{
+    box-shadow: none;
+    height: 44vw;
+}
+
+#probe-start{
+    height: 47vw;
+    width: auto;
+    box-shadow: none;
+    margin: auto;
 }

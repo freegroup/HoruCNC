@@ -30,17 +30,30 @@ function previewScreen(filter, index, step){
         ${slider(filter, index)}`
 }
 
-function finalSection(step){
-    let finalScreen = document.getElementById("finalScreen").innerHTML
+function pendantScreen(step){
+    let finalScreen = document.getElementById("pendantScreenTemplate").innerHTML
 
-    return  `<section id="sectionFiNAL">
-                <input type="radio" name="sections" id="optionFiNAL">
-                <label for="optionFiNAL"><img src="/static/images/engrave.png"/><div class="step">${step}.</div></label>
-                <article>
+    return  `<section id="sectionFINAL">
+                <input type="radio" name="sections" id="optionFINAL">
+                <label for="optionFINAL"><img src="/static/images/engrave.png"/><div class="step">${step}.</div></label>
+                <article id="millingWizard">
                 ${finalScreen}
                 </article>
              </section>`
 }
+
+function probeScreen(){
+    let finalScreen = document.getElementById("probeScreenTemplate").innerHTML
+    let millingWizard = document.getElementById("millingWizard")
+    millingWizard.innerHTML = finalScreen
+}
+
+function carveScreen(){
+    let finalScreen = document.getElementById("carveScreenTemplate").innerHTML
+    let millingWizard = document.getElementById("millingWizard")
+    millingWizard.innerHTML = finalScreen
+}
+
 
 fetch('/meta')
     .then(response => response.json())
@@ -60,7 +73,7 @@ fetch('/meta')
                 step++;
             }
         })
-        element.insertAdjacentHTML('beforeend', finalSection(step))
+        element.insertAdjacentHTML('beforeend', pendantScreen(step))
 
         function updateImage() {
             setTimeout(() => {
@@ -91,9 +104,25 @@ fetch('/meta')
             })
         })
 
-        let backButton = document.getElementById("index_button")
-        backButton.onclick=  ()=>{
-            document.location.href = "/"
-        }
+        document.addEventListener('click', function (event) {
+
+            // If the clicked element doesn't have the right selector, bail
+            switch(event.target.id){
+                case "index_button":
+                    document.location.href = "/"
+                    break;
+                case "pendant-next":
+                    probeScreen()
+                    break;
+                case "probe-next":
+                    carveScreen()
+                    break;
+                case "carve-start":
+                    alert("start")
+                    break;
+            }
+
+        }, false);
+
 
     })

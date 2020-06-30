@@ -110,6 +110,7 @@ def create_app():
                 print(exc)
                 return make_response("temporarly unavailable", 503)
 
+
     @app.route('/image/<index>', methods=['GET'])
     def input(index):
         global previewImage
@@ -124,9 +125,9 @@ def create_app():
             except:
                 return make_response("temporarly unavailable", 503)
 
-    @app.route('/machine/<axis>/<amount>', methods=['POST'])
+
+    @app.route('/machine/pendant/<axis>/<amount>', methods=['POST'])
     def machine_axis(axis, amount):
-        global previewImage
         global dataLock
         with dataLock:
             try:
@@ -136,6 +137,17 @@ def create_app():
             except:
                 return make_response("temporarly unavailable", 503)
 
+
+    @app.route('/machine/probe/depth/speed', methods=['POST'])
+    def machine_probe(depth, speed):
+        global dataLock
+        with dataLock:
+            try:
+                print("probe")
+                outputLineAndWaitForReady("G38.2 Z{} F{}".format(depth,speed))
+                return make_response("ok", 200)
+            except:
+                return make_response("temporarly unavailable", 503)
 
 
     @app.route('/parameter/<index>/<value>', methods=['POST'])

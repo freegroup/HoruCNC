@@ -28,7 +28,6 @@ class Filter:
         try:
             image = image.copy()
             (thresh, blackAndWhiteImage) = cv2.threshold(image, self.threshold, 255, cv2.THRESH_BINARY)
-            cv2.imwrite("bw.png", blackAndWhiteImage)
         except Exception as exc:
             print(self.config_section, exc)
 

@@ -32,16 +32,31 @@
 
 </body>
 
-<script id="finalScreen" type="text/template">
-    <button id="x-left">x-left</button> <button id="x-right">x-right</button>
-    <br>
-    <button id="y-left">y-left</button><button id="y-right">y-right</button>
+<script id="pendantScreenTemplate" type="text/template">
 
-    <div id="pendant">
+    <div id="pendantScreen">
         <img src="/static/images/arrow-east.png"  id="arrow-east">
         <img src="/static/images/arrow-north.png" id="arrow-north">
         <img src="/static/images/arrow-south.png" id="arrow-south">
         <img src="/static/images/arrow-west.png"  id="arrow-west">
+        <div class="description">Move the worktable so that the cutter is in the center of your workpiece.</div>
+        <img src="/static/images/next.png" id="pendant-next">
+    </div>
+</script>
+
+<script id="probeScreenTemplate" type="text/template">
+
+    <div id="probeScreen">
+        <div class="description">Setup the probe tool and press the button</div>
+        <img src="/static/images/start-probe.png" id="probe-start">
+        <img src="/static/images/next.png" id="probe-next">
+    </div>
+</script>
+
+<script id="carveScreenTemplate" type="text/template">
+    <div id="carveScreen">
+        <div class="description">Press the button to start carving instantly</div>
+        <img src="/static/images/start-carve.png" id="carve-start">
     </div>
 </script>
 
