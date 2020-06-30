@@ -14,10 +14,10 @@ document.addEventListener('click', function (event) {
         case "arrow-south":
             fetch("/machine/pendant/y/-1", {method: "POST"})
             break;
-        case "start-probe":
+        case "probe-start":
             fetch("/machine/probe/-20/10", {method: "POST"})
             break;
-        case "start-carve":
+        case "carve-start":
             fetch("/machine/carve/start", {method: "POST"})
             break;
     }
