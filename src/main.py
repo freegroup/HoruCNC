@@ -135,7 +135,7 @@ def create_app():
                 # reset the work coordinate system to 0/0/0 before start milling.
                 # The method expect the the user has already place the milling head and did probing
                 #
-                outputLineAndWaitForReady("G10 P0 L20 X0 Y0 Z0".format(depth,speed))
+                outputLineAndWaitForReady("G10 P0 L20 X0 Y0 Z0")
 
                 #
                 return make_response("ok", 200)
