@@ -1,5 +1,6 @@
 import serial
 import time
+import threading
 
 # Open grbl serial port
 serial_port = None
