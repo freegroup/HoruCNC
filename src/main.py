@@ -34,8 +34,8 @@ def create_app():
     def index():
         return send_file('static/html/index.html', cache_timeout=-1)
 
-    @app.route('/pipelineJob/<name>')
-    def pipelineJob(name):
+    @app.route('/pipeline/<name>')
+    def pipeline(name):
         global pipelineJob
         global dataLock
         print("Pipeline:", name)
@@ -45,8 +45,8 @@ def create_app():
             pipelineJob = VideoPipeline("./config/"+name+".ini")
             return send_file('static/html/pipelineJob.html', cache_timeout=-1)
 
-    @app.route('/pipelineJobs')
-    def pipelineJobs():
+    @app.route('/pipelines')
+    def pipeline():
         from os import listdir
         from os.path import isfile, join, basename, splitext
         onlyfiles = [splitext(basename(f))[0] for f in listdir("./config") if isfile(join("./config", f))]
