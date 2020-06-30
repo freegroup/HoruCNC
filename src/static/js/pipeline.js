@@ -117,9 +117,6 @@ fetch('/meta')
                 case "probe-next":
                     carveScreen()
                     break;
-                case "carve-start":
-                    alert("start")
-                    break;
             }
 
         }, false);
