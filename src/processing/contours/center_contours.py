@@ -27,8 +27,8 @@ class Filter:
                 cnt2 = np.concatenate(cnt)
                 # Determine the bounding rectangle
                 x, y, w, h = cv2.boundingRect(cnt2)
-                image_height, image_width = image.shape[0], image.shape[1]
 
+                image_height, image_width = image.shape[0], image.shape[1]
                 newimage = np.zeros(image.shape, dtype="uint8")
                 newimage.fill(255)
 

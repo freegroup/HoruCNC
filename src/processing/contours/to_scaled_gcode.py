@@ -1,6 +1,6 @@
 import numpy as np
 import cv2
-from gcode import GCode
+from utils.gcode import GCode
 
 class Filter:
     def __init__(self):

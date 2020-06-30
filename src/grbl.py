@@ -11,30 +11,27 @@ except:
     print("No serial port found")
 
 readyToSend = False
-readyString = "ok\r\n"
+ready_string = "ok\r\n"
 
 def outputLineAndWaitForReady(lineToSend):
     if not serial_port:
-        print("no serial port configured")
+        print(lineToSend)
         return
-
-    readString = ""
-    readAChar = True
+    
+    read_string = ""
+    read_a_char = True
     serial_port.write(str.encode(lineToSend + '\n'))
-    while (readAChar) :
-        readString = readString + s.read().decode()
-        readyStringLength = len(readyString)
-
-        #print("read string:" + readString)
-        #print("last part of read string: " + readString[-readyStringLength:])
-        if (readString[-readyStringLength:] == readyString):
+    while read_a_char :
+        read_string = read_string + s.read().decode()
+        ready_string_length = len(ready_string)
+        if read_string[-ready_string_length:] == ready_string:
             #print("ready")
-            print(readyString)
-            readAChar = False
-        if (readString[-1] == '\n'):
+            print(ready_string)
+            read_a_char = False
+        if read_string[-1] == '\n':
             #do reporting & flushing here
-            print(readString[:-1])
-            readString = ""
+            print(read_string[:-1])
+            read_string = ""
 
 if serial_port:
     serial_port.flushInput()  # Flush startup text in serial input
@@ -42,25 +39,20 @@ if serial_port:
     time.sleep(5)             # Wait for grbl to initialize
     serial_port.flushInput()  # Flush startup text in serial input
 
-
 # Inherting the base class 'Thread'
 class AsyncWrite(threading.Thread):
 
-    def __init__(self, text):
-
+    def __init__(self, filename):
         # calling superclass init
         threading.Thread.__init__(self)
-        self.text = text
-        self.out = out
+        self.filename = filename
 
     def run(self):
-
-        f = open(self.out, "a")
-        f.write(self.text + '\n')
-        f.close()
-
-        # waiting for 2 seconds after writing
-        # the file
-        time.sleep(2)
-        print("Finished background file write to",
-              self.out)
+        # Open g-code file
+        print("streaming gcode to CNC machine. ", self.filename)
+        with open(self.filename,'r') as f:
+            # Stream g-code to grbl
+            for line in f:
+                l = line.strip() # Strip all EOL characters for streaming
+                outputLineAndWaitForReady(l) # Send g-code block to grbl
+        print("Finished background file write to CNC Maschine")

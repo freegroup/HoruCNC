@@ -31,16 +31,19 @@ class Filter:
             cnt, hierarchy = cv2.findContours(single_channel, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
             cv2.drawContours(outline, cnt, -1, (0,255,0), 1)
             i = 0
+            validated_cnt = []
             while i < len(cnt):
                 c = cnt[i]
-                cnt[i] = np.squeeze(c)
+                sq_cnt = np.squeeze(c)
+                if len(sq_cnt.shape)==2:
+                    validated_cnt.append(sq_cnt)
                 i += 1
             image = outline
 
         except Exception as exc:
             print(self.config_section, exc)
 
-        return image, cnt, code
+        return image, validated_cnt, code
 
     def stop(self):
         pass

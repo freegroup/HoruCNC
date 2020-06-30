@@ -5,10 +5,11 @@ import json
 import logging
 from flask import Flask, render_template, make_response, send_file
 
-from grbl import outputLineAndWaitForReady
-from jobs.video import VideoPipeline
+from pipeline import VideoPipeline
+from grbl import AsyncWrite, outputLineAndWaitForReady
 
-POOL_TIME = 0.5 #Seconds
+POOL_TIME       = 0.5 # Seconds
+PIPELINE_FOLDER = "./pipelines"
 
 app = Flask(__name__)
 app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
@@ -25,6 +26,7 @@ previewImage = None
 dataLock = threading.Lock()
 # thread handler
 jobThread = threading.Thread()
+millingThread = None
 
 
 def create_app():
@@ -42,15 +44,14 @@ def create_app():
         with dataLock:
             if pipelineJob:
                 pipelineJob.stop()
-            pipelineJob = VideoPipeline("./config/"+name+".ini")
+            pipelineJob = VideoPipeline(PIPELINE_FOLDER+"/"+name+".ini")
             return send_file('static/html/pipeline.html', cache_timeout=-1)
 
     @app.route('/pipelines')
     def pipelines():
         from os import listdir
         from os.path import isfile, join, basename, splitext
-        onlyfiles = [splitext(basename(f))[0] for f in listdir("./config") if isfile(join("./config", f))]
-        print(onlyfiles)
+        onlyfiles = [splitext(basename(f))[0] for f in listdir(PIPELINE_FOLDER) if isfile(join(PIPELINE_FOLDER, f))]
         response = make_response(json.dumps(onlyfiles))
         response.headers['Content-Type'] = 'application/json'
         return response
@@ -66,20 +67,6 @@ def create_app():
         response.headers['Expires'] = '0'
         return response
 
-    @app.route('/gcode/<index>')
-    def gcode(index):
-        global pipelineJob
-        global dataLock
-        with dataLock:
-            try:
-                gcode = pipelineJob.gcode(int(index)).to_string()
-                response = make_response(gcode,200)
-                response.headers['Content-Type'] = 'application/txt'
-                return response
-            except Exception as exc:
-                print(exc)
-                return make_response("temporarly unavailable", 503)
-
 
     @app.route('/image/<index>', methods=['GET'])
     def input(index):
@@ -87,7 +74,6 @@ def create_app():
         global dataLock
         with dataLock:
             try:
-                # print("reading image from", previewImage[int(index)]["filter"])
                 retval, buffer = cv2.imencode('.png', previewImage[int(index)]["image"])
                 response = make_response(buffer.tobytes())
                 response.headers['Content-Type'] = 'image/png'
@@ -101,7 +87,6 @@ def create_app():
         global dataLock
         with dataLock:
             try:
-                print(axis, amount)
                 outputLineAndWaitForReady("$J=G21 G91 {}{} F100".format(axis,amount))
                 return make_response("ok", 200)
             except:
@@ -113,46 +98,50 @@ def create_app():
         global dataLock
         with dataLock:
             try:
-                print("probe")
                 outputLineAndWaitForReady("G38.2 Z{} F{}".format(depth,speed))
                 return make_response("ok", 200)
             except Exception as exc:
                 print(exc)
                 return make_response("temporarly unavailable", 503)
 
+
     @app.route('/machine/carve/start', methods=['POST'])
     def machine_milling_start():
         global pipelineJob
         global dataLock
+        global millingThread
         with dataLock:
             try:
-                print("start milling")
-                print(pipelineJob.filter_count()-1)
-                gcode = pipelineJob.gcode(pipelineJob.filter_count()-1).to_string()
-                with open("job.nc","w") as out:
-                    out.write(gcode)
-
                 # reset the work coordinate system to 0/0/0 before start milling.
                 # The method expect the the user has already place the milling head and did probing
                 #
                 outputLineAndWaitForReady("G10 P0 L20 X0 Y0 Z0")
 
+                filename= "job.nc"
+                gcode = pipelineJob.gcode(pipelineJob.filter_count()-1).to_string()
+                with open(filename,"w") as out:
+                    out.write(gcode)
+
+                # start the thread and send the GCODE to the CNC machine
                 #
+                millingThread = AsyncWrite(filename)
+                millingThread.start()
+
                 return make_response("ok", 200)
             except Exception as exc:
                 print(exc)
-                return make_response("temporarly unavailable", 503)
+                return make_response("temporally unavailable", 503)
+
 
     @app.route('/machine/milling/stop', methods=['POST'])
     def machine_milling_stop():
         global dataLock
         with dataLock:
             try:
-                print("probe")
                 outputLineAndWaitForReady("G38.2 Z{} F{}".format(depth,speed))
                 return make_response("ok", 200)
             except:
-                return make_response("temporarly unavailable", 503)
+                return make_response("temporally unavailable", 503)
 
 
     @app.route('/parameter/<index>/<value>', methods=['POST'])
@@ -165,11 +154,13 @@ def create_app():
                 return make_response("ok",200)
             except Exception as exc:
                 print(exc)
-                return make_response("temporarly unavailable", 503)
+                return make_response("temporally unavailable", 503)
+
 
     def interrupt():
         global jobThread
         jobThread.cancel()
+
 
     def processJob():
         global pipelineJob
@@ -186,6 +177,7 @@ def create_app():
         # Set the next thread to happen
         jobThread = threading.Timer(POOL_TIME, processJob, ())
         jobThread.start()
+
 
     def startJob():
         # Do initialisation stuff here
