@@ -127,6 +127,7 @@ def create_app():
         with dataLock:
             try:
                 print(axis, amount)
+                outputLineAndWaitForReady("$J=G21 G91 X1 F100")
                 return make_response("ok", 200)
             except:
                 return make_response("temporarly unavailable", 503)
