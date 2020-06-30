@@ -116,11 +116,13 @@ def create_app():
                 print("probe")
                 outputLineAndWaitForReady("G38.2 Z{} F{}".format(depth,speed))
                 return make_response("ok", 200)
-            except:
+            except Exception as exc:
+                print(exc)
                 return make_response("temporarly unavailable", 503)
 
     @app.route('/machine/carve/start', methods=['POST'])
     def machine_milling_start():
+        global pipelineJob
         global dataLock
         with dataLock:
             try:
@@ -136,7 +138,8 @@ def create_app():
 
                 #
                 return make_response("ok", 200)
-            except:
+            except Exception as exc:
+                print(exc)
                 return make_response("temporarly unavailable", 503)
 
     @app.route('/machine/milling/stop', methods=['POST'])
