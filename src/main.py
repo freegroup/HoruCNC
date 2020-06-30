@@ -181,7 +181,7 @@ def create_app():
     time.sleep(4)   # Wait for grbl to initialize
     tty.flushInput()  # Flush startup text in serial input
 
-return app
+    return app
 
 app = create_app()
 app.run(host="0.0.0.0", port=8080, debug=False,  threaded=False, use_reloader=False)
