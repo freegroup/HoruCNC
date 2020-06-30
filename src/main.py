@@ -127,6 +127,7 @@ def create_app():
         with dataLock:
             try:
                 print("start milling")
+                print(pipelineJob.filter_count()-1)
                 gcode = pipelineJob.gcode(pipelineJob.filter_count()-1).to_string()
                 with open("job.nc") as out:
                     out.write(gcode)

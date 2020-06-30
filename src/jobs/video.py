@@ -38,7 +38,7 @@ class VideoPipeline:
         return meta_info
 
     def filter_count(self):
-        return len(self.pipeline)
+        return len(self.filters)
 
     def set_parameter(self, index, value):
         self.filters[index].set_parameter(value)
