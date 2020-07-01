@@ -7,17 +7,27 @@
     <meta http-equiv="Pragma" content="no-cache" />
     <meta http-equiv="Expires" content="0" />
 
+    <link rel="stylesheet" href='./static/css/skeuos.css' />
+    <link rel="stylesheet" href='./static/css/loader.css' />
     <link rel="stylesheet" href='./static/css/main.css' />
-    <link rel="stylesheet" href='./static/css/rangeslider.css' />
 </head>
 <body>
 <div class="screen">
-    <ul>
-        <li><a href="/pipeline/caligraph_gcode">Caligraph</a></li>
-        <li><a href="/pipeline/outline_gcode">Outline</a></li>
-    </ul>
-</div>
+    <h2>What do you want to mill today?</h2>
 
+    <div class="paper">
+        <div class="pipeline"><span>Caligraph</span><button class="navigate" data-url="/pipeline/caligraph_gcode">&#9654;</button></div>
+        <hr>
+        <div class="pipeline"><span>Outline Shape</span><button class="navigate" data-url="/pipeline/outline_gcode">&#9654;</button></div>
+    </div>
+
+    <div class="loader" id="loader" style="display:none">
+        <div class="dot-1"></div>
+        <div class="dot-2"></div>
+        <div class="dot-3"></div>
+    </div>
+
+</div>
 </body>
 
 <script src="./static/js/index.js"></script>

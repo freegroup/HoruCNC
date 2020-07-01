@@ -22,10 +22,16 @@ class VideoPipeline:
             # try to load an image/icon for the give filter
             python_file = inspect.getfile(instance.__class__)
             png_file = python_file.replace(".py", ".png")
+            svg_file = python_file.replace(".py", ".svg")
             if os.path.isfile(png_file):
                 with open(png_file, "rb") as image_file:
                     encoded_string = base64.b64encode(image_file.read()).decode('utf-8')
-                    instance.icon = encoded_string
+                    instance.icon = "data:image/png;base64,"+encoded_string
+            elif os.path.isfile(svg_file):
+                with open(svg_file, "rb") as image_file:
+                    encoded_string = base64.b64encode(image_file.read()).decode('utf-8')
+                    instance.icon = "data:image/svg+xml;base64,"+encoded_string
+
             self.filters.append(instance)
 
     def meta(self):

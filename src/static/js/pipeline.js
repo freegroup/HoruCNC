@@ -1,6 +1,6 @@
 function icon(filter, index, step){
     if(filter.icon){
-        return `<img src="data:image/png;base64,${filter.icon}"/><div class="step">${step}.</div>`
+        return `<img class="with-shadow" src="${filter.icon}"/>`
     }
     return filter.name
 }
