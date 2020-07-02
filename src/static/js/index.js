@@ -9,3 +9,8 @@ document.addEventListener('click', function (event) {
 
 }, false);
 
+document.addEventListener('DOMContentLoaded', function() {
+    let url = 'http://127.0.0.1:8081/GUI-is-still-open'
+    fetch(url, { mode: 'no-cors'})
+    setInterval(function(){ fetch(url, { mode: 'no-cors'});}, 5000)
+})

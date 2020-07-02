@@ -14,7 +14,7 @@ class GCode:
     self.clearance = 10
 
     # Define the feed_rate (50mm / minute)
-    self.feed_rate = 50
+    self.feed_rate = 150
 
     # Define the start position (clearance unscaled here)
     self.start = [0, 0, self.clearance]
@@ -136,9 +136,9 @@ class GCode:
 
 
   # Feed linearly to a position at a specified feed_rate
-  def feed_linear(self, position, feed_rate=50):
+  def feed_linear(self, position, feed_rate=None):
     # Add the code to the stack to linearly to the specified position
-    self.motion('01', position, feed_rate)
+    self.motion('01', position, self.feed_rate if not feed_rate else feed_rate)
 
 
   # Terminate our code and ensure everything is stopped

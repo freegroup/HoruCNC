@@ -1,58 +1,72 @@
 import serial
 import time
-import threading
 
-# Open grbl serial port
-serial_port = None
+from threading import Thread
 
-try:
-    serial_port = serial.Serial('/dev/ttyAMA0',115200)
-except:
-    print("No serial port found")
 
-readyToSend = False
-ready_string = "ok\r\n"
+class GrblWriter:
 
-def outputLineAndWaitForReady(lineToSend):
-    if not serial_port:
-        print(lineToSend)
-        return
-    
-    read_string = ""
-    read_a_char = True
-    serial_port.write(str.encode(lineToSend + '\n'))
-    while read_a_char :
-        read_string = read_string + s.read().decode()
-        ready_string_length = len(ready_string)
-        if read_string[-ready_string_length:] == ready_string:
-            #print("ready")
-            print(ready_string)
-            read_a_char = False
-        if read_string[-1] == '\n':
-            #do reporting & flushing here
-            print(read_string[:-1])
-            read_string = ""
+    def __init__(self, port, baud):
+        self.thread = None
+        self.gcode = None
+        self.serial_port = None
+        try:
+            self.serial_port = serial.Serial(port,baud)
+            self.serial_port.flushInput()            # Flush startup text in serial input
+            self.serial_port.write(str.encode('\n'))
+            time.sleep(5)                            # Wait for grbl to initialize
+            self.serial_port.flushInput()            # Flush startup text in serial input
+        except:
+            print("No serial port found")
 
-if serial_port:
-    serial_port.flushInput()  # Flush startup text in serial input
-    serial_port.write(str.encode('\n'))
-    time.sleep(5)             # Wait for grbl to initialize
-    serial_port.flushInput()  # Flush startup text in serial input
 
-# Inherting the base class 'Thread'
-class AsyncWrite(threading.Thread):
+    def is_sending(self):
+        return self.thread is not None
 
-    def __init__(self, filename):
-        # calling superclass init
-        threading.Thread.__init__(self)
-        self.filename = filename
 
-    def run(self):
+    def send_line(self, line):
+        if self.is_sending():
+            print(line)
+            print("milling already running...ignored")
+            return
+        self.__send_line(line)
+
+    def send(self, gcode):
+        self.gcode = gcode
+        self.thread = Thread(target=self.__send)
+        self.thread.start()
+
+
+    def __send(self):
         # Open g-code file
-        print("streaming gcode to CNC machine. ", self.filename)
-        with open(self.filename,'r') as f:
-            # Stream g-code to grbl
-            for line in f:
-                l = line.strip() # Strip all EOL characters for streaming
-                outputLineAndWaitForReady(l) # Send g-code block to grbl
-        print("Finished background file write to CNC Maschine")
+        print("Streaming gcode to CNC machine. ")
+        for line in self.gcode.code:
+            l = line.strip() # Strip all EOL characters for streaming
+            self.__send_line(l) # Send g-code block to grbl
+        print("Finished background file write to CNC Machine")
+        self.thread = None
+
+
+    def __send_line(self, lineToSend):
+        if not self.serial_port:
+            print("simulate", lineToSend)
+            time.sleep(1)
+            return
+
+
+        ready_string = "ok\r\n"
+        read_string = ""
+        read_a_char = True
+        print("CNC: ",lineToSend)
+        self.serial_port.write(str.encode(lineToSend + '\n'))
+        while read_a_char :
+            read_string = read_string + self.serial_port.read().decode()
+            ready_string_length = len(ready_string)
+            if read_string[-ready_string_length:] == ready_string:
+                #print("ready")
+                #print(ready_string)
+                read_a_char = False
+            if read_string[-1] == '\n':
+                #do reporting & flushing here
+                #print(read_string[:-1])
+                read_string = ""

@@ -4,7 +4,7 @@ from utils.gcode import GCode
 
 class Filter:
     def __init__(self):
-        self.config_section = None
+        self.conf_section = None
         self.conf_file = None
         self.icon = None
         self.cnt = None
@@ -12,23 +12,23 @@ class Filter:
 
     def meta(self):
         return {
-            "filter": self.config_section,
+            "filter": self.conf_section,
             "name":"Scale your Contours",
             "description":"Resize your shape until it fits your needs",
             "parameter": True,
             "icon": self.icon
         }
 
-    def configure(self, config_section, conf_file):
-        self.config_section = config_section
+    def configure(self, global_conf, conf_section, conf_file):
+        self.conf_section = conf_section
         self.conf_file = conf_file
-        self.width_in_mm = self.conf_file.get_int("width_in_mm", self.config_section)
+        self.width_in_mm = self.conf_file.get_int("width_in_mm", self.conf_section)
 
     def process(self, image, cnt, code):
         try:
             if len(cnt)>0:
                 self.cnt = cnt
-                unit = self.conf_file.get("display_unit", self.config_section)
+                unit = self.conf_file.get("display_unit", self.conf_section)
                 # only "cm" and "mm" are allowed
                 unit = "cm" if unit == "cm" else "mm"
                 display_factor = 1 if unit == "mm" else 0.1
@@ -66,7 +66,7 @@ class Filter:
 
     def set_parameter(self, val):
         self.width_in_mm = val
-        self.conf_file.set("width_in_mm", self.config_section, str(val))
+        self.conf_file.set("width_in_mm", self.conf_section, str(val))
 
 
     def gcode(self):

@@ -3,34 +3,42 @@ import threading
 import atexit
 import json
 import logging
+import os
+
 from flask import Flask, render_template, make_response, send_file
+from utils.webgui import FlaskUI   # get the FlaskUI class
 
 from pipeline import VideoPipeline
-from grbl import AsyncWrite, outputLineAndWaitForReady
+from grbl import GrblWriter
+from utils.configuration import Configuration
 
-POOL_TIME       = 0.5 # Seconds
-PIPELINE_FOLDER = "./pipelines"
+configuration_dir = os.path.abspath(os.path.join(os.path.dirname(__file__),"..","config","configuration.ini"))
+conf = Configuration(configuration_dir)
+
+POOL_TIME       = conf.get_int("image-read-ms")/1000 # convert to Seconds
+PIPELINE_FOLDER = os.path.abspath(os.path.join(os.path.dirname(__file__),conf.get("pipelines")))
+SERIAL_PORT     = conf.get("serial-port")
+SERIAL_BAUD     = conf.get_int("serial-baud")
+
+grbl = GrblWriter(SERIAL_PORT, SERIAL_BAUD)
 
 app = Flask(__name__)
 app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
-
-pipelineJob = None
+ui = FlaskUI(app= app, width=800, height=480, port=8080)
 
 log = logging.getLogger('werkzeug')
 log.setLevel(logging.ERROR)
 
 
-# variables that are accessible from anywhere
-previewImage = None
-# lock to control access to variable
-dataLock = threading.Lock()
-# thread handler
-jobThread = threading.Thread()
-millingThread = None
+# global, thread base variables
+previewImage = None         # the result of each pipeline run
+dataLock = threading.Lock() # sync the access to "previewImage" of the different thread
+pipelineJob = None          # the current, selected pipeline for image processing
+jobThread = None            # runs the pipeline
+millingThread = None        # runs the milling job
 
 
 def create_app():
-    app = Flask(__name__)
 
     @app.route('/')
     def index():
@@ -40,11 +48,12 @@ def create_app():
     def pipeline(name):
         global pipelineJob
         global dataLock
+        global conf
         print("Pipeline:", name)
         with dataLock:
             if pipelineJob:
                 pipelineJob.stop()
-            pipelineJob = VideoPipeline(PIPELINE_FOLDER+"/"+name+".ini")
+            pipelineJob = VideoPipeline(conf, PIPELINE_FOLDER+"/"+name+".ini")
             return send_file('static/html/pipeline.html', cache_timeout=-1)
 
     @app.route('/pipelines')
@@ -69,7 +78,7 @@ def create_app():
 
 
     @app.route('/image/<index>', methods=['GET'])
-    def input(index):
+    def image(index):
         global previewImage
         global dataLock
         with dataLock:
@@ -83,13 +92,16 @@ def create_app():
 
 
     @app.route('/machine/pendant/<axis>/<amount>', methods=['POST'])
-    def machine_axis(axis, amount):
+    def machine_pendant(axis, amount):
         global dataLock
+        global grbl
         with dataLock:
             try:
-                outputLineAndWaitForReady("$J=G21 G91 {}{} F100".format(axis,amount))
+                grbl.send_line("$X")
+                grbl.send_line("$J=G21 G91 {}{} F100".format(axis,amount))
                 return make_response("ok", 200)
-            except:
+            except Exception as exc:
+                print(exc)
                 return make_response("temporarly unavailable", 503)
 
 
@@ -98,7 +110,7 @@ def create_app():
         global dataLock
         with dataLock:
             try:
-                outputLineAndWaitForReady("G38.2 Z{} F{}".format(depth,speed))
+                grbl.send_line("G38.2 Z{} F{}".format(depth,speed))
                 return make_response("ok", 200)
             except Exception as exc:
                 print(exc)
@@ -106,7 +118,7 @@ def create_app():
 
 
     @app.route('/machine/carve/start', methods=['POST'])
-    def machine_milling_start():
+    def machine_carve_start():
         global pipelineJob
         global dataLock
         global millingThread
@@ -115,17 +127,12 @@ def create_app():
                 # reset the work coordinate system to 0/0/0 before start milling.
                 # The method expect the the user has already place the milling head and did probing
                 #
-                outputLineAndWaitForReady("G10 P0 L20 X0 Y0 Z0")
-
-                filename= "job.nc"
-                gcode = pipelineJob.gcode(pipelineJob.filter_count()-1).to_string()
-                with open(filename,"w") as out:
-                    out.write(gcode)
+                grbl.send_line("G10 P0 L20 X0 Y0 Z0")
 
                 # start the thread and send the GCODE to the CNC machine
                 #
-                millingThread = AsyncWrite(filename)
-                millingThread.start()
+                gcode = pipelineJob.gcode(pipelineJob.filter_count()-1)
+                grbl.send(gcode)
 
                 return make_response("ok", 200)
             except Exception as exc:
@@ -134,11 +141,13 @@ def create_app():
 
 
     @app.route('/machine/milling/stop', methods=['POST'])
-    def machine_milling_stop():
+    def machine_carve_stop():
         global dataLock
         with dataLock:
             try:
-                outputLineAndWaitForReady("G38.2 Z{} F{}".format(depth,speed))
+                if millingThread:
+                    millingThread.cancel()
+
                 return make_response("ok", 200)
             except:
                 return make_response("temporally unavailable", 503)
@@ -159,7 +168,11 @@ def create_app():
 
     def interrupt():
         global jobThread
-        jobThread.cancel()
+        global millingThread
+        if jobThread:
+            jobThread.cancel()
+        if millingThread:
+            millingThread.cancel()
 
 
     def processJob():
@@ -178,7 +191,6 @@ def create_app():
         jobThread = threading.Timer(POOL_TIME, processJob, ())
         jobThread.start()
 
-
     def startJob():
         # Do initialisation stuff here
         global jobThread
@@ -190,8 +202,8 @@ def create_app():
     startJob()
     # When you kill Flask (SIGTERM), clear the trigger for the next thread
     atexit.register(interrupt)
-    return app
+    print("Running server on http://127.0.0.1:8080")
+    ui.run()
 
-app = create_app()
-app.run(host="0.0.0.0", port=8080, debug=False,  threaded=False, use_reloader=False)
 
+create_app()

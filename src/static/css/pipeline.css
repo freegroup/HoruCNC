@@ -32,6 +32,11 @@ body {
     background-position: center top;
 }
 
+.step-index{
+    position: absolute;
+    right: 10px;
+    top: 10px;
+}
 #pendantScreen{
     bottom: 0;
     position: absolute;
@@ -46,17 +51,27 @@ body {
     top: 50%;
     -webkit-transform: translate(-50%, -50%);
     transform: translate(-50%, -50%);
+    height:50%;
+    display: table;
+    border-radius: 5px;
+}
+
+#pendantScreen .description p{
+    display: table-cell;
+    vertical-align: middle;
 }
 
 #index_button {
     position: absolute;
-    top: 0;
-    right: 0;
-    width: 64px;
-    height: 64px;
-    background-image: url(/static/images/index_button.png);
-    background-position: center;
-    background-size: contain;
+    top: 6px;
+    right: 6px;
+    width: 40px;
+    height: 40px;
+    font-size: 3vw;
+    font-weight: 100;
+    line-height: 0;
+    padding-left: 3px;
+    padding-top: 3px;
 }
 
 
@@ -81,18 +96,9 @@ body {
 }
 
 .description{
-    line-height: 50px;
-    font-weight: 700;
     text-align: center;
-}
-
-article img {
-    max-width: 100%;
-    display: block;
-    width: 100vw;
-    height: 100vh;
-    object-fit: contain;
-    border-radius: 3px;
+    margin:0;
+    font-size:2vw;
 }
 
 
@@ -117,6 +123,7 @@ article img {
     width:110px;
     margin:0;
 }
+
 .tabordion input[name="sections"] {
     left: -9999px;
     position: absolute;
@@ -180,75 +187,124 @@ article img {
     display: block;
 }
 
+#millingWizard {
+    height:100%;
+}
+
+#millingWizard > div {
+    height:100%;
+}
 
 #arrow-east{
-    width:15vw;
-    height:auto;
-    box-shadow: none;
+    width: 0;
+    height: 0;
+    border-left: 60px solid #367bf0;
+    border-bottom: 30px solid transparent;
+    border-top: 30px solid transparent;
     position: absolute;
-    right: 0;
+    right: 20px;
     top: 50%;
     transform: translateY(-50%);
 }
 
 
 #arrow-south{
-    width:28vw;
-    height:auto;
-    box-shadow: none;
+    width: 0;
+    height: 0;
+    border-left: 30px solid transparent;
+    border-right: 30px solid transparent;
+    border-top: 60px solid #367bf0;
     position: absolute;
-    bottom: 0;
+    bottom: 20px;
     left: 50%;
     transform: translateX(-50%);
 }
 
 #arrow-west{
-    width:15vw;
-    height:auto;
-    box-shadow: none;
+    width: 0;
+    height: 0;
+    border-right: 60px solid #367bf0;
+    border-bottom: 30px solid transparent;
+    border-top: 30px solid transparent;
     position: absolute;
-    left: 0;
+    left: 20px;
     top: 50%;
     transform: translateY(-50%);
 }
 
 #arrow-north{
-    width:20vw;
-    height:auto;
-    box-shadow: none;
+    width: 0;
+    height: 0;
+    border-left: 30px solid transparent;
+    border-right: 30px solid transparent;
+    border-bottom: 60px solid #367bf0;
     position: absolute;
     left: 50%;
-    top: 0;
+    top: 20px;
     transform: translateX(-50%);
 }
 
 
-#pendant-next{
+.bottom-button-right{
     position: absolute;
-    bottom: 0;
-    right: 0;
+    bottom: 10px;
+    right: 10px;
     height: 10vw;
-    width: auto;
-    box-shadow: none;
+    width: 10vw;
+    font-size: 4vw;
+    font-weight: 100;
+    color: #777;
 }
 
-#probe-next{
+
+.bottom-button-left{
     position: absolute;
-    bottom: 0;
-    right: 0;
+    bottom: 10px;
+    left: 10px;
     height: 10vw;
-    width: auto;
+    width: 10vw;
+    font-size: 4vw;
+    font-weight: 100;
+    color: #777;
+}
+
+
+
+#carve-start {
+    height: 50%;
     box-shadow: none;
 }
 
-#carve-start{
-    box-shadow: none;
-    height: 44vw;
-}
-
-#probe-start{
-    height: 47vw;
+#probe-icon {
+    height: 50%;
     width: auto;
     box-shadow: none;
     margin: auto;
+    top: 50%;
+    position: absolute;
+    transform: translateY(-50%);
+    left: 10%;
+}
+
+
+#probe-up {
+    width: 0;
+    height: 0;
+    border-left: 30px solid transparent;
+    border-right: 30px solid transparent;
+    border-bottom: 60px solid #367bf0;
+    position: absolute;
+    left: 60%;
+    top: 30%;
+}
+
+#probe-down {
+    width: 0;
+    height: 0;
+    border-left: 30px solid transparent;
+    border-right: 30px solid transparent;
+    border-top: 60px solid #367bf0;
+    position: absolute;
+    left: 60%;
+    top: 60%;
 }

@@ -26,29 +26,33 @@ function previewScreen(filter, index, step){
            style="background-image:url(/image/${index})" 
            id="preview${index}" 
            ></div>
-        <div class="description">${filter.description}</div>
+        <h4 class="description">${filter.description}</h4>
         ${slider(filter, index)}`
 }
 
 function pendantScreen(step){
-    let finalScreen = document.getElementById("pendantScreenTemplate").innerHTML
-
     return  `<section id="sectionFINAL">
                 <input type="radio" name="sections" id="optionFINAL">
-                <label for="optionFINAL"><img src="/static/images/engrave.png"/><div class="step">${step}.</div></label>
+                <label for="optionFINAL"><img class="with-shadow" src="/static/images/engrave.svg"/></label>
                 <article id="millingWizard">
-                ${finalScreen}
                 </article>
              </section>`
 }
 
-function probeScreen(){
+
+function pendantStep(){
+    let finalScreen = document.getElementById("pendantScreenTemplate").innerHTML
+    let millingWizard = document.getElementById("millingWizard")
+    millingWizard.innerHTML = finalScreen
+}
+
+function probeStep(){
     let finalScreen = document.getElementById("probeScreenTemplate").innerHTML
     let millingWizard = document.getElementById("millingWizard")
     millingWizard.innerHTML = finalScreen
 }
 
-function carveScreen(){
+function carveStep(){
     let finalScreen = document.getElementById("carveScreenTemplate").innerHTML
     let millingWizard = document.getElementById("millingWizard")
     millingWizard.innerHTML = finalScreen
@@ -74,6 +78,7 @@ fetch('/meta')
             }
         })
         element.insertAdjacentHTML('beforeend', pendantScreen(step))
+        pendantStep()
 
         function updateImage() {
             setTimeout(() => {
@@ -112,14 +117,25 @@ fetch('/meta')
                     document.location.href = "/"
                     break;
                 case "pendant-next":
-                    probeScreen()
+                    probeStep()
+                    break;
+                case "probe-back":
+                    pendantStep()
                     break;
                 case "probe-next":
-                    carveScreen()
+                    carveStep()
+                    break;
+                case "carve-back":
+                    probeStep()
                     break;
             }
 
         }, false);
-
-
     })
+
+
+document.addEventListener('DOMContentLoaded', function() {
+    let url = 'http://127.0.0.1:8081/GUI-is-still-open'
+    fetch(url, { mode: 'no-cors'})
+    setInterval(function(){ fetch(url, { mode: 'no-cors'});}, 5000)
+})

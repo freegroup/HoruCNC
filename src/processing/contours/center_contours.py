@@ -3,21 +3,21 @@ import cv2
 
 class Filter:
     def __init__(self):
-        self.config_section = None
+        self.conf_section = None
         self.conf_file = None
         self.icon = None
 
     def meta(self):
         return {
-            "filter": self.config_section,
+            "filter": self.conf_section,
             "name":"Center Contour",
             "description":"Control the red contour before you start carving or exporting your CNC data",
             "parameter": False,
             "icon": self.icon
         }
 
-    def configure(self, config_section, conf_file):
-        self.config_section = config_section
+    def configure(self, global_conf, conf_section, conf_file):
+        self.conf_section = conf_section
         self.conf_file = conf_file
 
     def process(self, image, cnt, code):
@@ -48,7 +48,7 @@ class Filter:
                 cv2.drawContours(newimage, cnt, -1, (0,0,255), 2)
                 image = newimage
         except Exception as exc:
-            print(self.config_section, exc)
+            print(self.conf_section, exc)
 
 
         return image, cnt, code

@@ -7,7 +7,7 @@ CWD_PATH = os.path.dirname(os.path.realpath(__file__))
 
 class Camera:
     def __init__(self):
-        self.config_section = None
+        self.conf_section = None
         self.conf_file = None
         self.icon = None
         self.capture = None
@@ -15,7 +15,7 @@ class Camera:
 
     def meta(self):
         return {
-            "filter": self.config_section,
+            "filter": self.conf_section,
             "name":"Camera",
             "description":"Place the image in front of your camera and zoom in to focus",
             "parameter": True,
@@ -24,12 +24,12 @@ class Camera:
         }
 
 
-    def configure(self, config_section, conf_file):
-        self.config_section = config_section
+    def configure(self, global_conf, conf_section, conf_file):
+        self.conf_section = conf_section
         self.conf_file = conf_file
 
-        self.factor = self.conf_file.get_int("zoom", self.config_section)
-        camera_to_use = self.conf_file.get_int("camera", self.config_section)
+        self.factor = self.conf_file.get_int("zoom", self.conf_section)
+        camera_to_use = global_conf.get_int("camera-scanner")
         self.capture = VideoStream(camera_to_use)
         self.capture.start()
 
@@ -58,7 +58,7 @@ class Camera:
 
     def set_parameter(self, val):
         self.factor = val
-        self.conf_file.set("zoom", self.config_section, str(val))
+        self.conf_file.set("zoom", self.conf_section, str(val))
 
 
     def stop(self):
