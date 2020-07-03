@@ -19,6 +19,9 @@ class Configuration:
     def get_int(self, key, section="common"):
         return int(self.get(key, section))
 
+    def get_float(self, key, section="common"):
+        return float(self.get(key, section))
+
     def get(self, key, section="common"):
         try:
             return self.config[section][key]

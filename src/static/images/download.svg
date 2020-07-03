@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="96px" height="96px" viewBox="0 0 96 96" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>download</title>
+    <g id="download" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <rect id="Rectangle" stroke="#000000" x="25" y="16" width="47" height="64" rx="3"></rect>
+        <polygon id="Combined-Shape" stroke="#000000" fill="#FFFFFF" stroke-linejoin="round" points="48 59 35.6565097 65.7983739 38.0139066 51.3991869 28.0278132 41.2016261 41.8282549 39.1008131 48 26 54.1717451 39.1008131 67.9721868 41.2016261 57.9860934 51.3991869 60.3434903 65.7983739"></polygon>
+        <text id="gcode" font-family="Verdana" font-size="10" font-weight="normal" fill="#000000">
+            <tspan x="41" y="77">gcode</tspan>
+        </text>
+        <path d="M10,87 L10,78 C10,75.790861 11.790861,74 14,74 L82,74 C84.209139,74 86,75.790861 86,78 L86,87 L86,87" id="Line-9" stroke="#4A4A4A" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" transform="translate(48.000000, 80.500000) scale(1, -1) translate(-48.000000, -80.500000) "></path>
+    </g>
+</svg>

@@ -8,7 +8,6 @@ import inspect
 
 class VideoPipeline:
     def __init__(self, global_conf, pipeline_file ):
-        print("init pipeline")
         self.pipeline_conf = Configuration(pipeline_file)
         self.filters = []
         self.pipeline = self.pipeline_conf.sections()
@@ -17,7 +16,6 @@ class VideoPipeline:
             if pipeline_section == "common":
                 continue
 
-            print(pipeline_section)
             instance = clazz.instance_by_name(pipeline_section)
             instance.configure(global_conf, pipeline_section, self.pipeline_conf)
             # try to load an image/icon for the give filter
@@ -37,7 +35,14 @@ class VideoPipeline:
             meta  =instance.meta()
             meta["menu"]= menu
             meta_info.append(meta)
-        return meta_info
+        return {
+            "name":self.pipeline_conf.get("name"),
+            "description":self.pipeline_conf.get("description"),
+            "author":self.pipeline_conf.get("author"),
+            "output":self.pipeline_conf.get("output"),
+            "filters":meta_info
+        }
+
 
     def filter_count(self):
         return len(self.filters)

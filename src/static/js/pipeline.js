@@ -1,9 +1,63 @@
-function icon(filter, index, step){
+
+
+fetch('/meta')
+    .then(response => response.json())
+    .then(data => {
+        let step =1
+        let element = document.querySelector("#filters")
+        data.filters.forEach( (filter, index) => {
+            if(filter.menu) {
+                let html = `<section id="section${index}">
+                            <input type="radio" name="sections" id="option${index}">
+                            <label for="option${index}">${icon(filter)}</label>
+                            <article>
+                            ${filterScreen(filter, index)}
+                            </article>
+                        </section>`
+                element.insertAdjacentHTML('beforeend', html);
+                step++;
+            }
+        })
+        eval(data.output+"()")
+
+        let nodes = document.querySelectorAll(".parameter")
+        nodes.forEach( (node)=>{
+            node.addEventListener("input", (event)=>{
+                let element = event.target
+                fetch("/parameter/"+element.dataset.index+"/"+element.value, {
+                    method: "POST"
+                })
+            })
+        })
+    })
+
+
+function updateImage() {
+    setTimeout(() => {
+        let preview = document.querySelector('.tabordion input[name="sections"]:checked ~ article .update')
+        if (preview) {
+            let image = new Image()
+            image.onload = () => {
+                preview.style["background-image"] = "url("+image.src+")"
+                updateImage()
+            }
+            image.src = preview.dataset.image + "?time=" + new Date().getTime()
+        }
+        else{
+            updateImage()
+        }
+    }, 300)
+}
+updateImage()
+
+
+function icon(filter){
     if(filter.icon){
         return `<img class="with-shadow" src="${filter.icon}"/>`
     }
     return filter.name
 }
+
 
 function slider(filter, index){
     if(filter.parameter){
@@ -19,7 +73,8 @@ function slider(filter, index){
     return ""
 }
 
-function previewScreen(filter, index, step){
+
+function filterScreen(filter, index){
     return `<div
            data-image="/image/${index}"  
            class="preview update"
@@ -30,13 +85,63 @@ function previewScreen(filter, index, step){
         ${slider(filter, index)}`
 }
 
-function pendantScreen(step){
-    return  `<section id="sectionFINAL">
-                <input type="radio" name="sections" id="optionFINAL">
-                <label for="optionFINAL"><img class="with-shadow" src="/static/images/engrave.svg"/></label>
+
+function carveScreen(){
+    let element = document.querySelector("#filters")
+    let html=  `<section id="sectionCarve">
+                <input type="radio" name="sections" id="optionCarve">
+                <label for="optionCarve"><img class="with-shadow" src="/static/images/engrave.svg"/></label>
                 <article id="millingWizard">
                 </article>
              </section>`
+    element.insertAdjacentHTML('beforeend', html)
+    pendantStep()
+}
+
+
+function downloadScreen(){
+    let element = document.querySelector("#filters")
+    let html=  `<section id="sectionDownload">
+                <input type="radio" name="sections" id="optionDownload">
+                <label id="optionDownloadButton" for="optionDownload"><img class="with-shadow" src="/static/images/download.svg"/></label>
+                <article id="millingWizard">
+                </article>
+             </section>`
+    element.insertAdjacentHTML('beforeend', html)
+    downloadStep()
+}
+
+
+function previewGCode(){
+    container = document.getElementById("millingWizard")
+    container.innerHTML=""
+    downloadStep()
+
+    gcview = document.getElementById('gcview')
+
+    let width = container.clientWidth;
+    let height = container.clientHeight;
+    gcview.style.width = width+"px"
+    gcview.style.height = height+"px"
+    // setup GCView with the div element to display the gcode in
+
+    fetch('/gcode')
+        .then(response => response.text())
+        .then(data => {
+            var renderer = new GCView(gcview)
+            renderer.loadGC(data)
+            let downloadButton = document.getElementById('downloadButton')
+
+            downloadButton.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(data))
+            downloadButton.setAttribute('download', "carving.gcode")
+    })
+}
+
+
+function downloadStep(){
+    let finalScreen = document.getElementById("downloadScreenTemplate").innerHTML
+    let millingWizard = document.getElementById("millingWizard")
+    millingWizard.innerHTML = finalScreen
 }
 
 
@@ -58,84 +163,36 @@ function carveStep(){
     millingWizard.innerHTML = finalScreen
 }
 
-
-fetch('/meta')
-    .then(response => response.json())
-    .then(data => {
-        let step =1
-        let element = document.querySelector("#filters");
-        data.forEach( (filter, index) => {
-            if(filter.menu) {
-                let html = `<section id="section${index}">
-                            <input type="radio" name="sections" id="option${index}">
-                            <label for="option${index}">${icon(filter, index, step)}</label>
-                            <article>
-                            ${previewScreen(filter, index, step)}
-                            </article>
-                        </section>`
-                element.insertAdjacentHTML('beforeend', html);
-                step++;
-            }
-        })
-        element.insertAdjacentHTML('beforeend', pendantScreen(step))
-        pendantStep()
-
-        function updateImage() {
-            setTimeout(() => {
-                let preview = document.querySelector('.tabordion input[name="sections"]:checked ~ article .update')
-                if (preview) {
-                    let image = new Image()
-                    image.onload = () => {
-                        preview.style["background-image"] = "url("+image.src+")"
-                        updateImage()
-                    }
-                    image.src = preview.dataset.image + "?time=" + new Date().getTime()
-                }
-                else{
-                    updateImage()
-                }
-            }, 300)
-        }
-        updateImage()
-
-
-        let nodes = document.querySelectorAll(".parameter")
-        nodes.forEach( (node)=>{
-            node.addEventListener("input", (event)=>{
-                let element = event.target
-                fetch("/parameter/"+element.dataset.index+"/"+element.value, {
-                    method: "POST"
-                })
-            })
-        })
-
-        document.addEventListener('click', function (event) {
-
-            // If the clicked element doesn't have the right selector, bail
-            switch(event.target.id){
-                case "index_button":
-                    document.location.href = "/"
-                    break;
-                case "pendant-next":
-                    probeStep()
-                    break;
-                case "probe-back":
-                    pendantStep()
-                    break;
-                case "probe-next":
-                    carveStep()
-                    break;
-                case "carve-back":
-                    probeStep()
-                    break;
-            }
-
-        }, false);
-    })
-
-
 document.addEventListener('DOMContentLoaded', function() {
     let url = 'http://127.0.0.1:8081/GUI-is-still-open'
     fetch(url, { mode: 'no-cors'})
     setInterval(function(){ fetch(url, { mode: 'no-cors'});}, 5000)
+
+
+    document.addEventListener('click', function (event) {
+
+        // If the clicked element doesn't have the right selector, bail
+        switch(event.target.id){
+            case "index_button":
+                document.location.href = "/"
+                break;
+            case "pendant-next":
+                probeStep()
+                break;
+            case "probe-back":
+                pendantStep()
+                break;
+            case "probe-next":
+                carveStep()
+                break;
+            case "carve-back":
+                probeStep()
+                break;
+            case "optionDownloadButton":
+            case "optionDownload":
+                previewGCode()
+                break;
+        }
+
+    }, false);
 })

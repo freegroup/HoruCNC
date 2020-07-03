@@ -15,6 +15,7 @@ class GCode:
 
     # Define the feed_rate (50mm / minute)
     self.feed_rate = 150
+    self.rapid_rate = 300
 
     # Define the start position (clearance unscaled here)
     self.start = [0, 0, self.clearance]
@@ -22,27 +23,8 @@ class GCode:
     # Define the finish position (clearance unscaled here)
     self.finish = [0, 0, self.clearance]
 
-    # Define the state [0 off, 1 running]
-    self.state = 0
-
-    # Startup now that all the variables are configured
-    self.initialize()
-
-
-  # Startup the code and make the first moves
-  def initialize(self):
-
     # Add code for which unit system to use (mm )
     self.add('G21')
-
-    # Set the state to on
-    self.toggle_state()
-
-    # Raise the mill above the clearance
-    self.raise_mill()
-
-    # Feed rapidly to the start position
-    self.feed_rapid(self.start, self.feed_rate)
 
 
   # Applying the positioning (absolute or relative)
@@ -61,25 +43,26 @@ class GCode:
   def position_code(self, position):
 
     # Create a list of positions
-    positions = ""
+    positions = []
 
     # If there is an x coordinate then add it to the positions
     if "x" in position:
-        positions+=('X'+str(self.scale(position['x']))+' ')
+        positions.append('X'+str(self.scale(position['x'])))
 
     # If there is an y coordinate then add it to the positions
     if "y" in position:
-        positions+=('Y'+str(self.scale(position['y']))+' ')
+        positions.append('Y'+str(self.scale(position['y'])))
 
     # If there is an z coordinate then add it to the positions
     if "z" in position:
-        positions+=('Z'+str(self.scale(position['z'])))
+        positions.append('Z'+str(self.scale(position['z'])))
 
     # Return the position words
-    return positions
+    return " ".join(positions)
 
   # Derive the feed_rate word from a feed_rate (mm/minute)
-  def feed_rate_code(self, feed_rate = 50):
+  def feed_rate_code(self, feed_rate = None):
+    feed_rate = feed_rate if feed_rate else self.feed_rate
     # Return the feed_rate word
     return 'F' + str(feed_rate)
 
@@ -130,7 +113,9 @@ class GCode:
 
 
   # Feed rapidly to a position at a specified feed_rate
-  def feed_rapid(self, position, feed_rate=100):
+  def feed_rapid(self, position, feed_rate=None):
+    feed_rate = feed_rate if feed_rate else self.rapid_rate
+
     # Add the code to feed rapidly to the position
     self.motion('00', position, feed_rate)
 
@@ -138,33 +123,24 @@ class GCode:
   # Feed linearly to a position at a specified feed_rate
   def feed_linear(self, position, feed_rate=None):
     # Add the code to the stack to linearly to the specified position
-    self.motion('01', position, self.feed_rate if not feed_rate else feed_rate)
+    self.motion('01', position, feed_rate if feed_rate else self.feed_rate)
 
 
   # Terminate our code and ensure everything is stopped
   def terminate(self, force = False):
     # Check that the code is not force stopping
     if not force:
+      # Raise the mill above the clearance
+      self.raise_mill()
+
       # Stop the spindle
       self.stop_spindle()
 
       # Stop the coolant
       self.stop_coolant()
 
-      # Raise the mill above the clearance
-      self.raise_mill()
-
     # Force stop or rewind the program
     self.add('M00' if force else 'M30')
-
-    # Toggle the state to off
-    self.toggle_state()
-
-
-  # Toggle the current state
-  def toggle_state(self):
-    # Update the state to the opposite of what it is currently
-    self.state = not self.state
 
 
   # Add the code to the stack
@@ -181,17 +157,7 @@ class GCode:
     self.code.append(code)
 
 
-  # Evaluate the gcode
-  def evaluate(self):
-    # Check if the code has been terminate, and if not then terminate
-    if self.state == 1:
-        self.terminate()
-
-    # Return the code as a string
-    return '\n'.join(self.code)
-
-
   # Return the same output as the eval function
   def to_string(self):
-    return self.evaluate()
+    return '\n'.join(self.code)
 

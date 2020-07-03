@@ -13,47 +13,50 @@
     <link rel="stylesheet" href='/static/css/rangeslider.css' />
 </head>
 <body>
-<div class="screen">
-    <div class="tabordion-background inset"></div>
-    <div class="filter">
-        <div id="filters" class="tabordion">
-            <section id="sectionINDEX">
-                <input type="radio" name="sections" id="optionINDEX" checked>
-                <label for="optionINDEX">fffff</label>
-                <article>
-                    <div class="description">Click and follow the steps on the left</div>
-                </article>
-            </section>
+    <div class="screen">
+        <div class="tabordion-background inset"></div>
+        <div class="filter">
+            <div id="filters" class="tabordion">
+                <section id="sectionINDEX">
+                    <input type="radio" name="sections" id="optionINDEX" checked>
+                    <label for="optionINDEX">fffff</label>
+                    <article>
+                        <div class="description">Click and follow the steps on the left</div>
+                    </article>
+                </section>
+            </div>
         </div>
     </div>
-
-</div>
-
-<button id="index_button">&#8962;</button>
-
+    <button id="index_button">&#8962;</button>
 </body>
 
-<script id="pendantScreenTemplate" type="text/template">
 
+
+<script id="downloadScreenTemplate" type="text/template">
+    <div id="downloadScreen">
+        <h4 class="description">Download your CNC file.</h4>
+        <div id="gcview"></div>
+        <button class="bottom-button-right"><a  id="downloadButton" href="" title="Download GCode">&#x25BC;</a></button>
+    </div>
+</script>
+
+
+<script id="pendantScreenTemplate" type="text/template">
     <div id="pendantScreen">
         <div id="arrow-east"></div>
         <div id="arrow-north"></div>
         <div id="arrow-south"></div>
         <div id="arrow-west"></div>
-        <div class="description">
-            <div class="step-index">1/3</div>
-            Move the worktable so that the cutter is in the center of your workpiece.
-        </div>
+        <h4 class="description">Move the table to center the cutter above your workpiece.</h4>
         <img src="/static/images/start-pendant.svg" id="pendant-icon">
-
         <button class="bottom-button-right" id="pendant-next">&#x276F;</button>
     </div>
 </script>
 
-<script id="probeScreenTemplate" type="text/template">
 
+<script id="probeScreenTemplate" type="text/template">
     <div id="probeScreen">
-        <div class="description">Setup the probe tool and press the button</div>
+        <h4 class="description">Move the spindle down until the cutter just touches the workpiece</h4>
         <img src="/static/images/start-probe.svg" id="probe-icon">
         <div id="probe-up"></div>
         <div id="probe-down"></div>
@@ -62,16 +65,22 @@
     </div>
 </script>
 
+
 <script id="carveScreenTemplate" type="text/template">
     <div id="carveScreen">
-        <div class="description">Press the button to start carving instantly</div>
+        <h4 class="description">Press the button to start carving instantly</h4>
         <img src="/static/images/start-carve.svg" id="carve-icon">
         <button id="carve-start" >&#9654;</button>
         <button class="bottom-button-left"  id="carve-back" >&#x276E;</button>
     </div>
 </script>
 
+
 <script src="/static/js/pipeline.js"></script>
 <script src="/static/js/machine.js"></script>
+
+<script src="/static/js/preview/three.min.js"></script>
+<script src="/static/js/preview/TrackballControls.js"></script>
+<script src="/static/js/preview/GCView.js"></script>
 
 </html>

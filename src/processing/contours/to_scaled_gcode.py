@@ -1,6 +1,7 @@
 import numpy as np
 import cv2
 from utils.gcode import GCode
+from utils.configuration import Configuration
 
 class Filter:
     def __init__(self):
@@ -70,7 +71,15 @@ class Filter:
 
 
     def gcode(self):
+        clearance = self.conf_file.get_float(key="clearance", section=self.conf_section)
+        feed_rate = self.conf_file.get_float(key="feed_rate", section=self.conf_section)
+        depth_in_mm = self.conf_file.get_float(key="depth_in_mm", section=self.conf_section)
+
         code = GCode()
+        code.feed_rate = feed_rate
+        code.rapid_rate = feed_rate*2
+        code.clearance = clearance
+
         if len(self.cnt)>0:
             cnt2 = np.concatenate(self.cnt)
             # Determine the bounding rectangle
@@ -89,6 +98,10 @@ class Filter:
             #    - the x/y translation
             #    - flip them upside down (gcode coordinate system vs. openCV coordinate system)
             #
+            code.raise_mill()
+            code.feed_rapid({"x":0, "y":0})
+            code.start_spindle()
+
             for c in self.cnt:
                 i = 0
                 while i < len(c):
@@ -99,6 +112,7 @@ class Filter:
                     if i == 0:
                         code.feed_rapid(position)
                         code.drop_mill()
+                        code.feed_linear({"z":-depth_in_mm}, feed_rate= feed_rate/4)
                     else:
                         code.feed_linear(position)
 
@@ -108,6 +122,8 @@ class Filter:
                 y = '{:06.4f}'.format(((h - c[0][1])-offset_y)*scale_factor)
                 code.feed_linear({"x":x ,"y": y})
                 code.raise_mill()
+            code.stop_spindle()
+            code.feed_rapid({"x":0, "y":0})
 
         return code
 

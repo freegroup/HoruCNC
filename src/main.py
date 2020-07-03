@@ -50,7 +50,6 @@ def create_app():
         global pipelineJob
         global dataLock
         global conf
-        print("Pipeline:", name)
         with dataLock:
             if pipelineJob:
                 pipelineJob.stop()
@@ -81,6 +80,17 @@ def create_app():
         global pipelineJob
         response = make_response(json.dumps(pipelineJob.meta()))
         response.headers['Content-Type'] = 'application/json'
+        response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
+        response.headers['Pragma'] = 'no-cache'
+        response.headers['Expires'] = '0'
+        return response
+
+
+    @app.route('/gcode')
+    def gcode():
+        global pipelineJob
+        response = make_response(pipelineJob.gcode(pipelineJob.filter_count()-1).to_string())
+        response.headers['Content-Type'] = 'application/text'
         response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
         response.headers['Pragma'] = 'no-cache'
         response.headers['Expires'] = '0'
