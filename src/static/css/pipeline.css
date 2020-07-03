@@ -37,6 +37,7 @@ body {
     right: 10px;
     top: 10px;
 }
+
 #pendantScreen{
     bottom: 0;
     position: absolute;
@@ -45,21 +46,6 @@ body {
     right: 0;
 }
 
-#pendantScreen .description{
-    position: absolute;
-    left: 50%;
-    top: 50%;
-    -webkit-transform: translate(-50%, -50%);
-    transform: translate(-50%, -50%);
-    height:50%;
-    display: table;
-    border-radius: 5px;
-}
-
-#pendantScreen .description p{
-    display: table-cell;
-    vertical-align: middle;
-}
 
 #index_button {
     position: absolute;
@@ -240,7 +226,7 @@ body {
     border-bottom: 60px solid #367bf0;
     position: absolute;
     left: 50%;
-    top: 20px;
+    top: 80px;
     transform: translateX(-50%);
 }
 
@@ -271,21 +257,54 @@ body {
 
 
 #carve-start {
-    height: 50%;
-    box-shadow: none;
+    width: 11vw;
+    height: auto;
+    position: absolute;
+    right: 10vw;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 6vw;
+    background-color: #B8174C;
+    color: white;
 }
+
+
+#pendant-icon {
+    height: 50%;
+    width: auto;
+    box-shadow: none;
+    margin: auto;
+    top: 50%;
+    left:50%;
+    position: absolute;
+    transform: translateY(-50%)  translateX(-50%);
+}
+
 
 #probe-icon {
     height: 50%;
     width: auto;
     box-shadow: none;
     margin: auto;
-    top: 50%;
     position: absolute;
-    transform: translateY(-50%);
-    left: 10%;
+    top: 50%;
+    left: 50%;
+    transform: translateY(-50%) translateX(-50%);
 }
 
+
+
+
+#carve-icon {
+    height: 50%;
+    width: auto;
+    box-shadow: none;
+    margin: auto;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translateY(-50%) translateX(-50%);
+}
 
 #probe-up {
     width: 0;
@@ -294,9 +313,10 @@ body {
     border-right: 30px solid transparent;
     border-bottom: 60px solid #367bf0;
     position: absolute;
-    left: 60%;
+    right: 10vw;
     top: 30%;
 }
+
 
 #probe-down {
     width: 0;
@@ -305,6 +325,6 @@ body {
     border-right: 30px solid transparent;
     border-top: 60px solid #367bf0;
     position: absolute;
-    left: 60%;
+    right: 10vw;
     top: 60%;
 }

@@ -22,12 +22,13 @@ SERIAL_BAUD     = conf.get_int("serial-baud")
 
 grbl = GrblWriter(SERIAL_PORT, SERIAL_BAUD)
 
+log = logging.getLogger('werkzeug')
+log.setLevel(logging.ERROR)
+
+
 app = Flask(__name__)
 app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
 ui = FlaskUI(app= app, width=800, height=480, port=8080)
-
-log = logging.getLogger('werkzeug')
-log.setLevel(logging.ERROR)
 
 
 # global, thread base variables

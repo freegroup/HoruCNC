@@ -13,6 +13,9 @@ class S(BaseHTTPRequestHandler):
         self.send_header('Content-type', 'text/html')
         self.end_headers()
 
+    def log_message(self, format, *args):
+        pass
+
     def do_GET(self):
         self._set_response()
         self.wfile.write("GET request for {}".format(self.path).encode('utf-8'))
@@ -76,9 +79,9 @@ class FlaskUI:
         """
             Run flask or other framework specified
         """
-        print("start Flask server")
+        #print("start Flask server")
         self.flask_app.run(host=self.host, port=self.port)
-        print("done")
+        #print("done")
 
 
     def get_default_chrome_path(self):
@@ -158,7 +161,7 @@ class FlaskUI:
                                               '--app={}'.format(self.localhost)],
                                              stdout=sps.PIPE, stderr=sps.PIPE, stdin=sps.PIPE)
         else:
-            print("Browser not found")
+            #print("Browser not found")
             import webbrowser
             webbrowser.open_new(self.localhost)
 
@@ -175,7 +178,7 @@ class FlaskUI:
 
             httpd.handle_request()
 
-            print("Checking Gui status")
+            #print("Checking Gui status")
 
             if os.path.isfile("bo.txt"):
                 with open("bo.txt", "r") as f:
@@ -186,7 +189,7 @@ class FlaskUI:
                     print("Gui was closed.")
                     break
 
-            print("Gui still open.")
+            #print("Gui still open.")
 
             time.sleep(2)
 
