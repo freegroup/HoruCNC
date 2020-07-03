@@ -61,8 +61,17 @@ def create_app():
     def pipelines():
         from os import listdir
         from os.path import isfile, join, basename, splitext
-        onlyfiles = [splitext(basename(f))[0] for f in listdir(PIPELINE_FOLDER) if isfile(join(PIPELINE_FOLDER, f))]
-        response = make_response(json.dumps(onlyfiles))
+        onlyfiles = [join(PIPELINE_FOLDER, f) for f in listdir(PIPELINE_FOLDER) if isfile(join(PIPELINE_FOLDER, f))]
+        pipelines = []
+        for f in onlyfiles:
+            conf = Configuration(f)
+
+            pipelines.append({ "basename":splitext(basename(f))[0],
+                            "name": conf.get("name"),
+                            "description": conf.get("description"),
+                            "author": conf.get("author")
+                            })
+        response = make_response(json.dumps(pipelines))
         response.headers['Content-Type'] = 'application/json'
         return response
 
