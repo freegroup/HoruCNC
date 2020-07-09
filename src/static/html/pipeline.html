@@ -32,11 +32,21 @@
 
 
 
+<script id="previewScreenTemplate" type="text/template">
+    <div id="previewScreen">
+        <h4 class="description">Download your CNC file.</h4>
+        <div id="gcview"></div>
+        <button class="bottom-button-center"><a  id="downloadButton" href="" title="Download GCode">download</a></button>
+        <button class="bottom-button-right" id="preview-next">&#x276F;</button>
+    </div>
+</script>
+
+
 <script id="downloadScreenTemplate" type="text/template">
     <div id="downloadScreen">
         <h4 class="description">Download your CNC file.</h4>
         <div id="gcview"></div>
-        <button class="bottom-button-right"><a  id="downloadButton" href="" title="Download GCode">&#x25BC;</a></button>
+        <button class="bottom-button-center"><a  id="downloadButton" href="" title="Download GCode">download</a></button>
     </div>
 </script>
 
@@ -50,6 +60,7 @@
         <h4 class="description">Move the table to center the cutter above your workpiece.</h4>
         <img src="/static/images/start-pendant.svg" id="pendant-icon">
         <button class="bottom-button-right" id="pendant-next">&#x276F;</button>
+        <button class="bottom-button-left"  id="pendant-back" >&#x276E;</button>
     </div>
 </script>
 

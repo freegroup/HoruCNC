@@ -95,7 +95,7 @@ function carveScreen(){
                 </article>
              </section>`
     element.insertAdjacentHTML('beforeend', html)
-    pendantStep()
+    previewStep()
 }
 
 
@@ -112,12 +112,12 @@ function downloadScreen(){
 }
 
 
-function previewGCode(){
-    container = document.getElementById("millingWizard")
-    container.innerHTML=""
-    downloadStep()
+function previewStep(){
+    let container = document.getElementById("millingWizard")
+    let template = document.getElementById("previewScreenTemplate").innerHTML
+    container.innerHTML = template
 
-    gcview = document.getElementById('gcview')
+    let gcview = document.getElementById('gcview')
 
     let width = container.clientWidth;
     let height = container.clientHeight;
@@ -137,11 +137,29 @@ function previewGCode(){
     })
 }
 
-
 function downloadStep(){
-    let finalScreen = document.getElementById("downloadScreenTemplate").innerHTML
-    let millingWizard = document.getElementById("millingWizard")
-    millingWizard.innerHTML = finalScreen
+    let container = document.getElementById("millingWizard")
+    let template = document.getElementById("downloadScreenTemplate").innerHTML
+    container.innerHTML = template
+
+    let gcview = document.getElementById('gcview')
+
+    let width = container.clientWidth;
+    let height = container.clientHeight;
+    gcview.style.width = width+"px"
+    gcview.style.height = height+"px"
+    // setup GCView with the div element to display the gcode in
+
+    fetch('/gcode')
+        .then(response => response.text())
+        .then(data => {
+            var renderer = new GCView(gcview)
+            renderer.loadGC(data)
+            let downloadButton = document.getElementById('downloadButton')
+
+            downloadButton.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(data))
+            downloadButton.setAttribute('download', "carving.gcode")
+        })
 }
 
 
@@ -176,8 +194,14 @@ document.addEventListener('DOMContentLoaded', function() {
             case "index_button":
                 document.location.href = "/"
                 break;
+            case "preview-next":
+                pendantStep()
+                break;
             case "pendant-next":
                 probeStep()
+                break;
+            case "pendant-back":
+                previewStep()
                 break;
             case "probe-back":
                 pendantStep()
@@ -188,9 +212,12 @@ document.addEventListener('DOMContentLoaded', function() {
             case "carve-back":
                 probeStep()
                 break;
+            case "optionCarve":
+                previewStep()
+                break;
             case "optionDownloadButton":
             case "optionDownload":
-                previewGCode()
+                downloadStep()
                 break;
         }
 

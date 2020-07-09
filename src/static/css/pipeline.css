@@ -256,6 +256,21 @@ body {
 
 
 
+
+.bottom-button-center{
+    position: absolute;
+    bottom: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    height: 5vw;
+    width: 14vw;
+    font-size: 2vw;
+    font-weight: 100;
+    color: #777;
+}
+
+
+
 #carve-start {
     width: 11vw;
     height: auto;
