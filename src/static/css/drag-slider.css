@@ -1,0 +1,13 @@
+
+
+.drag-thumb {
+    cursor: pointer;
+    position: absolute;
+    left: -32px;
+    width: 0;
+    height: 60px;
+    border-left: 30px solid transparent;
+    border-right: 30px solid transparent;
+    border-bottom: 60px solid #367bf0;
+    filter: drop-shadow(4px 4px 4px #aaa);
+}

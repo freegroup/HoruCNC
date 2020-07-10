@@ -111,18 +111,18 @@ def create_app():
                 return make_response("temporarly unavailable", 503)
 
 
-    @app.route('/machine/pendant/<axis>/<amount>', methods=['POST'])
-    def machine_pendant(axis, amount):
+    @app.route('/machine/pendant/<axis>/<amount>/<speed>', methods=['POST'])
+    def machine_pendant(axis, amount, speed):
         global dataLock
         global grbl
         with dataLock:
             try:
                 grbl.send_line("$X")
-                grbl.send_line("$J=G21 G91 {}{} F100".format(axis,amount))
+                grbl.send_line("$J=G21 G91 {}{} F{}".format(axis,amount,speed))
                 return make_response("ok", 200)
             except Exception as exc:
                 print(exc)
-                return make_response("temporarly unavailable", 503)
+                return make_response("temporally unavailable", 503)
 
 
     @app.route('/machine/probe/<depth>/<speed>', methods=['POST'])
@@ -134,7 +134,7 @@ def create_app():
                 return make_response("ok", 200)
             except Exception as exc:
                 print(exc)
-                return make_response("temporarly unavailable", 503)
+                return make_response("temporally unavailable", 503)
 
 
     @app.route('/machine/carve/start', methods=['POST'])

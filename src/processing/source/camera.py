@@ -30,6 +30,7 @@ class Camera:
 
         self.factor = self.conf_file.get_int("zoom", self.conf_section)
         camera_to_use = global_conf.get_int("camera-scanner")
+        print("using camera:", camera_to_use)
         self.capture = VideoStream(camera_to_use)
         self.capture.start()
 

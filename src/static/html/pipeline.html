@@ -11,6 +11,7 @@
     <link rel="stylesheet" href='/static/css/skeuos.css' />
     <link rel="stylesheet" href='/static/css/pipeline.css' />
     <link rel="stylesheet" href='/static/css/rangeslider.css' />
+    <link rel="stylesheet" href='/static/css/drag-slider.css' />
 </head>
 <body>
     <div class="screen">
@@ -54,7 +55,7 @@
 <script id="pendantScreenTemplate" type="text/template">
     <div id="pendantScreen">
         <div id="arrow-east"></div>
-        <div id="arrow-north"></div>
+        <div  id="slider-north"><div id="arrow-north"></div></div>
         <div id="arrow-south"></div>
         <div id="arrow-west"></div>
         <h4 class="description">Move the table to center the cutter above your workpiece.</h4>
@@ -87,6 +88,8 @@
 </script>
 
 
+<script src="/static/js/queue.js"></script>
+<script src="/static/js/drag-slider.js"></script>
 <script src="/static/js/pipeline.js"></script>
 <script src="/static/js/machine.js"></script>
 

@@ -60,6 +60,9 @@ class VideoPipeline:
         gcode = None
         for instance in self.filters:
             image, cnt, gcode = instance.process(image, cnt, gcode)
+            if image is None:
+                print("unable to read image from camera")
+                break
             result.append({"filter": instance.conf_section, "image":image, "contour": cnt, "gcode": gcode})
 
         return result

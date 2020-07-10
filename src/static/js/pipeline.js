@@ -1,4 +1,4 @@
-
+var pendantQueue=new Queue;
 
 fetch('/meta')
     .then(response => response.json())
@@ -167,6 +167,24 @@ function pendantStep(){
     let finalScreen = document.getElementById("pendantScreenTemplate").innerHTML
     let millingWizard = document.getElementById("millingWizard")
     millingWizard.innerHTML = finalScreen
+    let sliderNorth = new DragSlider(0, 100, document.getElementById("slider-north"), document.getElementById("arrow-north"));
+    sliderNorth.onChange = (value)=>{
+        pendantQueue.clear()
+        pendantQueue.add(()=>{
+            let distance = 0.05 * value
+            let speed = 2 * value
+            fetch(`/machine/pendant/Y/${distance}/${speed}` , {method: "POST"})
+                .then(()=>{
+                    console.log("next")
+                    pendantQueue.next()
+                })
+        })
+    };
+    sliderNorth.onMouseUp = ()=>{
+        sliderNorth.setValue(0)
+        pendantQueue.clear()
+    }
+    sliderNorth.setValue(0)
 }
 
 function probeStep(){
