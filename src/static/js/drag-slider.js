@@ -38,3 +38,12 @@ DragSlider.prototype.setValue = function (value) {
     this.value = value
     this.onChange(this.value)
 }
+
+
+DragSlider.prototype.reset = function () {
+    let value = Math.max(this.min, Math.min(this.max, 0))
+    let yRange = this.element.clientHeight
+    let y = Math.floor((this.max - value) / (this.max - this.min) * yRange)
+    this.thumb.style.top = y + 'px'
+    this.value = value
+}

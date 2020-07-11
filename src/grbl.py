@@ -53,7 +53,7 @@ class GrblWriter:
             time.sleep(1)
             return
 
-        ready_string = "ok\r\n"
+        ready_string = "\r\n"
         read_string = ""
         read_a_char = True
         print("CNC: ",lineToSend)

@@ -117,8 +117,28 @@ def create_app():
         global grbl
         with dataLock:
             try:
-                grbl.send_line("$X")
+                amount= int(amount)
+                speed = int(speed)
+                if amount==0 or speed==0:
+                    return make_response("ok", 200)
+
+                grbl.send_line("\x85")
                 grbl.send_line("$J=G21 G91 {}{} F{}".format(axis,amount,speed))
+                print("done")
+                return make_response("ok", 200)
+            except Exception as exc:
+                print(exc)
+                return make_response("temporally unavailable", 503)
+
+
+    @app.route('/machine/pendant/reset', methods=['POST'])
+    def machine_reset():
+        global dataLock
+        global grbl
+        with dataLock:
+            try:
+                grbl.send_line("\x85")
+                grbl.send_line("$X")
                 return make_response("ok", 200)
             except Exception as exc:
                 print(exc)

@@ -164,27 +164,37 @@ function downloadStep(){
 
 
 function pendantStep(){
+    let lastCommand = ""
     let finalScreen = document.getElementById("pendantScreenTemplate").innerHTML
     let millingWizard = document.getElementById("millingWizard")
     millingWizard.innerHTML = finalScreen
-    let sliderNorth = new DragSlider(0, 100, document.getElementById("slider-north"), document.getElementById("arrow-north"));
+    let sliderNorth = new DragSlider(10, 200, document.getElementById("slider-north"), document.getElementById("arrow-north"));
     sliderNorth.onChange = (value)=>{
         pendantQueue.clear()
-        pendantQueue.add(()=>{
-            let distance = 0.05 * value
-            let speed = 2 * value
-            fetch(`/machine/pendant/Y/${distance}/${speed}` , {method: "POST"})
-                .then(()=>{
-                    console.log("next")
-                    pendantQueue.next()
-                })
+        pendantQueue.add(( doneCallback)=>{
+            let distance = 100
+            let speed = parseInt(value/10)*10
+            let command = `/machine/pendant/Y/${distance}/${speed}`
+            if(lastCommand !== command) {
+                lastCommand = command
+                fetch(command, {method: "POST"})
+                    .then(() => {
+                        doneCallback()
+                        this.next()
+                    })
+            }
+            else{
+                doneCallback()
+                this.next()
+            }
         })
     };
     sliderNorth.onMouseUp = ()=>{
-        sliderNorth.setValue(0)
+        fetch("machine/reset", {method:"POST"})
+        sliderNorth.reset()
         pendantQueue.clear()
     }
-    sliderNorth.setValue(0)
+    sliderNorth.reset()
 }
 
 function probeStep(){

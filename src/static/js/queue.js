@@ -16,21 +16,6 @@ function Queue(){
                 enumerable:true,
                 writable:false,
                 value:clearQueue
-            },
-            contents:{
-                enumerable:false,
-                get:getQueue,
-                set:setQueue
-            },
-            autoRun:{
-                enumerable:true,
-                writable:true,
-                value:true
-            },
-            stop:{
-                enumerable:true,
-                writable:true,
-                value:false
             }
         }
     );
@@ -43,31 +28,24 @@ function Queue(){
         return queue;
     }
 
-    function getQueue(){
-        return queue;
-    }
-
-    function setQueue(val){
-        queue=val;
-        return queue;
-    }
-
     function addToQueue(){
         for(let i in arguments){
             queue.push(arguments[i]);
         }
-        if(!running && !this.stop && this.autoRun){
+        if(!running){
             this.next();
         }
     }
 
     function run(){
         running=true;
-        if(queue.length<1 || this.stop){
+        if(queue.length<1){
             running=false;
             return;
         }
 
-        queue.shift().bind(this)();
+        queue.shift().bind(this)( ()=>{
+            running = false
+        });
     }
 }
