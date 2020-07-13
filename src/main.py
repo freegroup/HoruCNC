@@ -117,8 +117,8 @@ def create_app():
         global grbl
         with dataLock:
             try:
-                amount= int(amount)
-                speed = int(speed)
+                amount= float(amount)
+                speed = float(speed)
                 if amount==0 or speed==0:
                     return make_response("ok", 200)
 
@@ -131,7 +131,7 @@ def create_app():
                 return make_response("temporally unavailable", 503)
 
 
-    @app.route('/machine/pendant/reset', methods=['POST'])
+    @app.route('/machine/reset', methods=['POST'])
     def machine_reset():
         global dataLock
         global grbl

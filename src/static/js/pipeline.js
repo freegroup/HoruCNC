@@ -1,5 +1,3 @@
-var pendantQueue=new Queue;
-
 fetch('/meta')
     .then(response => response.json())
     .then(data => {
@@ -164,37 +162,13 @@ function downloadStep(){
 
 
 function pendantStep(){
-    let lastCommand = ""
     let finalScreen = document.getElementById("pendantScreenTemplate").innerHTML
     let millingWizard = document.getElementById("millingWizard")
     millingWizard.innerHTML = finalScreen
-    let sliderNorth = new DragSlider(10, 200, document.getElementById("slider-north"), document.getElementById("arrow-north"));
-    sliderNorth.onChange = (value)=>{
-        pendantQueue.clear()
-        pendantQueue.add(( doneCallback)=>{
-            let distance = 100
-            let speed = parseInt(value/10)*10
-            let command = `/machine/pendant/Y/${distance}/${speed}`
-            if(lastCommand !== command) {
-                lastCommand = command
-                fetch(command, {method: "POST"})
-                    .then(() => {
-                        doneCallback()
-                        this.next()
-                    })
-            }
-            else{
-                doneCallback()
-                this.next()
-            }
-        })
-    };
-    sliderNorth.onMouseUp = ()=>{
-        fetch("machine/reset", {method:"POST"})
-        sliderNorth.reset()
-        pendantQueue.clear()
-    }
-    sliderNorth.reset()
+    let sliderNorth = new PendantSlider(1, 2000, "x", false, true,  document.getElementById("slider-north"), document.getElementById("arrow-north"))
+    let sliderSouth = new PendantSlider(1, 2000, "x", true,  true,  document.getElementById("slider-south"), document.getElementById("arrow-south"))
+    let sliderWest  = new PendantSlider(1, 2000, "y", false, false, document.getElementById("slider-west"),  document.getElementById("arrow-west"))
+    let sliderEast  = new PendantSlider(1, 2000, "y", true, false, document.getElementById("slider-east"),  document.getElementById("arrow-east"))
 }
 
 function probeStep(){

@@ -10,7 +10,7 @@ class VideoStream:
         # from the stream
         self.stream = cv2.VideoCapture(src)
         if not self.stream.isOpened():
-            print("Port {} is not working:".format(src))
+            print("Camera port '{}' is not working:".format(src))
 
         self.stream.set(3, 1920)
         self.stream.set(4, 1080)
@@ -19,7 +19,7 @@ class VideoStream:
         # cv2.SetCaptureProperty(self.stream,cv2.CV_CAP_PROP_FRAME_HEIGHT, 720)
 
         # the camera needs some time to warm up
-        time.sleep(3.0)
+        time.sleep(2.0)
 
         (self.grabbed, self.frame) = self.stream.read()
 
@@ -40,12 +40,7 @@ class VideoStream:
 
     def update(self):
         # keep looping infinitely until the thread is stopped
-        while True:
-            # if the thread indicator variable is set, stop the thread
-            if self.stopped:
-                return
-
-            # otherwise, read the next frame from the stream
+        while not self.stopped:
             (self.grabbed, self.frame) = self.stream.read()
 
     def read(self):
@@ -57,5 +52,7 @@ class VideoStream:
     def stop(self):
         # indicate that the thread should be stopped
         self.stopped = True
+        print("stopping camera thread")
         self.thread.join()
+        print("camera thread stopped")
 

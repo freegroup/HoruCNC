@@ -185,7 +185,7 @@ body {
     height: 50px;
     position: absolute;
     left: 50%;
-    top: 75px;
+    top: 50px;
     transform: translateX(-50%);
     border: 0.2px solid #01010121;
     width: 16px;
@@ -201,11 +201,24 @@ body {
     border-right: 30px solid transparent;
     border-bottom: 60px solid #367bf0;
     position: absolute;
-    left: -22px;
+    left: -23px;
     filter: drop-shadow(4px 4px 4px #aaa);
-    transform: translateY(-50%);
+    transform: translateY(-20%);
 }
 
+
+#slider-south{
+    height: 50px;
+    position: absolute;
+    left: 50%;
+    bottom: 30px;
+    transform: translateX(-50%);
+    border: 0.2px solid #01010121;
+    width: 16px;
+    border-radius: 10px;
+    box-shadow: 0 0 transparent, 0 0 transparent, inset 3px 3px 5px rgba(0, 0, 0, 0.1), inset -3px -3px 5px white;
+    background: #f8f9fb;
+}
 
 #arrow-south{
     width: 0;
@@ -214,10 +227,22 @@ body {
     border-right: 30px solid transparent;
     border-top: 60px solid #367bf0;
     position: absolute;
-    bottom: 20px;
-    left: 50%;
-    transform: translateX(-50%);
+    left: -23px;
+    transform: translateY(-80%);
     filter: drop-shadow(4px 4px 4px #aaa);
+}
+
+#slider-west{
+    height: 16px;
+    position: absolute;
+    top: 50%;
+    left: 30px;
+    transform: translateY(-50%);
+    border: 0.2px solid #01010121;
+    width: 50px;
+    border-radius: 10px;
+    box-shadow: 0 0 transparent, 0 0 transparent, inset 3px 3px 5px rgba(0, 0, 0, 0.1), inset -3px -3px 5px white;
+    background: #f8f9fb;
 }
 
 #arrow-west{
@@ -227,12 +252,24 @@ body {
     border-bottom: 30px solid transparent;
     border-top: 30px solid transparent;
     position: absolute;
-    left: 20px;
-    top: 50%;
-    transform: translateY(-50%);
+    top: -23px;
+    transform: translateX(-20%);
     filter: drop-shadow(4px 4px 4px #aaa);
 }
 
+
+#slider-east{
+    height: 16px;
+    position: absolute;
+    top: 50%;
+    right: 30px;
+    transform: translateY(-50%);
+    border: 0.2px solid #01010121;
+    width: 50px;
+    border-radius: 10px;
+    box-shadow: 0 0 transparent, 0 0 transparent, inset 3px 3px 5px rgba(0, 0, 0, 0.1), inset -3px -3px 5px white;
+    background: #f8f9fb;
+}
 
 #arrow-east{
     width: 0;
@@ -241,9 +278,8 @@ body {
     border-bottom: 30px solid transparent;
     border-top: 30px solid transparent;
     position: absolute;
-    right: 20px;
-    top: 50%;
-    transform: translateY(-50%);
+    transform: translateX(-80%);
+    top:-23px;
     filter: drop-shadow(4px 4px 4px #aaa);
 }
 
@@ -302,7 +338,7 @@ body {
 
 
 #pendant-icon {
-    height: 50%;
+    height: 40%;
     width: auto;
     box-shadow: none;
     margin: auto;

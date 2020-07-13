@@ -50,7 +50,7 @@ class GrblWriter:
     def __send_line(self, lineToSend):
         if not self.serial_port:
             print("Simulate: ", lineToSend)
-            time.sleep(1)
+            time.sleep(0.1)
             return
 
         ready_string = "\r\n"

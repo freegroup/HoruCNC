@@ -5,15 +5,6 @@ document.addEventListener('click', function (event) {
         case "arrow-west":
             fetch("/machine/pendant/X/-1/100", {method: "POST"})
             break;
-        case "arrow-east":
-            fetch("/machine/pendant/X/1/100", {method: "POST"})
-            break;
-        case "arrow-north":
-            fetch("/machine/pendant/Y/1/100", {method: "POST"})
-            break;
-        case "arrow-south":
-            fetch("/machine/pendant/Y/-1/100", {method: "POST"})
-            break;
         case "probe-up":
             fetch("/machine/pendant/Z/1/100", {method: "POST"})
             break;
