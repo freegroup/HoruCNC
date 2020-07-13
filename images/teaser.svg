@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg width="577px" height="290px" viewBox="0 0 577 290" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<svg width="651px" height="290px" viewBox="0 0 651 290" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
     <title>teaser</title>
     <defs>
         <radialGradient cx="48.7573181%" cy="68.6772245%" fx="48.7573181%" fy="68.6772245%" r="128.069597%" gradientTransform="translate(0.487573,0.686772),scale(0.417431,1.000000),rotate(172.055705),translate(-0.487573,-0.686772)" id="radialGradient-1">
@@ -16,7 +16,7 @@
         </linearGradient>
     </defs>
     <g id="teaser" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
-        <g id="Group-3" transform="translate(345.000000, 23.000000)">
+        <g id="Group-3" transform="translate(419.000000, 23.000000)">
             <polygon id="Rectangle" stroke="#4A4A4A" fill="url(#radialGradient-1)" stroke-linejoin="round" points="112.488028 84 218 84.6971585 218 113.110705 108.078437 175 0 113.110705 0 84.6971585"></polygon>
             <polygon id="Rectangle" stroke="#4A4A4A" fill="url(#linearGradient-2)" stroke-linejoin="round" points="109 22 218 85.1961955 108.078437 147 0 85.1961955"></polygon>
             <line x1="108" y1="147.882353" x2="108" y2="176.117647" id="Line" stroke="#4A4A4A" stroke-linecap="round" stroke-linejoin="round"></line>
@@ -35,7 +35,7 @@
             <line x1="129" y1="72" x2="130" y2="73" id="Line-7" stroke="#149BC3" stroke-linecap="round" stroke-linejoin="round"></line>
             <line x1="131" y1="67" x2="134" y2="66" id="Line-6" stroke="#149BC3" stroke-linecap="round" stroke-linejoin="round"></line>
         </g>
-        <g id="Group-2" transform="translate(50.000000, 43.000000)">
+        <g id="Group-2" transform="translate(124.000000, 43.000000)">
             <polyline id="Line-2" stroke="#4A4A4A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" points="0 22 5.55111512e-15 2 20 2"></polyline>
             <polyline id="Line-2" stroke="#4A4A4A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" points="22 136 2 136 2 116"></polyline>
             <polyline id="Line-2" stroke="#4A4A4A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" transform="translate(119.000000, 126.000000) rotate(-90.000000) translate(-119.000000, -126.000000) " points="129 136 109 136 109 116"></polyline>
@@ -47,11 +47,11 @@
             <line x1="4" y1="92" x2="124" y2="92" id="Line" stroke="#FFFFFF" stroke-width="2" stroke-linecap="square"></line>
         </g>
         <text id="WebCam" font-family="Verdana" font-size="18" font-weight="normal" fill="#000000">
-            <tspan x="81" y="247">WebCam</tspan>
+            <tspan x="155" y="247">WebCam</tspan>
         </text>
         <text id="GRBL-Code" font-family="Verdana" font-size="18" font-weight="normal" fill="#000000">
-            <tspan x="404" y="258">GRBL Code</tspan>
+            <tspan x="478" y="258">GRBL Code</tspan>
         </text>
-        <path id="Line-10" d="M283.194009,191.5 C319.883173,191.5 357.557665,200.755563 396.208132,219.252219 L399.880727,212.099609 L412.44481,229.228352 L391.203366,229.002372 L394.837684,221.922223 C356.603034,203.635928 319.391587,194.5 283.194009,194.5 C242.234334,194.5 203.457241,204.602742 166.840128,224.816364 L165.73118,225.431993 L164.421456,226.163173 L162.959097,223.543725 L164.26882,222.812546 C201.656154,201.940311 241.305648,191.5 283.194009,191.5 Z" fill="#F54768" fill-rule="nonzero"></path>
+        <path id="Line-10" d="M357.194009,191.5 C393.883173,191.5 431.557665,200.755563 470.208132,219.252219 L473.880727,212.099609 L486.44481,229.228352 L465.203366,229.002372 L468.837684,221.922223 C430.603034,203.635928 393.391587,194.5 357.194009,194.5 C316.234334,194.5 277.457241,204.602742 240.840128,224.816364 L239.73118,225.431993 L238.421456,226.163173 L236.959097,223.543725 L238.26882,222.812546 C275.656154,201.940311 315.305648,191.5 357.194009,191.5 Z" fill="#F54768" fill-rule="nonzero"></path>
     </g>
 </svg>
