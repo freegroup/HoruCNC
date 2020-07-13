@@ -5,9 +5,14 @@ CNC machines are an essential part of the hacker’s toolset. These computer-con
 The motivation for this project was to reduce the effort of toolpath generation and the frustration at the cost of commercial software. 
 
 ## What is the philosophy behind HoruCNC?
+Dead simple - design and print your template with any kind of software you like, scan it with your WebCam, and press the **Carve** button to send your GRBL code direct to your CNC mill.
 
+ 
 ![teaser](./images/teaser.svg)
 
+Of course, this method has several disadvantages such as, accuracy, complex calculated travel paths, ... but high precision is not what the software is designed for. It should be very easy to make cutters for cookies, stamps and engravings of name plates. Everything where an accuracy of 0.01mm is not required.
+
+It should be possible that not CNC and CAD users should be able to engrave a stamp or a name plate in minutes. Possibly the software simply extends the standard tool set of a CAD expert if he want to engrave something without having to create a 3D model.
 
 ## Get the software running
 The software is written in Python3 for convenience. Python has a very good interface to OpenCV for image processing, which is heavily used here.
