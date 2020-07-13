@@ -6,7 +6,7 @@ The motivation for this project was to reduce the effort of toolpath generation 
 
 ## What is the philosophy behind HoruCNC?
 
-![teaser](./images/teaser.png)
+![teaser](./images/teaser.svg)
 
 
 ## Get the software running
