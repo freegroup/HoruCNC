@@ -17,7 +17,7 @@ function PendantSlider(min, max, axis, inverse, vertical, element, thumb) {
         pendantQueue.clear()
     }
     this.onMouseDown= ()=>{
-        fetch(`/machine/pendant/${axis}/200/${1*slider.factor}`, {method:"POST"})
+        fetch(`/machine/pendant/${axis}/${200*this.factor}/1`, {method:"POST"})
     }
     this.onChange= (value)=>{
         let slider = this
