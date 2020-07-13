@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="151px" height="116px" viewBox="0 0 151 116" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>start-carve</title>
+    <defs>
+        <radialGradient cx="48.7573181%" cy="68.6772245%" fx="48.7573181%" fy="68.6772245%" r="127.888815%" gradientTransform="translate(0.487573,0.686772),scale(0.418033,1.000000),rotate(172.044403),translate(-0.487573,-0.686772)" id="radialGradient-1">
+            <stop stop-color="#FDD341" offset="0%"></stop>
+            <stop stop-color="#FAA841" offset="100%"></stop>
+        </radialGradient>
+        <linearGradient x1="72.7686761%" y1="50%" x2="14.5676137%" y2="53.4837841%" id="linearGradient-2">
+            <stop stop-color="#14BFF2" offset="0%"></stop>
+            <stop stop-color="#04AFF1" offset="100%"></stop>
+        </linearGradient>
+        <linearGradient x1="28.6743164%" y1="51.9539388%" x2="117.39502%" y2="51.9539388%" id="linearGradient-3">
+            <stop stop-color="#CFCFD3" offset="0%"></stop>
+            <stop stop-color="#4A4A4A" offset="100%"></stop>
+        </linearGradient>
+    </defs>
+    <g id="start-carve" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <polygon id="Rectangle" stroke="#4A4A4A" fill="url(#radialGradient-1)" stroke-linejoin="round" points="77.9520156 57 137 57.3907152 137 73.3147905 75.4842631 108 15 73.3147905 15 57.3907152"></polygon>
+        <polygon id="Rectangle" stroke="#4A4A4A" fill="url(#linearGradient-2)" stroke-linejoin="round" points="76 22 137 57.3898695 75.4842631 92 15 57.3898695"></polygon>
+        <line x1="75.5" y1="92.5" x2="75.5" y2="108.5" id="Line" stroke="#4A4A4A" stroke-linecap="round" stroke-linejoin="round"></line>
+        <path d="M85.8693615,47.7244766 L100.984131,50.5388151 C101.467697,50.6288542 101.632196,51.2190843 101.302989,51.5491709 L101.230513,51.6114944 L89.577,60.209 L91.1142644,72.2956085 C91.1690618,72.7263796 90.7666239,73.0598568 90.3657574,72.9517193 L90.2800487,72.9216621 L77,67.154 L63.7199513,72.9216621 C63.4464017,73.0404645 63.1327891,72.9394422 62.976572,72.6964746 L62.9306,72.610335 C62.8117976,72.3367854 62.9128199,72.0231728 63.1557875,71.8669557 L63.2419271,71.8209837 L76.7609879,65.9496608 C76.8829579,65.8966893 77.0181354,65.886095 77.1453884,65.9178779 L77.2390121,65.9496608 L89.79,71.4 L88.3419463,60.0113759 C88.3184241,59.8264639 88.3822421,59.6430495 88.5111577,59.5131144 L88.5809373,59.4528442 L99.406,51.465 L85.6496993,48.9042005 C85.3565047,48.8496083 85.1531024,48.5904058 85.1595736,48.3016237 L85.1696684,48.2045075 C85.2242607,47.9113129 85.4834631,47.7079105 85.7722453,47.7143817 L85.8693615,47.7244766 Z" id="Path" fill="#FFFFFF" fill-rule="nonzero"></path>
+        <path d="M85.8510563,47.8227869 L100.965826,50.6371255 C101.36496,50.7114434 101.503245,51.1946855 101.239267,51.471171 L101.171144,51.5310248 L89.47,60.163 L91.0150638,72.3082275 C91.0604953,72.665372 90.7287755,72.9422633 90.3964211,72.8563372 L90.3198841,72.8299389 L77,67.045 L63.6801159,72.8299389 C63.4549723,72.9277187 63.1972619,72.8468064 63.0655144,72.6497274 L63.0223232,72.5704996 C62.9245434,72.345356 63.0054557,72.0876456 63.2025347,71.9558981 L63.2817625,71.9127069 L76.8008233,66.041384 C76.9024649,65.9972411 77.0151128,65.9884125 77.121157,66.0148982 L77.1991767,66.041384 L89.912,71.562 L88.4411469,59.9987568 C88.4220896,59.8489439 88.4718284,59.7003105 88.5733299,59.5926644 L88.640306,59.5333137 L99.651,51.409 L85.6680045,48.8058902 C85.4266921,48.7609583 85.2583704,48.549702 85.2594464,48.3126443 L85.2679788,48.2228127 C85.3129106,47.9815002 85.5241669,47.8131785 85.7612247,47.8142444 L85.8510563,47.8227869 Z" id="Path" fill="#4A4A4A" fill-rule="nonzero"></path>
+        <g id="Group" transform="translate(83.000000, 15.000000)">
+            <ellipse id="Oval" fill="#4A4A4A" cx="2.25" cy="1" rx="2.25" ry="1"></ellipse>
+            <path d="M0.3,1 C0.966666667,1.42057292 1.63333333,1.63085937 2.3,1.63085937 C2.96666667,1.63085937 3.63333333,1.42057292 4.3,1 L4.3,31 L2.25,33 L0.3,31 L0.3,1 Z" id="Rectangle" stroke="#4A4A4A" stroke-width="0.5" fill="url(#linearGradient-3)" stroke-linejoin="round"></path>
+        </g>
+        <line x1="91.5" y1="20.5" x2="102.5" y2="20.5" id="Line-2" stroke="#F5A623" stroke-linecap="square"></line>
+        <line x1="91.5" y1="25.5" x2="97.5" y2="25.5" id="Line-3" stroke="#F5A623" stroke-linecap="square"></line>
+        <line x1="91.5" y1="31.5" x2="106.5" y2="31.5" id="Line-4" stroke="#F5A623" stroke-linecap="square"></line>
+        <path d="M85,14 C87.7614237,14 90,13.1045695 90,12 C90,10.8954305 87.7614237,10 85,10 C82.2385763,10 80,10.8954305 80,12" id="Path" stroke="#F5A623"></path>
+        <line x1="82.5" y1="46.5" x2="81.5" y2="45.5" id="Line-5" stroke="#149BC3" stroke-linecap="round" stroke-linejoin="round"></line>
+        <line x1="83.5" y1="49.5" x2="82.5" y2="50.5" id="Line-8" stroke="#149BC3" stroke-linecap="round" stroke-linejoin="round"></line>
+        <line x1="87" y1="50" x2="87.5" y2="50.5" id="Line-7" stroke="#149BC3" stroke-linecap="round" stroke-linejoin="round"></line>
+        <line x1="88" y1="47" x2="89.5" y2="46.5" id="Line-6" stroke="#149BC3" stroke-linecap="round" stroke-linejoin="round"></line>
+    </g>
+</svg>

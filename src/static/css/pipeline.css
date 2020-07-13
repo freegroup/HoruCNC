@@ -85,6 +85,8 @@ body {
     text-align: center;
     margin:0;
     font-size:2vw;
+    position: absolute;
+    width: 100%;
 }
 
 
@@ -146,6 +148,8 @@ body {
 
 .tabordion section label img{
     height:100%;
+    border: 1px solid rgba(0,0,0,0.1);
+    border-radius: 4px;
 }
 
 
