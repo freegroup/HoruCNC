@@ -16,8 +16,7 @@ It should be possible that not CNC and CAD users should be able to engrave a sta
 
 ## Youtube Demo
     
-[![Demo](https://img.youtube.com/vi/Wjtr2Kol8Lw/1.jpg)](https://www.youtube.com/watch?v=Wjtr2Kol8Lw)
-    
+[![Demo](http://img.youtube.com/vi/Wjtr2Kol8Lw/0.jpg)](http://www.youtube.com/watch?v=Wjtr2Kol8Lw "")    
     
 ## Get the software running
 The software is written in Python3 for convenience. Python has a very good interface to OpenCV for image processing, which is heavily used here.
