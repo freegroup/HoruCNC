@@ -6,7 +6,9 @@ import logging
 import os
 
 from flask import Flask, render_template, make_response, send_file
+
 from utils.webgui import FlaskUI   # get the FlaskUI class
+from utils.hardware_info import cameraIndexes
 
 from pipeline import VideoPipeline
 from grbl import GrblWriter
@@ -38,6 +40,7 @@ pipelineJob = None          # the current, selected pipeline for image processin
 jobThread = None            # runs the pipeline
 millingThread = None        # runs the milling job
 
+print(cameraIndexes())
 
 def create_app():
 
@@ -90,6 +93,7 @@ def create_app():
     def gcode():
         global pipelineJob
         response = make_response(pipelineJob.gcode(pipelineJob.filter_count()-1).to_string())
+        response.headers['Content-Disposition'] = 'attachment; filename="carve.gcode"; filename*="carve.gcode"'
         response.headers['Content-Type'] = 'application/text'
         response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
         response.headers['Pragma'] = 'no-cache'

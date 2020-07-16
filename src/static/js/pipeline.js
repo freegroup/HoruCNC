@@ -128,10 +128,6 @@ function previewStep(){
         .then(data => {
             var renderer = new GCView(gcview)
             renderer.loadGC(data)
-            let downloadButton = document.getElementById('downloadButton')
-
-            downloadButton.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(data))
-            downloadButton.setAttribute('download', "carving.gcode")
     })
 }
 
@@ -153,10 +149,6 @@ function downloadStep(){
         .then(data => {
             var renderer = new GCView(gcview)
             renderer.loadGC(data)
-            let downloadButton = document.getElementById('downloadButton')
-
-            downloadButton.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(data))
-            downloadButton.setAttribute('download', "carving.gcode")
         })
 }
 
@@ -168,7 +160,7 @@ function pendantStep(){
     let sliderNorth = new PendantSlider(1, 2000, "x", false, true,  document.getElementById("slider-north"), document.getElementById("arrow-north"))
     let sliderSouth = new PendantSlider(1, 2000, "x", true,  true,  document.getElementById("slider-south"), document.getElementById("arrow-south"))
     let sliderWest  = new PendantSlider(1, 2000, "y", false, false, document.getElementById("slider-west"),  document.getElementById("arrow-west"))
-    let sliderEast  = new PendantSlider(1, 2000, "y", true, false, document.getElementById("slider-east"),  document.getElementById("arrow-east"))
+    let sliderEast  = new PendantSlider(1, 2000, "y", true,  false, document.getElementById("slider-east"),  document.getElementById("arrow-east"))
 }
 
 function probeStep(){
