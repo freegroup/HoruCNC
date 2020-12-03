@@ -12,7 +12,7 @@ class Filter:
             "filter": self.conf_section,
             "name":"Contours",
             "description":"Generates the contour of your outline image",
-            "parameter": False,
+            "parameter": None,
             "icon": self.icon
         }
 
@@ -22,6 +22,9 @@ class Filter:
 
     def process(self, image, cnt, code):
         try:
+            if len(image.shape)==2:
+                print("Error: Input shape for 'to_contour' mist be three channel images")
+
             outline = np.zeros(image.shape, dtype="uint8")
             if len(image.shape)==3:
                 single_channel =  cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
@@ -32,6 +35,7 @@ class Filter:
             cv2.drawContours(outline, cnt, -1, (0,255,0), 1)
             i = 0
             validated_cnt = []
+
             while i < len(cnt):
                 c = cnt[i]
                 sq_cnt = np.squeeze(c)
@@ -39,7 +43,6 @@ class Filter:
                     validated_cnt.append(sq_cnt)
                 i += 1
             image = outline
-
         except Exception as exc:
             print(self.conf_section, exc)
 

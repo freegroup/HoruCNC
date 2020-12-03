@@ -15,7 +15,7 @@ class Filter:
             "filter": self.conf_section,
             "name":" Carve Contour",
             "description":"Carves the contour",
-            "parameter": True,
+            "parameter": "slider",
             "icon": self.icon
         }
 

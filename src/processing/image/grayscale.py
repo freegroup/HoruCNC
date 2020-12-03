@@ -11,7 +11,7 @@ class Filter:
             "filter": self.conf_section,
             "name":"grayscale",
             "description":"Grayscale a color image",
-            "parameter": False,
+            "parameter": None,
             "icon": self.icon
         }
 

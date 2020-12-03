@@ -10,7 +10,7 @@ class Filter:
             "filter": self.conf_section,
             "name":"Invers Black&White",
             "description":"The filter inverts a Black&White image",
-            "parameter": False,
+            "parameter": None,
             "icon": self.icon
         }
 

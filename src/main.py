@@ -5,10 +5,10 @@ import json
 import logging
 import os
 
-from flask import Flask, render_template, make_response, send_file
+from flask import Flask, render_template, make_response, send_file, request
 
 from utils.webgui import FlaskUI   # get the FlaskUI class
-from utils.hardware_info import cameraIndexes
+
 
 from pipeline import VideoPipeline
 from grbl import GrblWriter
@@ -40,7 +40,6 @@ pipelineJob = None          # the current, selected pipeline for image processin
 jobThread = None            # runs the pipeline
 millingThread = None        # runs the milling job
 
-print(cameraIndexes())
 
 def create_app():
 
@@ -197,13 +196,14 @@ def create_app():
                 return make_response("temporally unavailable", 503)
 
 
-    @app.route('/parameter/<index>/<value>', methods=['POST'])
-    def parameter(index, value):
+    @app.route('/parameter/<index>', methods=['POST'])
+    def parameter(index):
         global pipelineJob
         global dataLock
         with dataLock:
             try:
-                pipelineJob.set_parameter(int(index),int(value))
+                value = request.data.decode("utf-8")
+                pipelineJob.set_parameter(int(index),value)
                 return make_response("ok",200)
             except Exception as exc:
                 print(exc)
@@ -214,8 +214,10 @@ def create_app():
         global jobThread
         global millingThread
         if jobThread:
+            print("cancel jobThread")
             jobThread.cancel()
         if millingThread:
+            print("cancel millingThread")
             millingThread.cancel()
 
 
@@ -232,13 +234,17 @@ def create_app():
                 print("error during image processing...ignored")
 
         # Set the next thread to happen
+        print("start next jobThread")
         jobThread = threading.Timer(POOL_TIME, processJob, ())
         jobThread.start()
+        #for thread in threading.enumerate():
+        #    print(thread.name)
 
     def startJob():
         # Do initialisation stuff here
         global jobThread
         # Create your thread
+        print("start jobThread")
         jobThread = threading.Timer(POOL_TIME, processJob, ())
         jobThread.start()
 

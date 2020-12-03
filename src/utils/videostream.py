@@ -33,6 +33,7 @@ class VideoStream:
 
     def start(self):
         # start the thread to read frames from the video stream
+        print("starting video stream thread")
         self.thread = Thread(target=self.update, name=self.name, args=())
         self.thread.setDaemon(True)
         self.thread.start()
@@ -54,5 +55,6 @@ class VideoStream:
         self.stopped = True
         print("stopping camera thread")
         self.thread.join()
+        self.thread = None
         print("camera thread stopped")
 

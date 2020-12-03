@@ -33,7 +33,9 @@ class GrblWriter:
 
     def send(self, gcode):
         self.gcode = gcode
-        self.thread = Thread(target=self.__send)
+        print("starting GRBL thread")
+        self.thread = Thread(name="GRBL Sender", target=self.__send)
+        self.thread.setDaemon(True)
         self.thread.start()
 
 

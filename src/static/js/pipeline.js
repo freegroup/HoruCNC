@@ -18,12 +18,13 @@ fetch('/meta')
         })
         eval(data.output+"()")
 
-        let nodes = document.querySelectorAll(".parameter")
+        let nodes = document.querySelectorAll("input[type=range].parameter")
         nodes.forEach( (node)=>{
             node.addEventListener("input", (event)=>{
                 let element = event.target
-                fetch("/parameter/"+element.dataset.index+"/"+element.value, {
-                    method: "POST"
+                fetch("/parameter/"+element.dataset.index, {
+                    method: "POST",
+                    body: element.value
                 })
             })
         })
@@ -37,6 +38,9 @@ function updateImage() {
             let image = new Image()
             image.onload = () => {
                 preview.style["background-image"] = "url("+image.src+")"
+                updateImage()
+            }
+            image.onerror = ()=> {
                 updateImage()
             }
             image.src = preview.dataset.image + "?time=" + new Date().getTime()
@@ -57,16 +61,26 @@ function icon(filter){
 }
 
 
-function slider(filter, index){
-    if(filter.parameter){
+function inputParameter(filter, index){
+    if(filter.parameter==="slider"){
         return `<input 
                      class="parameter" 
-                     id="slider${index}"  
+                     id="param_${index}"  
                      data-index="${index}" 
                      type="range"
-                      min="0" 
-                      max="255" 
-                      value="${filter.value}" step="1">`
+                     min="0" 
+                     max="255" 
+                     value="${filter.value}" 
+                     step="1">`
+    }
+    else if(filter.parameter === "filepicker" ){
+        return  `<input 
+                   class="parameter" 
+                   onchange="console.log(event);uploadFile(event)"
+                   data-index="${index}" 
+                   type="file"
+                   id="param_${index}"  
+                   accept="image/png">`
     }
     return ""
 }
@@ -80,7 +94,7 @@ function filterScreen(filter, index){
            id="preview${index}" 
            ></div>
         <h4 class="description">${filter.description}</h4>
-        ${slider(filter, index)}`
+        ${inputParameter(filter, index)}`
 }
 
 
@@ -152,6 +166,26 @@ function downloadStep(){
         })
 }
 
+function uploadFile(event){
+    let element = event.target
+    let file = element.files[0]
+    event.preventDefault()
+
+    const reader = new FileReader();
+    reader.addEventListener("load", function () {
+        // convert image file to base64 string
+        dataUri = reader.result
+        base64 = dataUri.replace("data:image/png;base64,","")
+        fetch("/parameter/"+element.dataset.index, {
+            method: "POST",
+            body: base64
+        })
+    }, false);
+
+    if (file) {
+        reader.readAsDataURL(file);
+    }
+}
 
 function pendantStep(){
     let finalScreen = document.getElementById("pendantScreenTemplate").innerHTML

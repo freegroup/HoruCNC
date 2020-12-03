@@ -1,6 +1,6 @@
 import os
 import cv2
-from utils.videostream import VideoStream
+from scanner_camera import Camera as Scanner
 
 CWD_PATH = os.path.dirname(os.path.realpath(__file__))
 
@@ -12,13 +12,14 @@ class Camera:
         self.icon = None
         self.capture = None
         self.factor = 2
+        self.camera = None
 
     def meta(self):
         return {
             "filter": self.conf_section,
             "name":"Camera",
             "description":"Place the image in front of your camera and zoom in to focus",
-            "parameter": True,
+            "parameter": "slider",
             "value": self.factor,
             "icon": self.icon
         }
@@ -29,14 +30,12 @@ class Camera:
         self.conf_file = conf_file
 
         self.factor = self.conf_file.get_int("zoom", self.conf_section)
-        camera_to_use = global_conf.get_int("camera-scanner")
-        print("using camera:", camera_to_use)
-        self.capture = VideoStream(camera_to_use)
-        self.capture.start()
-
+        print("CREATE CAMERA")
+        self.camera = Scanner()
+        print(self.camera)
 
     def process(self, image, cnt, code):
-        image = self.capture.read()
+        image = self.camera.capture.read()
         if self.factor>0:
             # map 0..255 -> 1..10
             image = self.zoom(image, 1+(5/255)*self.factor)
@@ -58,10 +57,11 @@ class Camera:
 
 
     def set_parameter(self, val):
-        self.factor = val
+        self.factor = int(val)
         self.conf_file.set("zoom", self.conf_section, str(val))
 
 
     def stop(self):
-        self.capture.stop()
+        Scanner.stop()
+        pass
 

@@ -1,7 +1,6 @@
 import numpy as np
 import cv2
 from utils.gcode import GCode
-from utils.configuration import Configuration
 
 class Filter:
     def __init__(self):
@@ -16,7 +15,7 @@ class Filter:
             "filter": self.conf_section,
             "name":"Scale your Contours",
             "description":"Resize your shape until it fits your needs",
-            "parameter": True,
+            "parameter": "slider",
             "icon": self.icon
         }
 
@@ -66,7 +65,8 @@ class Filter:
 
 
     def set_parameter(self, val):
-        self.width_in_mm = val
+        self.width_in_mm = int(val)
+        print(self.width_in_mm)
         self.conf_file.set("width_in_mm", self.conf_section, str(val))
 
 
@@ -80,7 +80,7 @@ class Filter:
         code.rapid_rate = feed_rate*2
         code.clearance = clearance
 
-        if len(self.cnt)>0:
+        if self.cnt and len(self.cnt)>0:
             cnt2 = np.concatenate(self.cnt)
             # Determine the bounding rectangle
             x, y, w, h = cv2.boundingRect(cnt2)

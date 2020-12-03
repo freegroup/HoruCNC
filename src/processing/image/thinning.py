@@ -11,7 +11,7 @@ class Filter:
             "filter": self.conf_section,
             "name":"Thinning",
             "description":"Thinning the outline of the found contour",
-            "parameter": False,
+            "parameter": None,
             "icon": self.icon
         }
 

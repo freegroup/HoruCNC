@@ -1,6 +1,4 @@
 import cv2
-import numpy as np
-
 
 
 class Filter:
@@ -15,8 +13,8 @@ class Filter:
         return {
             "filter": self.conf_section,
             "name":"Blur",
-            "description":"Remove noise from the image",
-            "parameter": True,
+            "description":"Remove noise from the image and smooth it",
+            "parameter": "slider",
             "value": self.factor,
             "icon": self.icon
         }
@@ -29,15 +27,17 @@ class Filter:
     def process(self, image, cnt, code):
         try:
             image = image.copy()
-            image = cv2.bilateralFilter(image,9,self.factor,self.factor)
+            kernel = max(3, int((19 /255*self.factor)/2)*2+1 )
+            print(kernel)
+            blur = cv2.blur(image,(kernel,kernel))
         except Exception as exc:
             print(self.conf_section, exc)
 
 
-        return image, cnt, code
+        return blur, cnt, code
 
     def set_parameter(self, val):
-        self.factor = val
+        self.factor = int(val)
         self.conf_file.set("factor", self.conf_section, str(self.factor))
 
 

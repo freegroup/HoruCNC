@@ -61,8 +61,10 @@ class VideoPipeline:
         for instance in self.filters:
             image, cnt, gcode = instance.process(image, cnt, gcode)
             if image is None:
-                print("unable to read image from camera")
+                print("unable to read image from filter: "+instance.meta()["name"])
                 break
+            if len(image.shape) != 3:
+                print("Image must have 3 color channels. Filter '{}' mst return RGB image for further processing".format(instance.conf_section))
             result.append({"filter": instance.conf_section, "image":image, "contour": cnt, "gcode": gcode})
 
         return result
