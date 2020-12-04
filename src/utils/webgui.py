@@ -2,8 +2,9 @@ from http.server import BaseHTTPRequestHandler, HTTPServer
 
 import os, time, signal
 import sys, subprocess as sps
-from threading import Thread
+import threading
 
+from threading import Thread
 from datetime import datetime
 
 
@@ -193,6 +194,8 @@ class FlaskUI:
 
             time.sleep(2)
 
+        for thread in threading.enumerate():
+           print(thread.name)
 
         if self.on_exit:
             self.on_exit()
@@ -207,7 +210,7 @@ class FlaskUI:
             import psutil
             psutil.Process(os.getpid()).kill()
         except:
-            os.kill(os.getpid(), signal.SIGSTOP)
+            os.kill(os.getpid(), signal.SIGKILL)
 
 
 

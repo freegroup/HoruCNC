@@ -234,11 +234,8 @@ def create_app():
                 print("error during image processing...ignored")
 
         # Set the next thread to happen
-        print("start next jobThread")
         jobThread = threading.Timer(POOL_TIME, processJob, ())
         jobThread.start()
-        #for thread in threading.enumerate():
-        #    print(thread.name)
 
     def startJob():
         # Do initialisation stuff here

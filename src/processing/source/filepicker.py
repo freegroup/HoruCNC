@@ -35,7 +35,8 @@ class FilePicker:
     def set_parameter(self, val):
         bytearray = base64.b64decode(val)
         png_as_np = np.frombuffer(bytearray, dtype=np.uint8)
-        self.image = self.image_resize(cv2.imdecode(png_as_np, flags=cv2.IMREAD_COLOR), width=640)
+        width = self.conf_file.get_int("width", self.conf_section)
+        self.image = self.image_resize(cv2.imdecode(png_as_np, flags=cv2.IMREAD_COLOR), width=width)
 
     def image_resize(self, image, width = None, height = None, inter = cv2.INTER_AREA):
         # initialize the dimensions of the image to be resized and

@@ -28,30 +28,36 @@ fetch('/meta')
                 })
             })
         })
+
+        // start the initial trigger to update the preview image
+        //
+        updatePreviewImage()
+
+        // select the first pane/filter in the navigation to show the first page
+        //
+        document.getElementById("option0").click()
     })
 
 
-function updateImage() {
+function updatePreviewImage() {
     setTimeout(() => {
         let preview = document.querySelector('.tabordion input[name="sections"]:checked ~ article .update')
         if (preview) {
             let image = new Image()
             image.onload = () => {
                 preview.style["background-image"] = "url("+image.src+")"
-                updateImage()
+                updatePreviewImage()
             }
             image.onerror = ()=> {
-                updateImage()
+                updatePreviewImage()
             }
             image.src = preview.dataset.image + "?time=" + new Date().getTime()
         }
         else{
-            updateImage()
+            updatePreviewImage()
         }
     }, 300)
 }
-updateImage()
-
 
 function icon(filter){
     if(filter.icon){
@@ -74,13 +80,17 @@ function inputParameter(filter, index){
                      step="1">`
     }
     else if(filter.parameter === "filepicker" ){
-        return  `<input 
-                   class="parameter" 
+        return  `<div  class="parameter">
+                 <input 
+                
                    onchange="console.log(event);uploadFile(event)"
                    data-index="${index}" 
                    type="file"
                    id="param_${index}"  
-                   accept="image/png">`
+                   accept="image/png">
+                  <label for="param_${index}"   />Choose an Image..</label>
+                  </div>
+                   `
     }
     return ""
 }

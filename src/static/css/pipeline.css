@@ -38,6 +38,33 @@ body {
     top: 10px;
 }
 
+[type="file"] {
+    height: 0;
+    overflow: hidden;
+    width: 0;
+}
+
+[type="file"] + label {
+    background: #f15d22;
+    border: none;
+    border-radius: 5px;
+    color: #fff;
+    cursor: pointer;
+    display: inline-block;
+    font-family: 'Rubik', sans-serif;
+    font-size: inherit;
+    font-weight: 500;
+    margin-bottom: 1rem;
+    outline: none;
+    padding: 1rem 50px;
+    position: relative;
+    transition: all 0.3s;
+    vertical-align: middle;
+}
+[type="file"] + label:hover {
+     background-color: #912900;
+ }
+
 #pendantScreen{
     bottom: 0;
     position: absolute;
@@ -129,7 +156,7 @@ body {
     overflow:hidden;
 }
 
-.tabordion section label {
+.tabordion section > label {
     cursor: pointer;
     display: inline-block;
     padding: 0;
@@ -137,16 +164,11 @@ body {
     z-index:100;
     margin-left:2px;
     border-radius: 4px;
+    width:88px;
+    height:88px;
 }
 
-
-.tabordion section label {
-   width:88px;
-   height:88px;
-}
-
-
-.tabordion section label img{
+.tabordion section > label img{
     height:100%;
     border: 1px solid rgba(0,0,0,0.1);
     border-radius: 4px;
@@ -320,10 +342,11 @@ body {
     left: 50%;
     transform: translateX(-50%);
     height: 5vw;
-    width: 14vw;
+    width: 22vw;
     font-size: 2vw;
     font-weight: 100;
     color: #777;
+    text-transform: none;
 }
 
 
