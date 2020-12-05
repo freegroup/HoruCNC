@@ -39,7 +39,6 @@ class VideoPipeline:
             "name":self.pipeline_conf.get("name"),
             "description":self.pipeline_conf.get("description"),
             "author":self.pipeline_conf.get("author"),
-            "output":self.pipeline_conf.get("output"),
             "filters":meta_info
         }
 

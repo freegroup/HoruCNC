@@ -16,7 +16,7 @@ fetch('/meta')
                 step++;
             }
         })
-        eval(data.output+"()")
+        carveScreen()
 
         let nodes = document.querySelectorAll("input[type=range].parameter")
         nodes.forEach( (node)=>{
@@ -47,8 +47,23 @@ function updatePreviewImage() {
             image.onload = () => {
                 preview.style["background-image"] = "url("+image.src+")"
                 updatePreviewImage()
+                let nodeList = document.querySelectorAll("#section0 ~ section")
+                let nodeArray = [...nodeList]; // converts NodeList to Array
+                nodeArray.forEach(node => {
+                    node.classList.remove('disabled');
+                });
             }
             image.onerror = ()=> {
+                // no image selected or available. Either the user didn'T upload/select one or the camera isn't
+                // available. Go to step-0 and force that the user selects an image or camera source
+                document.getElementById("option0").click()
+                // disable all other steps. It makes no sense to enalbe the filters without any selected image
+                // #section0 ~ section
+                let nodeList = document.querySelectorAll("#section0 ~ section")
+                let nodeArray = [...nodeList]; // converts NodeList to Array
+                nodeArray.forEach(node => {
+                    node.classList.add('disabled');
+                });
                 updatePreviewImage()
             }
             image.src = preview.dataset.image + "?time=" + new Date().getTime()
@@ -118,19 +133,6 @@ function carveScreen(){
              </section>`
     element.insertAdjacentHTML('beforeend', html)
     previewStep()
-}
-
-
-function downloadScreen(){
-    let element = document.querySelector("#filters")
-    let html=  `<section id="sectionDownload">
-                <input type="radio" name="sections" id="optionDownload">
-                <label id="optionDownloadButton" for="optionDownload"><img class="with-shadow" src="/static/images/download.svg"/></label>
-                <article id="millingWizard">
-                </article>
-             </section>`
-    element.insertAdjacentHTML('beforeend', html)
-    downloadStep()
 }
 
 

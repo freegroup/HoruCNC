@@ -176,17 +176,14 @@ class FlaskUI:
         httpd.timeout = 10
 
         while True:
-
             httpd.handle_request()
-
             #print("Checking Gui status")
-
             if os.path.isfile("bo.txt"):
                 with open("bo.txt", "r") as f:
                     bo = f.read().splitlines()[0]
                 diff = datetime.now() - datetime.strptime(bo, "%Y-%m-%d %H:%M:%S.%f")
 
-                if diff.total_seconds() > 10:
+                if diff.total_seconds() > 4:
                     print("Gui was closed.")
                     break
 

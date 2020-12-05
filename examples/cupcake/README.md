@@ -63,8 +63,6 @@ The pipeline described here is updated as follows...I hope the comments in the f
 author = Andreas Herz
 name = Download Shape Outline GCode
 description = Generates the carving outline of an Black&White image
-# how to handle the result of the GCODE generation. Possible values are ["carveScreen", "downloadScreen"]
-output = downloadScreen
 
 
 ###########################################################################################

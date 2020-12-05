@@ -168,6 +168,14 @@ body {
     height:88px;
 }
 
+.tabordion section.disabled {
+    opacity: 0.1;
+}
+.tabordion section.disabled > label, .tabordion section.disabled > label > img{
+    cursor: not-allowed;
+}
+
+
 .tabordion section > label img{
     height:100%;
     border: 1px solid rgba(0,0,0,0.1);
