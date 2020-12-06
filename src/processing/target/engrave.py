@@ -15,7 +15,7 @@ class Filter:
             "filter": self.conf_section,
             "name":" Carve Contour",
             "description":"Carves the contour",
-            "parameter": "slider",
+            "parameters": [],
             "icon": self.icon
         }
 
@@ -38,7 +38,7 @@ class Filter:
             return image, cnt, code
 
 
-    def set_parameter(self, val):
+    def set_parameter(self, name, val):
         pass
 
 

@@ -27,11 +27,9 @@ grbl = GrblWriter(SERIAL_PORT, SERIAL_BAUD)
 log = logging.getLogger('werkzeug')
 log.setLevel(logging.ERROR)
 
-
 app = Flask(__name__)
 app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
-ui = FlaskUI(app= app, width=800, height=480, port=8080)
-
+ui = FlaskUI(app= app, port=8080)
 
 # global, thread base variables
 previewImage = None         # the result of each pipeline run
@@ -196,18 +194,43 @@ def create_app():
                 return make_response("temporally unavailable", 503)
 
 
-    @app.route('/parameter/<index>', methods=['POST'])
-    def parameter(index):
+    @app.route('/parameter/<index>/<name>/<value>', methods=['POST'])
+    def parameter(index, name, value):
         global pipelineJob
         global dataLock
         with dataLock:
             try:
-                value = request.data.decode("utf-8")
-                pipelineJob.set_parameter(int(index),value)
+                pipelineJob.set_parameter(int(index), name, value)
                 return make_response("ok",200)
             except Exception as exc:
                 print(exc)
                 return make_response("temporally unavailable", 503)
+
+    @app.route('/sourceImage', methods=['POST'])
+    def sourceImagePost():
+        global pipelineJob
+        try:
+            if len(request.data)==0:
+                pipelineJob.override_source_image(None)
+            else:
+                value = request.data.decode("utf-8")
+                pipelineJob.override_source_image(value)
+            return make_response("ok",200)
+        except Exception as exc:
+            print(exc)
+            return make_response("temporally unavailable", 503)
+
+    @app.route('/sourceImage', methods=['GET'])
+    def sourceImageGet():
+        global pipelineJob
+        try:
+            retval, buffer = cv2.imencode('.png', pipelineJob.get_source_image())
+            response = make_response(buffer.tobytes())
+            response.headers['Content-Type'] = 'image/png'
+            return response
+        except Exception as exc:
+            print(exc)
+            return make_response("temporally unavailable", 503)
 
 
     def interrupt():

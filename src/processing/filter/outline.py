@@ -13,7 +13,7 @@ class Filter:
             "filter": self.conf_section,
             "name": "Outline",
             "description":"Generates the outline of your black-white image",
-            "parameter": None,
+            "parameters": [],
             "icon": self.icon
         }
 

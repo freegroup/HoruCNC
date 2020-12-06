@@ -2,6 +2,7 @@ body {
     padding:0;
     margin:0;
     overflow: hidden;
+    font-family: 'Cantarell', sans-serif;
 }
 
 .screen{
@@ -43,27 +44,24 @@ body {
     overflow: hidden;
     width: 0;
 }
-
-[type="file"] + label {
-    background: #f15d22;
-    border: none;
-    border-radius: 5px;
-    color: #fff;
-    cursor: pointer;
-    display: inline-block;
-    font-family: 'Rubik', sans-serif;
-    font-size: inherit;
-    font-weight: 500;
-    margin-bottom: 1rem;
-    outline: none;
-    padding: 1rem 50px;
-    position: relative;
-    transition: all 0.3s;
-    vertical-align: middle;
+#presetImage, #resetImage {
+    width:auto;
+    padding:0px;
 }
-[type="file"] + label:hover {
-     background-color: #912900;
- }
+
+#presetImage label, #resetImage label{
+    display: inline-block;
+    position: relative;
+    white-space: nowrap;
+    width: auto;
+    text-decoration: none;
+    font-size: 2vw;
+    padding-left:10px;
+    padding-right:10px;
+    color: #367bf0;
+    font-weight:bold;
+}
+
 
 #pendantScreen{
     bottom: 0;
@@ -102,10 +100,11 @@ body {
 
 .parameter{
     position: absolute;
-    bottom:0;
+    bottom:0px;
+    right:0px;
     padding-left:10px;
     padding-right:10px;
-    width:calc(100% - 20px);
+    width:calc(100% - 150px);
 }
 
 .description{
@@ -122,7 +121,6 @@ body {
     width: 100%;
     color: #333;
     display: block;
-    font-family: arial, sans-serif;
     margin: auto;
     position: relative;
     padding-left: 10px;
@@ -207,11 +205,11 @@ body {
     display: block;
 }
 
-#millingWizard {
+#finalWizard {
     height:100%;
 }
 
-#millingWizard > div {
+#finalWizard > div {
     height:100%;
 }
 
@@ -342,19 +340,20 @@ body {
 }
 
 
-
-
 .bottom-button-center{
     position: absolute;
     bottom: 10px;
     left: 50%;
     transform: translateX(-50%);
     height: 5vw;
-    width: 22vw;
+    width: auto;
     font-size: 2vw;
     font-weight: 100;
     color: #777;
     text-transform: none;
+    padding-left: 20px;
+    padding-right: 20px;
+    white-space: nowrap;
 }
 
 

@@ -1,9 +1,14 @@
 fetch('/meta')
     .then(response => response.json())
     .then(data => {
-        let step =1
+
+        startScreen()
+
+        // add all the filters to the pipeline
+        //
         let element = document.querySelector("#filters")
         data.filters.forEach( (filter, index) => {
+            // check if the filter should be visible in the pipeline
             if(filter.menu) {
                 let html = `<section id="section${index}">
                             <input type="radio" name="sections" id="option${index}">
@@ -13,18 +18,19 @@ fetch('/meta')
                             </article>
                         </section>`
                 element.insertAdjacentHTML('beforeend', html);
-                step++;
             }
         })
-        carveScreen()
+
+        // add the final carving screen to the pipeline
+        //
+        finalScreen()
 
         let nodes = document.querySelectorAll("input[type=range].parameter")
         nodes.forEach( (node)=>{
             node.addEventListener("input", (event)=>{
                 let element = event.target
-                fetch("/parameter/"+element.dataset.index, {
-                    method: "POST",
-                    body: element.value
+                fetch("/parameter/"+element.dataset.index+"/"+element.dataset.name+"/"+element.value, {
+                    method: "POST"
                 })
             })
         })
@@ -35,7 +41,7 @@ fetch('/meta')
 
         // select the first pane/filter in the navigation to show the first page
         //
-        document.getElementById("option0").click()
+        document.getElementById("optionStart").click()
     })
 
 
@@ -47,7 +53,7 @@ function updatePreviewImage() {
             image.onload = () => {
                 preview.style["background-image"] = "url("+image.src+")"
                 updatePreviewImage()
-                let nodeList = document.querySelectorAll("#section0 ~ section")
+                let nodeList = document.querySelectorAll("#sectionStart ~ section")
                 let nodeArray = [...nodeList]; // converts NodeList to Array
                 nodeArray.forEach(node => {
                     node.classList.remove('disabled');
@@ -56,10 +62,10 @@ function updatePreviewImage() {
             image.onerror = ()=> {
                 // no image selected or available. Either the user didn'T upload/select one or the camera isn't
                 // available. Go to step-0 and force that the user selects an image or camera source
-                document.getElementById("option0").click()
-                // disable all other steps. It makes no sense to enalbe the filters without any selected image
-                // #section0 ~ section
-                let nodeList = document.querySelectorAll("#section0 ~ section")
+                document.getElementById("optionStart").click()
+                // disable all other steps. It makes no sense to enable the filters without any selected image
+                //
+                let nodeList = document.querySelectorAll("#sectionStart ~ section")
                 let nodeArray = [...nodeList]; // converts NodeList to Array
                 nodeArray.forEach(node => {
                     node.classList.add('disabled');
@@ -83,31 +89,59 @@ function icon(filter){
 
 
 function inputParameter(filter, index){
-    if(filter.parameter==="slider"){
-        return `<input 
+    let paramHTML = ""
+    filter.parameters.forEach( (parameter)=>{
+        console.log(parameter)
+        if(parameter.type==="slider"){
+            paramHTML+= `<input 
                      class="parameter" 
                      id="param_${index}"  
                      data-index="${index}" 
+                     data-name="${parameter.name}" 
                      type="range"
                      min="0" 
                      max="255" 
                      value="${filter.value}" 
                      step="1">`
-    }
-    else if(filter.parameter === "filepicker" ){
-        return  `<div  class="parameter">
-                 <input 
-                
-                   onchange="console.log(event);uploadFile(event)"
-                   data-index="${index}" 
-                   type="file"
-                   id="param_${index}"  
-                   accept="image/png">
-                  <label for="param_${index}"   />Choose an Image..</label>
-                  </div>
-                   `
-    }
-    return ""
+        }
+    })
+    return paramHTML
+}
+
+
+function startScreen(){
+    let element = document.querySelector("#filters")
+    let html=  `<section id="sectionStart">
+                <input type="radio" name="sections" id="optionStart">
+                <label for="optionStart"><img class="with-shadow" src="/static/images/source.svg"/></label>
+                <article id="startWizard">
+                    <div
+                       data-image="/sourceImage"  
+                       class="preview update"
+                       style="background-image:url(/sourceImage)" 
+                       id="previewStart" 
+                       >
+                    </div>
+                    <h4 class="description">Select Image</h4>
+                    <div class="parameter bottom-button-center">
+                         <input 
+                           onchange="uploadImage(event)"
+                           type="file"
+                            id="presetImageInput" 
+                           accept="image/png">
+                         <button id="presetImage">
+                            <label for="presetImageInput"   />Choose Image..</label>
+                         </button>
+                         <button 
+                           id="resetImage"
+                           onclick="resetImage(event)">
+                           <label>Use Camera</label>
+                         </button>
+                                                  
+                    </div>
+                </article>
+             </section>`
+    element.insertAdjacentHTML('beforeend', html)
 }
 
 
@@ -123,12 +157,12 @@ function filterScreen(filter, index){
 }
 
 
-function carveScreen(){
+function finalScreen(){
     let element = document.querySelector("#filters")
-    let html=  `<section id="sectionCarve">
-                <input type="radio" name="sections" id="optionCarve">
-                <label for="optionCarve"><img class="with-shadow" src="/static/images/engrave.svg"/></label>
-                <article id="millingWizard">
+    let html=  `<section id="sectionFinal">
+                <input type="radio" name="sections" id="optionFinal">
+                <label for="optionFinal"><img class="with-shadow" src="/static/images/engrave.svg"/></label>
+                <article id="finalWizard">
                 </article>
              </section>`
     element.insertAdjacentHTML('beforeend', html)
@@ -137,7 +171,7 @@ function carveScreen(){
 
 
 function previewStep(){
-    let container = document.getElementById("millingWizard")
+    let container = document.getElementById("finalWizard")
     let template = document.getElementById("previewScreenTemplate").innerHTML
     container.innerHTML = template
 
@@ -152,13 +186,13 @@ function previewStep(){
     fetch('/gcode')
         .then(response => response.text())
         .then(data => {
-            var renderer = new GCView(gcview)
+            let renderer = new GCView(gcview)
             renderer.loadGC(data)
     })
 }
 
 function downloadStep(){
-    let container = document.getElementById("millingWizard")
+    let container = document.getElementById("finalWizard")
     let template = document.getElementById("downloadScreenTemplate").innerHTML
     container.innerHTML = template
 
@@ -173,12 +207,12 @@ function downloadStep(){
     fetch('/gcode')
         .then(response => response.text())
         .then(data => {
-            var renderer = new GCView(gcview)
+            let renderer = new GCView(gcview)
             renderer.loadGC(data)
         })
 }
 
-function uploadFile(event){
+function uploadImage(event){
     let element = event.target
     let file = element.files[0]
     event.preventDefault()
@@ -186,9 +220,9 @@ function uploadFile(event){
     const reader = new FileReader();
     reader.addEventListener("load", function () {
         // convert image file to base64 string
-        dataUri = reader.result
-        base64 = dataUri.replace("data:image/png;base64,","")
-        fetch("/parameter/"+element.dataset.index, {
+        let dataUri = reader.result
+        let base64 = dataUri.replace("data:image/png;base64,","")
+        fetch("/sourceImage", {
             method: "POST",
             body: base64
         })
@@ -199,10 +233,19 @@ function uploadFile(event){
     }
 }
 
+
+function resetImage(event){
+    event.preventDefault()
+    fetch("/sourceImage", {
+        method: "POST",
+        body: null
+    })
+}
+
 function pendantStep(){
     let finalScreen = document.getElementById("pendantScreenTemplate").innerHTML
-    let millingWizard = document.getElementById("millingWizard")
-    millingWizard.innerHTML = finalScreen
+    let finalWizard = document.getElementById("finalWizard")
+    finalWizard.innerHTML = finalScreen
     let sliderNorth = new PendantSlider(1, 2000, "x", false, true,  document.getElementById("slider-north"), document.getElementById("arrow-north"))
     let sliderSouth = new PendantSlider(1, 2000, "x", true,  true,  document.getElementById("slider-south"), document.getElementById("arrow-south"))
     let sliderWest  = new PendantSlider(1, 2000, "y", false, false, document.getElementById("slider-west"),  document.getElementById("arrow-west"))
@@ -211,14 +254,14 @@ function pendantStep(){
 
 function probeStep(){
     let finalScreen = document.getElementById("probeScreenTemplate").innerHTML
-    let millingWizard = document.getElementById("millingWizard")
-    millingWizard.innerHTML = finalScreen
+    let finalWizard = document.getElementById("finalWizard")
+    finalWizard.innerHTML = finalScreen
 }
 
 function carveStep(){
     let finalScreen = document.getElementById("carveScreenTemplate").innerHTML
-    let millingWizard = document.getElementById("millingWizard")
-    millingWizard.innerHTML = finalScreen
+    let finalWizard = document.getElementById("finalWizard")
+    finalWizard.innerHTML = finalScreen
 }
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -252,7 +295,7 @@ document.addEventListener('DOMContentLoaded', function() {
             case "carve-back":
                 probeStep()
                 break;
-            case "optionCarve":
+            case "optionFinal":
                 previewStep()
                 break;
             case "optionDownloadButton":

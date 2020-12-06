@@ -12,7 +12,7 @@ class Filter:
             "filter": self.conf_section,
             "name":"Center Contour",
             "description":"Control the red contour before you start carving or exporting your CNC data",
-            "parameter": None,
+            "parameters": [],
             "icon": self.icon
         }
 

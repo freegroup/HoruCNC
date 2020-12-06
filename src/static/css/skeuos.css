@@ -53,20 +53,20 @@ html, body {
   height: 100%;
   overflow: auto; }
 
-.with-shadow, .outset, button, .checktext input + span, .blue-button, .checktext input:checked + span, button.blue-button, .green-button, button.green-button, .green-button.blue-button, .red-button, button.red-button, .red-button.blue-button, .red-button.green-button, input[type="button"], input[type="submit"], input[type="reset"], select, input[type="text"]:not(select):focus, input[type="search"]:not(select):focus, input[type="tel"]:not(select):focus, input[type="url"]:not(select):focus,
+.with-shadow, .outset, button, .button, .checktext input + span, .blue-button, .checktext input:checked + span, button.blue-button, .green-button, button.green-button, .green-button.blue-button, .red-button, button.red-button, .red-button.blue-button, .red-button.green-button, input[type="button"], input[type="submit"], input[type="reset"], select, input[type="text"]:not(select):focus, input[type="search"]:not(select):focus, input[type="tel"]:not(select):focus, input[type="url"]:not(select):focus,
 input[type="email"]:not(select):focus, input[type="password"]:not(select):focus, input[type="date"]:not(select):focus,
 input[type="month"]:not(select):focus, input[type="week"]:not(select):focus, input[type="time"]:not(select):focus,
 input[type="number"]:not(select):focus, input[type="color"]:not(select):focus, select:not(select):focus, textarea:not(select):focus, .paper {
   box-shadow: 6px 6px 10px rgba(0, 0, 0, 0.1), -6px -6px 10px white; }
 
-.outset, button, .checktext input + span, .blue-button, .checktext input:checked + span, button.blue-button, .green-button, button.green-button, .green-button.blue-button, .red-button, button.red-button, .red-button.blue-button, .red-button.green-button, input[type="button"], input[type="submit"], input[type="reset"], select, input[type="text"]:not(select):focus, input[type="search"]:not(select):focus, input[type="tel"]:not(select):focus, input[type="url"]:not(select):focus,
+.outset, button, .button, .checktext input + span, .blue-button, .checktext input:checked + span, button.blue-button, .green-button, button.green-button, .green-button.blue-button, .red-button, button.red-button, .red-button.blue-button, .red-button.green-button, input[type="button"], input[type="submit"], input[type="reset"], select, input[type="text"]:not(select):focus, input[type="search"]:not(select):focus, input[type="tel"]:not(select):focus, input[type="url"]:not(select):focus,
 input[type="email"]:not(select):focus, input[type="password"]:not(select):focus, input[type="date"]:not(select):focus,
 input[type="month"]:not(select):focus, input[type="week"]:not(select):focus, input[type="time"]:not(select):focus,
 input[type="number"]:not(select):focus, input[type="color"]:not(select):focus, select:not(select):focus, textarea:not(select):focus, .paper {
   border-radius: 10px;
   background: #f2f3f7; }
 
-.inset, hr, button.active, .checktext input + span.active, .active.blue-button, .active.green-button, .active.red-button, button:active, .checktext input + span:active, .blue-button:active, .green-button:active, .red-button:active, input.active[type="button"], input[type="button"]:active, input.active[type="submit"], input[type="submit"]:active, input.active[type="reset"], input[type="reset"]:active, input[type="text"]:not(select), input[type="search"]:not(select), input[type="tel"]:not(select), input[type="url"]:not(select),
+.inset, hr, button.active,  .checktext input + span.active, .active.blue-button, .active.green-button, .active.red-button, button:active, .checktext input + span:active, .blue-button:active, .green-button:active, .red-button:active, input.active[type="button"], input[type="button"]:active, input.active[type="submit"], input[type="submit"]:active, input.active[type="reset"], input[type="reset"]:active, input[type="text"]:not(select), input[type="search"]:not(select), input[type="tel"]:not(select), input[type="url"]:not(select),
 input[type="email"]:not(select), input[type="password"]:not(select), input[type="date"]:not(select),
 input[type="month"]:not(select), input[type="week"]:not(select), input[type="time"]:not(select),
 input[type="number"]:not(select), input[type="color"]:not(select), select:not(select), textarea:not(select) {
@@ -140,7 +140,7 @@ input[type="search"]::-webkit-search-results-button,
 input[type="search"]::-webkit-search-results-decoration {
   display: none; }
 
-button, .checktext input + span, .blue-button, .checktext input:checked + span, button.blue-button, .green-button, button.green-button, .green-button.blue-button, .red-button, button.red-button, .red-button.blue-button, .red-button.green-button, input[type="button"], input[type="submit"], input[type="reset"] {
+button, .button, .checktext input + span, .blue-button, .checktext input:checked + span, button.blue-button, .green-button, button.green-button, .green-button.blue-button, .red-button, button.red-button, .red-button.blue-button, .red-button.green-button, input[type="button"], input[type="submit"], input[type="reset"] {
   border: 0;
   text-transform: capitalize;
   padding: 10px 0;
@@ -152,7 +152,7 @@ button, .checktext input + span, .blue-button, .checktext input:checked + span, 
   transition-property: background-color, box-shadow;
   transition-delay: .2s;
   transition-duration: .2s; }
-  button.active, .checktext input + span.active, .active.blue-button, .active.green-button, .active.red-button, button:active, .checktext input + span:active, .blue-button:active, .green-button:active, .red-button:active, input.active[type="button"], input[type="button"]:active, input.active[type="submit"], input[type="submit"]:active, input.active[type="reset"], input[type="reset"]:active {
+  button.active, .button, .checktext input + span.active, .active.blue-button, .active.green-button, .active.red-button, button:active, .checktext input + span:active, .blue-button:active, .green-button:active, .red-button:active, input.active[type="button"], input[type="button"]:active, input.active[type="submit"], input[type="submit"]:active, input.active[type="reset"], input[type="reset"]:active {
     transition-delay: 0s;
     transition-duration: .1s; }
   .red-button, button.red-button, .checktext input + span.red-button, .red-button.blue-button, .red-button.green-button, input.red-button[type="button"], input.red-button[type="submit"], input.red-button[type="reset"] {

@@ -14,8 +14,13 @@ class Filter:
             "filter": self.conf_section,
             "name":"Blur",
             "description":"Remove noise from the image and smooth it",
-            "parameter": "slider",
-            "value": self.factor,
+            "parameters": [
+                {
+                    "name": "threshold",
+                    "type": "slider",
+                    "value": self.factor
+                }
+            ],
             "icon": self.icon
         }
 
@@ -36,7 +41,7 @@ class Filter:
 
         return blur, cnt, code
 
-    def set_parameter(self, val):
+    def set_parameter(self, name, val):
         self.factor = int(val)
         self.conf_file.set("factor", self.conf_section, str(self.factor))
 

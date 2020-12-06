@@ -14,8 +14,13 @@ class Filter:
             "filter": self.conf_section,
             "name":"EdgeArt",
             "description":"Adjust until you see only the edges your want carve",
-            "parameter": "slider",
-            "value": self.threshold,
+            "parameters": [
+                {
+                    "name": "threshold",
+                    "type": "slider",
+                    "value": self.threshold,
+                }
+            ],
             "icon": self.icon
         }
 
@@ -44,7 +49,7 @@ class Filter:
 
         return edged, cnt, code
 
-    def set_parameter(self, val):
+    def set_parameter(self, name, val):
         self.threshold = int(val)
         self.conf_file.set("threshold", self.conf_section, str(val))
 

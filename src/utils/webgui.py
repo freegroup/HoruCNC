@@ -158,6 +158,7 @@ class FlaskUI:
             self.BROWSER_PROCESS = sps.Popen([self.browser_path, "--new-window", "--start-maximized", '--app={}'.format(self.localhost)],
                                              stdout=sps.PIPE, stderr=sps.PIPE, stdin=sps.PIPE)
         elif self.app_mode:
+            print(self.browser_path, "--new-window", "--window-size={},{}".format(self.width, self.height))
             self.BROWSER_PROCESS = sps.Popen([self.browser_path, "--new-window", "--window-size={},{}".format(self.width, self.height),
                                               '--app={}'.format(self.localhost)],
                                              stdout=sps.PIPE, stderr=sps.PIPE, stdin=sps.PIPE)

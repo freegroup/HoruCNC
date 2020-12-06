@@ -19,6 +19,9 @@ document.addEventListener('DOMContentLoaded', function() {
     fetch('/pipelines')
         .then(response => response.json())
         .then(data => {
+            let width = 1200
+            let height = width / 1.618
+            window.resizeTo(width,height) // resize window to golden ration
             let container = document.getElementById("pipeline-container")
             data.forEach( (pipeline, i ) => {
                 if(i !== 0){

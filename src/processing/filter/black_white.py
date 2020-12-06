@@ -14,8 +14,13 @@ class Filter:
             "filter": self.conf_section,
             "name":"Black & White",
             "description":"Adjust until you see only the black sections your want carve",
-            "parameter": "slider",
-            "value": self.threshold,
+            "parameters": [
+                {
+                    "name": "threshold",
+                    "type": "slider",
+                    "value": self.threshold
+                }
+            ],
             "icon": self.icon
         }
 
@@ -33,7 +38,7 @@ class Filter:
 
         return blackAndWhiteImage, cnt, code
 
-    def set_parameter(self, val):
+    def set_parameter(self, name, val):
         self.threshold = int(val)
         self.conf_file.set("threshold", self.conf_section, str(val))
 

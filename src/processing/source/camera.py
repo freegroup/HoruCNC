@@ -5,7 +5,7 @@ from scanner_camera import Camera as Scanner
 CWD_PATH = os.path.dirname(os.path.realpath(__file__))
 
 
-class Camera:
+class ImageSource:
     def __init__(self):
         self.conf_section = None
         self.conf_file = None
@@ -56,7 +56,7 @@ class Camera:
         return image[from_height:to_height,from_width:to_width]
 
 
-    def set_parameter(self, val):
+    def set_parameter(self, name, val):
         self.factor = int(val)
         self.conf_file.set("zoom", self.conf_section, str(val))
 

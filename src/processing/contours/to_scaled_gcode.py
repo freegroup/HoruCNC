@@ -15,7 +15,13 @@ class Filter:
             "filter": self.conf_section,
             "name":"Scale your Contours",
             "description":"Resize your shape until it fits your needs",
-            "parameter": "slider",
+            "parameters": [
+                {
+                    "name": "Width",
+                    "type": "slider",
+                    "value": self.width_in_mm
+                }
+            ],
             "icon": self.icon
         }
 
@@ -64,7 +70,7 @@ class Filter:
         return image, cnt, self.gcode()
 
 
-    def set_parameter(self, val):
+    def set_parameter(self, name, val):
         self.width_in_mm = int(val)
         print(self.width_in_mm)
         self.conf_file.set("width_in_mm", self.conf_section, str(val))

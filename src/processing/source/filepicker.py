@@ -6,7 +6,7 @@ import numpy as np
 CWD_PATH = os.path.dirname(os.path.realpath(__file__))
 
 
-class FilePicker:
+class ImageSource:
     def __init__(self):
         self.conf_section = None
         self.conf_file = None
@@ -32,7 +32,7 @@ class FilePicker:
     def process(self, image, cnt, code):
         return self.image, cnt, code
 
-    def set_parameter(self, val):
+    def set_parameter(self, name, val):
         bytearray = base64.b64decode(val)
         png_as_np = np.frombuffer(bytearray, dtype=np.uint8)
         width = self.conf_file.get_int("width", self.conf_section)

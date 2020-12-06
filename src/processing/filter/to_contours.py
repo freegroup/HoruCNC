@@ -12,7 +12,7 @@ class Filter:
             "filter": self.conf_section,
             "name":"Contours",
             "description":"Generates the contour of your outline image",
-            "parameter": None,
+            "parameter": [],
             "icon": self.icon
         }
 
