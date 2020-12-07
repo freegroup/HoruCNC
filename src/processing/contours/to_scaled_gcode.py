@@ -9,26 +9,42 @@ class Filter:
         self.icon = None
         self.cnt = None
         self.width_in_mm = 20
+        self.depth_in_mm = 1
+
 
     def meta(self):
+        range_min =  self.conf_file.get_float("depth_range_min", self.conf_section)
+        range_max =  self.conf_file.get_float("depth_range_max", self.conf_section)
+        range = range_max - range_min
+
         return {
             "filter": self.conf_section,
             "name":"Scale your Contours",
             "description":"Resize your shape until it fits your needs",
             "parameters": [
                 {
-                    "name": "Width",
+                    "name": "width",
+                    "label": "Width",
                     "type": "slider",
                     "value": self.width_in_mm
+                },
+                {
+                    "name": "depth",
+                    "label": "Depth",
+                    "type": "slider",
+                    "value": (self.depth_in_mm - range_min)/(range /255.0)
                 }
             ],
             "icon": self.icon
         }
 
+
     def configure(self, global_conf, conf_section, conf_file):
         self.conf_section = conf_section
         self.conf_file = conf_file
         self.width_in_mm = self.conf_file.get_int("width_in_mm", self.conf_section)
+        self.depth_in_mm = self.conf_file.get_float("depth_in_mm", self.conf_section)
+
 
     def process(self, image, cnt, code):
         try:
@@ -63,6 +79,9 @@ class Filter:
                 cv2.circle(newimage, (x+int(w/2),y+h), 15, (255, 0, 0), -1)
                 cv2.putText(newimage, "{:.1f} {}".format(height_in_mm*display_factor, unit),(x+int(w/2)+20,y+50), cv2.FONT_HERSHEY_SIMPLEX, 1.65, (255, 0, 0), 4)
 
+                # draw the carving depth
+                cv2.putText(newimage, "Carving Depth {:.1f} mm".format(self.depth_in_mm),(20,y+50), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (255, 0, 0), 4)
+
                 image = newimage
         except Exception as exc:
             print(exc)
@@ -71,9 +90,17 @@ class Filter:
 
 
     def set_parameter(self, name, val):
-        self.width_in_mm = int(val)
-        print(self.width_in_mm)
-        self.conf_file.set("width_in_mm", self.conf_section, str(val))
+        if name=="width":
+            self.width_in_mm = int(val)
+            self.conf_file.set("width_in_mm", self.conf_section, str(val))
+        elif name=="depth":
+            val = float(val)
+            range_min =  self.conf_file.get_float("depth_range_min", self.conf_section)
+            range_max =  self.conf_file.get_float("depth_range_max", self.conf_section)
+            range = range_max - range_min
+
+            self.depth_in_mm = (range /255.0)*val + range_min
+            self.conf_file.set("depth_in_mm", self.conf_section, str(self.depth_in_mm))
 
 
     def gcode(self):

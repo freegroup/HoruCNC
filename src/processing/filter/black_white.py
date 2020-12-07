@@ -9,6 +9,7 @@ class Filter:
         self.conf_file = None
         self.icon = None
 
+
     def meta(self):
         return {
             "filter": self.conf_section,
@@ -17,6 +18,7 @@ class Filter:
             "parameters": [
                 {
                     "name": "threshold",
+                    "label": "Threshold",
                     "type": "slider",
                     "value": self.threshold
                 }
@@ -24,10 +26,12 @@ class Filter:
             "icon": self.icon
         }
 
+
     def configure(self, global_conf, conf_section, conf_file):
         self.conf_section = conf_section
         self.conf_file = conf_file
         self.threshold = self.conf_file.get_int("threshold", self.conf_section)
+
 
     def process(self, image, cnt, code):
         try:
@@ -37,6 +41,7 @@ class Filter:
             print(self.conf_section, exc)
 
         return blackAndWhiteImage, cnt, code
+
 
     def set_parameter(self, name, val):
         self.threshold = int(val)

@@ -17,6 +17,7 @@ class Filter:
             "parameters": [
                 {
                     "name": "threshold",
+                    "label": "Threshold",
                     "type": "slider",
                     "value": self.factor
                 }

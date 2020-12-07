@@ -17,6 +17,7 @@ class Filter:
             "parameters": [
                 {
                     "name": "threshold",
+                    "label": "Threshold",
                     "type": "slider",
                     "value": self.threshold,
                 }
@@ -48,6 +49,7 @@ class Filter:
             print(self.conf_section, exc)
 
         return edged, cnt, code
+
 
     def set_parameter(self, name, val):
         self.threshold = int(val)

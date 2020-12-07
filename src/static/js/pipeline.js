@@ -25,10 +25,12 @@ fetch('/meta')
         //
         finalScreen()
 
-        let nodes = document.querySelectorAll("input[type=range].parameter")
+        let nodes = document.querySelectorAll(".parameter input[type=range]")
+        console.log(nodes)
         nodes.forEach( (node)=>{
             node.addEventListener("input", (event)=>{
                 let element = event.target
+                console.log("test")
                 fetch("/parameter/"+element.dataset.index+"/"+element.dataset.name+"/"+element.value, {
                     method: "POST"
                 })
@@ -91,18 +93,20 @@ function icon(filter){
 function inputParameter(filter, index){
     let paramHTML = ""
     filter.parameters.forEach( (parameter)=>{
-        console.log(parameter)
         if(parameter.type==="slider"){
-            paramHTML+= `<input 
-                     class="parameter" 
-                     id="param_${index}"  
-                     data-index="${index}" 
-                     data-name="${parameter.name}" 
-                     type="range"
-                     min="0" 
-                     max="255" 
-                     value="${filter.value}" 
-                     step="1">`
+            paramHTML+=
+            `<div class="parameter">
+             <label for="param_${index}">${parameter.label}</label>     
+             <input 
+                 id="param_${index}"  
+                 data-index="${index}" 
+                 data-name="${parameter.name}" 
+                 type="range"
+                 min="0" 
+                 max="255" 
+                 value="${parameter.value}" 
+                 step="1">
+             </div>`
         }
     })
     return paramHTML
@@ -153,7 +157,7 @@ function filterScreen(filter, index){
            id="preview${index}" 
            ></div>
         <h4 class="description">${filter.description}</h4>
-        ${inputParameter(filter, index)}`
+        <div class="parameters">${inputParameter(filter, index)}</div>`
 }
 
 
@@ -197,13 +201,9 @@ function downloadStep(){
     container.innerHTML = template
 
     let gcview = document.getElementById('gcview')
-
-    let width = container.clientWidth;
-    let height = container.clientHeight;
-    gcview.style.width = width+"px"
-    gcview.style.height = height+"px"
+    gcview.style.width = container.clientWidth+"px"
+    gcview.style.height = container.clientHeight+"px"
     // setup GCView with the div element to display the gcode in
-
     fetch('/gcode')
         .then(response => response.text())
         .then(data => {

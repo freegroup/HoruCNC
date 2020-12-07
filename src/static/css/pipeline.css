@@ -26,7 +26,7 @@ body {
     position: absolute;
     top: 50px;
     left: 0;
-    bottom: 50px;
+    bottom: 150px;
     right: 0;
     background-size: contain;
     background-repeat: no-repeat;
@@ -98,14 +98,29 @@ body {
 }
 
 
-.parameter{
+.parameters{
     position: absolute;
-    bottom:0px;
-    right:0px;
+    bottom:0;
+    right:0;
     padding-left:10px;
     padding-right:10px;
-    width:calc(100% - 150px);
+    width:calc(100% - 10px);
 }
+
+.parameter{
+}
+
+.parameter input[type="range"]{
+    width:80%;
+}
+.parameter label{
+    font-size: 2vw;
+    padding-left:10px;
+    padding-right:10px;
+    color: #367bf0;
+    font-weight:bold;
+}
+
 
 .description{
     text-align: center;
