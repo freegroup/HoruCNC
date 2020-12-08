@@ -1,5 +1,7 @@
 import numpy as np
 import cv2
+import copy
+
 from utils.gcode import GCode
 
 class Filter:
@@ -8,7 +10,6 @@ class Filter:
         self.conf_file = None
         self.icon = None
         self.cnt = None
-        self.width_in_mm = 20
         self.depth_in_mm = 1
 
 
@@ -19,22 +20,20 @@ class Filter:
 
         return {
             "filter": self.conf_section,
-            "name":"Scale your Contours",
-            "description":"Resize your shape until it fits your needs",
+            "name":"To GCODE",
+            "description":"Define the carving depth and the count of milling passes",
             "parameters": [
-                {
-                    "name": "width",
-                    "label": "Width",
-                    "type": "slider",
-                    "value": self.width_in_mm
-                },
                 {
                     "name": "depth",
                     "label": "Depth",
                     "type": "slider",
+                    "min": 1,
+                    "max": "255",
                     "value": (self.depth_in_mm - range_min)/(range /255.0)
                 }
             ],
+            "input": "contour",
+            "output": "gcode",
             "icon": self.icon
         }
 
@@ -42,7 +41,6 @@ class Filter:
     def configure(self, global_conf, conf_section, conf_file):
         self.conf_section = conf_section
         self.conf_file = conf_file
-        self.width_in_mm = self.conf_file.get_int("width_in_mm", self.conf_section)
         self.depth_in_mm = self.conf_file.get_float("depth_in_mm", self.conf_section)
 
 
@@ -50,37 +48,34 @@ class Filter:
         try:
             if len(cnt)>0:
                 self.cnt = cnt
-                unit = self.conf_file.get("display_unit", self.conf_section)
-                # only "cm" and "mm" are allowed
-                unit = "cm" if unit == "cm" else "mm"
-                display_factor = 1 if unit == "mm" else 0.1
 
-                cnt2 = np.concatenate(cnt)
-                # Determine the bounding rectangle
-                x, y, w, h = cv2.boundingRect(cnt2)
-
-                height_in_mm = self.width_in_mm / w * h
                 newimage = np.zeros(image.shape, dtype="uint8")
                 newimage.fill(255)
 
-                # shifted contour
-                cv2.drawContours(newimage, cnt, -1, (0,0,255), 2)
-                cv2.rectangle(newimage,(x,y),(x+w,y+h),(0,255,0),2)
+                # create a new cnt for the drawing on the image. The cnt should cover 4/5 of the overal image
+                #
+                image_height, image_width = image.shape[0], image.shape[1]
+                drawing_cnt = copy.deepcopy(cnt)
+                x, y, w, h = cv2.boundingRect(np.concatenate(drawing_cnt))
+                drawing_factor_w = (image_width/w)*0.8
+                drawing_factor_h = (image_height/h)*0.8
+                # ensure that the drawing fits into the preview image
+                drawing_factor = drawing_factor_w if drawing_factor_w<drawing_factor_h else drawing_factor_h
+                offset_x = (w/2+x)*drawing_factor
+                offset_y = (h/2+y)*drawing_factor
+                for c in drawing_cnt:
+                    i = 0
+                    while i < len(c):
+                        p = c[i]
+                        p[0] = (p[0]*drawing_factor)+(image_width/2)-offset_x
+                        p[1] = (p[1]*drawing_factor)+(image_height/2)-offset_y
+                        i+=1
 
-                # draw the width dimension
-                cv2.line(newimage, (x,y+int(h/2)),(x+w,y+int(h/2)), (255, 0, 0), 5)
-                cv2.circle(newimage, (x,y+int(h/2)), 15, (255, 0, 0), -1)
-                cv2.circle(newimage, (x+w,y+int(h/2)), 15, (255, 0, 0), -1)
-                cv2.putText(newimage, "{:.1f} {}".format(self.width_in_mm*display_factor, unit),(x+20,y+int(h/2)-30), cv2.FONT_HERSHEY_SIMPLEX, 1.65, (255, 0, 0), 4)
-
-                # draw the height dimension
-                cv2.line(newimage, (x+int(w/2),y),(x+int(w/2),y+h), (255, 0, 0), 5)
-                cv2.circle(newimage, (x+int(w/2),y), 15, (255, 0, 0), -1)
-                cv2.circle(newimage, (x+int(w/2),y+h), 15, (255, 0, 0), -1)
-                cv2.putText(newimage, "{:.1f} {}".format(height_in_mm*display_factor, unit),(x+int(w/2)+20,y+50), cv2.FONT_HERSHEY_SIMPLEX, 1.65, (255, 0, 0), 4)
+                cv2.drawContours(newimage, drawing_cnt, -1,  (60,169,242), 1)
+                cv2.rectangle(newimage,(x,y),(x+w,y+h),(0,255,0),1)
 
                 # draw the carving depth
-                cv2.putText(newimage, "Carving Depth {:.1f} mm".format(self.depth_in_mm),(20,y+50), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (255, 0, 0), 4)
+                cv2.putText(newimage, "Carving Depth {:.1f} mm".format(self.depth_in_mm),(20,50), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (255, 0, 0), 4)
 
                 image = newimage
         except Exception as exc:
@@ -90,10 +85,7 @@ class Filter:
 
 
     def set_parameter(self, name, val):
-        if name=="width":
-            self.width_in_mm = int(val)
-            self.conf_file.set("width_in_mm", self.conf_section, str(val))
-        elif name=="depth":
+        if name=="depth":
             val = float(val)
             range_min =  self.conf_file.get_float("depth_range_min", self.conf_section)
             range_max =  self.conf_file.get_float("depth_range_max", self.conf_section)
@@ -101,7 +93,6 @@ class Filter:
 
             self.depth_in_mm = (range /255.0)*val + range_min
             self.conf_file.set("depth_in_mm", self.conf_section, str(self.depth_in_mm))
-
 
     def gcode(self):
         clearance = self.conf_file.get_float(key="clearance", section=self.conf_section)
@@ -119,11 +110,11 @@ class Filter:
             x, y, w, h = cv2.boundingRect(cnt2)
 
             # the offset to move the center of the gcode to [0,0]
-            offset_x = w/2+x
-            offset_y = h/2-y
+            offset_x = 0 # w/2+x
+            offset_y = 0 # h/2-y
 
-            # the scale factor to fulfill the required width in [mm]
-            scale_factor = self.width_in_mm / w
+            # [micro m] to [mm]
+            scale_factor = 0.001
 
             # transform all coordinates and generate gcode
             # for this we must apply:

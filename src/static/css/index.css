@@ -29,12 +29,13 @@ body {
 
 
 .pipeline > .name {
-
+    padding-left:110px;
 }
 
 .pipeline > .description {
     color:grey;
     font-size:0.8em;
+    padding-left:110px;
 }
 .pipeline > button {
     padding: 10px;
@@ -43,6 +44,14 @@ body {
     top: 50%;
     right: 10px;
     transform: translateY(-50%);
+}
+
+.pipeline > img {
+    position: absolute;
+    top:0px;
+    left: 0px;
+    height:80px;
+    cursor:pointer;
 }
 
 .screen hr{

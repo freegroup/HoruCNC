@@ -184,21 +184,21 @@ GCView.prototype.absolute = function(v1, v2) {
         return this.relative ? v1 + v2 : v2;
 }
 
-GCView.prototype.g00 = function(args, line) {
+GCView.prototype.g00 = function (args, line) {
 
-            var newLine = {
-                x: args.x !== undefined ? this.absolute(this.lastLine.x, args.x) : this.lastLine.x,
-                y: args.y !== undefined ? this.absolute(this.lastLine.y, args.y) : this.lastLine.y,
-                z: args.z !== undefined ? this.absolute(this.lastLine.z, args.z) : this.lastLine.z,
-                e: args.e !== undefined ? this.absolute(this.lastLine.e, args.e) : this.lastLine.e,
-                f: args.f !== undefined ? this.absolute(this.lastLine.f, args.f) : this.lastLine.f,
-            };
+	var newLine = {
+		x: args.x !== undefined ? this.absolute(this.lastLine.x, args.x) : this.lastLine.x,
+		y: args.y !== undefined ? this.absolute(this.lastLine.y, args.y) : this.lastLine.y,
+		z: args.z !== undefined ? this.absolute(this.lastLine.z, args.z) : this.lastLine.z,
+		e: args.e !== undefined ? this.absolute(this.lastLine.e, args.e) : this.lastLine.e,
+		f: args.f !== undefined ? this.absolute(this.lastLine.f, args.f) : this.lastLine.f,
+	};
 
 	if (this.lastLine != undefined) {
 		// g0 lines are black
-            this.addSegment(this.lastLine, newLine, new THREE.LineBasicMaterial({color:'grey',linewidth:.5}));
+		this.addSegment(this.lastLine, newLine, new THREE.LineBasicMaterial({color: 'grey', linewidth: .5}));
 	}
-            this.lastLine = newLine;
+	this.lastLine = newLine;
 }
 
 GCView.prototype.g01 = function(args, line) {

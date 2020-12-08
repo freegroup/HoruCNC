@@ -14,6 +14,8 @@ class Filter:
             "name": "Outline",
             "description":"Generates the outline of your black-white image",
             "parameters": [],
+            "input": "image",
+            "output": "image",
             "icon": self.icon
         }
 

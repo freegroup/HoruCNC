@@ -102,8 +102,8 @@ function inputParameter(filter, index){
                  data-index="${index}" 
                  data-name="${parameter.name}" 
                  type="range"
-                 min="0" 
-                 max="255" 
+                 min="${parameter.min}" 
+                 max="${parameter.max}" 
                  value="${parameter.value}" 
                  step="1">
              </div>`

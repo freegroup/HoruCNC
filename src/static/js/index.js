@@ -31,6 +31,7 @@ document.addEventListener('DOMContentLoaded', function() {
                               <div class="name">${pipeline.name}</div>
                               <div class="description">${pipeline.description}</div>
                               <button class="navigate" data-url="/pipeline/${pipeline.basename}">&#9654;</button>
+                              <img class="navigate" data-url="/pipeline/${pipeline.basename}" src="${pipeline.icon}">
                            </div>`
                 container.insertAdjacentHTML('beforeend', html);
             })

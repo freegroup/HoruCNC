@@ -6,6 +6,7 @@ import threading
 
 from threading import Thread
 from datetime import datetime
+from utils.exit import exit_process
 
 
 class S(BaseHTTPRequestHandler):
@@ -203,12 +204,7 @@ class FlaskUI:
         if os.path.isfile("bo.txt"):
             #bo.txt is used to save timestamp used to check if browser is open
             os.remove("bo.txt")
-
-        try:
-            import psutil
-            psutil.Process(os.getpid()).kill()
-        except:
-            os.kill(os.getpid(), signal.SIGKILL)
+        exit_process()
 
 
 

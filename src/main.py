@@ -4,7 +4,7 @@ import atexit
 import json
 import logging
 import os
-
+import base64
 from flask import Flask, render_template, make_response, send_file, request
 
 from utils.webgui import FlaskUI   # get the FlaskUI class
@@ -63,13 +63,25 @@ def create_app():
         onlyfiles = [join(PIPELINE_FOLDER, f) for f in listdir(PIPELINE_FOLDER) if isfile(join(PIPELINE_FOLDER, f))]
         pipelines = []
         for f in onlyfiles:
+            if not f.endswith(".ini"):
+                continue
             conf = Configuration(f)
 
-            pipelines.append({ "basename":splitext(basename(f))[0],
-                            "name": conf.get("name"),
-                            "description": conf.get("description"),
-                            "author": conf.get("author")
-                            })
+            pipeline_metadata = {
+                "basename":splitext(basename(f))[0],
+                "name": conf.get("name"),
+                "description": conf.get("description"),
+                "author": conf.get("author")
+            }
+
+            svg_file = f.replace(".ini", ".svg")
+            if os.path.isfile(svg_file):
+                with open(svg_file, "rb") as image_file:
+                    encoded_string = base64.b64encode(image_file.read()).decode('utf-8')
+                    pipeline_metadata["icon"] = "data:image/svg+xml;base64,"+encoded_string
+
+            pipelines.append(pipeline_metadata)
+
         response = make_response(json.dumps(pipelines))
         response.headers['Content-Type'] = 'application/json'
         return response

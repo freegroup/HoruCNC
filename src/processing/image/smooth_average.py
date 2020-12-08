@@ -13,15 +13,19 @@ class Filter:
         return {
             "filter": self.conf_section,
             "name":"Blur",
-            "description":"Remove noise from the image",
+            "description":"Remove noise from the image and smooth it",
             "parameters": [
                 {
                     "name": "threshold",
                     "label": "Threshold",
                     "type": "slider",
+                    "min": 1,
+                    "max": "255",
                     "value": self.factor
                 }
             ],
+            "input": "image",
+            "output": "image",
             "icon": self.icon
         }
 
@@ -33,12 +37,14 @@ class Filter:
     def process(self, image, cnt, code):
         try:
             image = image.copy()
-            image = cv2.bilateralFilter(image,9,self.factor,self.factor)
+            kernel = max(3, int((19 /255*self.factor)/2)*2+1 )
+            print(kernel)
+            blur = cv2.blur(image,(kernel,kernel))
         except Exception as exc:
             print(self.conf_section, exc)
 
 
-        return image, cnt, code
+        return blur, cnt, code
 
     def set_parameter(self, name, val):
         self.factor = int(val)

@@ -9,9 +9,11 @@ class Filter:
     def meta(self):
         return {
             "filter": self.conf_section,
-            "name":"grayscale",
-            "description":"Grayscale a color image",
-            "parameters": [ ],
+            "name":"Thinning",
+            "description":"Thinning the outline of the found contour",
+            "parameters": [],
+            "input": "image",
+            "output": "image",
             "icon": self.icon
         }
 
@@ -22,14 +24,13 @@ class Filter:
     def process(self, image, cnt, code):
         try:
             image = image.copy()
-            image = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
-            # Make the grey scale image have three channels
+            single_channel =  cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
+            image = cv2.ximgproc.thinning(single_channel)
             image = cv2.cvtColor(image, cv2.COLOR_GRAY2RGB)
         except Exception as exc:
-            print(self.conf_section, exc)
+            print(exc)
 
         return image, cnt, code
-
 
     def stop(self):
         pass

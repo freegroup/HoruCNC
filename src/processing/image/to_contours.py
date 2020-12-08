@@ -1,5 +1,6 @@
 import cv2
 import numpy as np
+import imutils
 
 class Filter:
     def __init__(self):
@@ -13,6 +14,8 @@ class Filter:
             "name":"Contours",
             "description":"Generates the contour of your outline image",
             "parameter": [],
+            "input": "image",
+            "output": "contour",
             "icon": self.icon
         }
 
@@ -22,9 +25,6 @@ class Filter:
 
     def process(self, image, cnt, code):
         try:
-            if len(image.shape)==2:
-                print("Error: Input shape for 'to_contour' mist be three channel images")
-
             outline = np.zeros(image.shape, dtype="uint8")
             if len(image.shape)==3:
                 single_channel =  cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)

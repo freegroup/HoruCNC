@@ -5,7 +5,8 @@ from utils.configuration import Configuration
 import base64
 import os.path
 import inspect
-from processing.source.dual import ImageSource
+from processing.source import ImageSource
+from utils.exit import exit_process
 
 class VideoPipeline:
     def __init__(self, global_conf, pipeline_file ):
@@ -14,6 +15,8 @@ class VideoPipeline:
         self.pipeline = self.pipeline_conf.sections()
         self.source = ImageSource()
         self.source.configure(global_conf, "source", self.pipeline_conf)
+        # the input format for the first filter element
+        input_format = "image"
 
         for pipeline_section in self.pipeline:
             # ignore the common section
@@ -32,6 +35,17 @@ class VideoPipeline:
                 with open(svg_file, "rb") as image_file:
                     encoded_string = base64.b64encode(image_file.read()).decode('utf-8')
                     instance.icon = "data:image/svg+xml;base64,"+encoded_string
+
+            # check that the output format if the predecessor filter matches with the input if this
+            # filter
+            meta = instance.meta()
+            if not meta["input"] == input_format:
+                print("Filter '{}' is unable to process input format '{}'. Expected was '{}'".format(python_file, input_format, meta["input"] ))
+                print("Wrong pipeline definition. Exit")
+                exit_process()
+
+            # the output if this filter is the input of the next filter
+            input_format = meta["output"]
 
             self.filters.append(instance)
 
