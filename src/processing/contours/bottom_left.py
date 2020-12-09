@@ -48,9 +48,9 @@ class Filter:
 
                 # draw the width dimension
                 # horizontal
-                cv2.line(newimage, (x,y+int(h/2)),(x+w,y+int(h/2)), (0, 255, 0), 1)
+                cv2.line(newimage, (x,y+h),(x+w,y+h), (255, 0, 0), 1)
                 # vertical
-                cv2.line(newimage, (x+int(w/2),y),(x+int(w/2),y+h), (0, 0, 255), 1)
+                cv2.line(newimage, (x,y),(x,y+h), (0, 0, 255), 1)
 
                 # shifted contour to the center. Only required for the drawing
                 cnt2 = copy.deepcopy(cnt)

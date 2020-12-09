@@ -38,7 +38,6 @@ class Filter:
         try:
             image = image.copy()
             kernel = max(3, int((19 /255*self.factor)/2)*2+1 )
-            print(kernel)
             blur = cv2.blur(image,(kernel,kernel))
         except Exception as exc:
             print(self.conf_section, exc)

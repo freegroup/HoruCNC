@@ -46,15 +46,12 @@ class Filter:
                         p[1] -= offset_y
                         i+=1
 
-                # draw the width dimension
-                cv2.line(newimage, (x,y+int(h/2)),(x+w,y+int(h/2)), (255, 0, 0), 1)
-                cv2.line(newimage, (x+int(w/2),y),(x+int(w/2),y+h), (255, 0, 0), 1)
-
-                # shifted contour to the center. Only required for the drawing
-                cnt2 = copy.deepcopy(cnt)
+                # shift the contour to the center. Only required for the drawing
+                #
+                drawing_cnt = copy.deepcopy(cnt)
                 w2=image_width/2
                 h2=image_height/2
-                for c in cnt2:
+                for c in drawing_cnt:
                     i = 0
                     while i < len(c):
                         p = c[i]
@@ -62,8 +59,18 @@ class Filter:
                         p[1] += h2
                         i+=1
 
-                cv2.drawContours(newimage, cnt2, -1,  (60,169,242), 1)
+                # draw the coordinate system of the centered drawing contour
+                x, y, w, h = cv2.boundingRect(np.concatenate(drawing_cnt))
+                # horizontal
+                cv2.line(newimage, (x+int(w/2),y+int(h/2)),(x+w,y+int(h/2)), (255, 0, 0  ), 1)
+                # vertical
+                cv2.line(newimage, (x+int(w/2),y),(x+int(w/2),y+int(h/2)), (0  , 0, 255), 1)
+
+
+                cv2.drawContours(newimage, cnt, -1,  (60,169,0), 1)
+                cv2.drawContours(newimage, drawing_cnt, -1,  (60,169,242), 1)
                 image = newimage
+
         except Exception as exc:
             exc_type, exc_obj, exc_tb = sys.exc_info()
             fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]

@@ -67,7 +67,7 @@ class Filter:
                     i = 0
                     while i < len(c):
                         p = c[i]
-                        p[0] = (p[0]*drawing_factor)+(image_width/2)-offset_x
+                        p[0] = (p[0]*drawing_factor)+(image_width /2)-offset_x
                         p[1] = (p[1]*drawing_factor)+(image_height/2)-offset_y
                         i+=1
 
@@ -83,17 +83,6 @@ class Filter:
 
         return image, cnt, self.gcode()
 
-
-    def set_parameter(self, name, val):
-        if name=="depth":
-            val = float(val)
-            range_min =  self.conf_file.get_float("depth_range_min", self.conf_section)
-            range_max =  self.conf_file.get_float("depth_range_max", self.conf_section)
-            range = range_max - range_min
-
-            self.depth_in_mm = (range /255.0)*val + range_min
-            self.conf_file.set("depth_in_mm", self.conf_section, str(self.depth_in_mm))
-
     def gcode(self):
         clearance = self.conf_file.get_float(key="clearance", section=self.conf_section)
         feed_rate = self.conf_file.get_float(key="feed_rate", section=self.conf_section)
@@ -105,23 +94,19 @@ class Filter:
         code.clearance = clearance
 
         if self.cnt and len(self.cnt)>0:
-            cnt2 = np.concatenate(self.cnt)
             # Determine the bounding rectangle
-            x, y, w, h = cv2.boundingRect(cnt2)
+            x, y, w, h = cv2.boundingRect(np.concatenate(self.cnt))
 
-            # the offset to move the center of the gcode to [0,0]
-            offset_x = 0 # w/2+x
-            offset_y = 0 # h/2-y
-
-            # [micro m] to [mm]
+            # scale contour from [micro m] to [mm]
             scale_factor = 0.001
 
             # transform all coordinates and generate gcode
             # for this we must apply:
             #    - the scale factor
-            #    - the x/y translation
             #    - flip them upside down (gcode coordinate system vs. openCV coordinate system)
             #
+            shift_y = lambda y_coord: (-(y_coord-y)+(y+h) )
+
             code.raise_mill()
             code.feed_rapid({"x":0, "y":0})
             code.start_spindle()
@@ -130,26 +115,37 @@ class Filter:
                 i = 0
                 while i < len(c):
                     p = c[i]
-                    x = '{:06.4f}'.format((     p[0] -offset_x)*scale_factor)
-                    y = '{:06.4f}'.format(((h - p[1])-offset_y)*scale_factor)
-                    position = {"x":x, "y":y}
+                    grbl_x = '{:06.4f}'.format(p[0]*scale_factor)
+                    grbl_y = '{:06.4f}'.format((shift_y(p[1]))*scale_factor)
+                    position = {"x":grbl_x, "y":grbl_y}
                     if i == 0:
                         code.feed_rapid(position)
                         code.drop_mill()
                         code.feed_linear({"z":-depth_in_mm}, feed_rate= feed_rate/4)
                     else:
                         code.feed_linear(position)
-
                     i+=1
 
-                x = '{:06.4f}'.format((     c[0][0] -offset_x)*scale_factor)
-                y = '{:06.4f}'.format(((h - c[0][1])-offset_y)*scale_factor)
-                code.feed_linear({"x":x ,"y": y})
+                grbl_x = '{:06.4f}'.format((c[0][0])*scale_factor)
+                grbl_y = '{:06.4f}'.format((shift_y(c[0][1]))*scale_factor)
+                #y = '{:06.4f}'.format((    c[0][1])*scale_factor)
+                code.feed_linear({"x":grbl_x ,"y": grbl_y})
                 code.raise_mill()
             code.stop_spindle()
             code.feed_rapid({"x":0, "y":0})
 
         return code
+
+
+    def set_parameter(self, name, val):
+        if name=="depth":
+            val = float(val)
+            range_min =  self.conf_file.get_float("depth_range_min", self.conf_section)
+            range_max =  self.conf_file.get_float("depth_range_max", self.conf_section)
+            range = range_max - range_min
+
+            self.depth_in_mm = (range /255.0)*val + range_min
+            self.conf_file.set("depth_in_mm", self.conf_section, str(self.depth_in_mm))
 
 
     def stop(self):
