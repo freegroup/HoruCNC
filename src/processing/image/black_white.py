@@ -37,14 +37,14 @@ class Filter:
         self.threshold = self.conf_file.get_int("threshold", self.conf_section)
 
 
-    def process(self, image, cnt, code):
+    def process(self, image, cnt):
         try:
             image = image.copy()
             (thresh, blackAndWhiteImage) = cv2.threshold(image, self.threshold, 255, cv2.THRESH_BINARY)
         except Exception as exc:
             print(self.conf_section, exc)
 
-        return blackAndWhiteImage, cnt, code
+        return blackAndWhiteImage, cnt
 
 
     def set_parameter(self, name, val):

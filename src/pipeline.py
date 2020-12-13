@@ -5,8 +5,12 @@ from utils.configuration import Configuration
 import base64
 import os.path
 import inspect
+import time
+
+from utils.contour import ensure_3D_contour
 from processing.source import ImageSource
 from utils.exit import exit_process
+from utils.perf import perf_tracker
 
 class VideoPipeline:
     def __init__(self, global_conf, pipeline_file ):
@@ -19,6 +23,7 @@ class VideoPipeline:
         input_format = "image"
 
         for pipeline_section in self.pipeline:
+            print(pipeline_section)
             # ignore the common section
             if pipeline_section == "common":
                 continue
@@ -81,21 +86,31 @@ class VideoPipeline:
         self.filters[index].set_parameter(name, value)
 
 
-    def gcode(self, index):
-        return self.filters[index].gcode()
+    @perf_tracker()
+    def gcode(self, contour_3d):
+        return self.filters[len(self.filters)-1].gcode(contour_3d)
 
     def process(self):
         result = []
-        image ,cnt , gcode = self.source.process(None, None, None)
+        image = self.get_source_image()
+        cnt = []
 
         for instance in self.filters:
-            image, cnt, gcode = instance.process(image, cnt, gcode)
+            start = time.process_time()
+            image, cnt = instance.process(image, cnt)
+            end = time.process_time()
+            print(instance.meta()["name"], end - start)
+            print("Contour Count:", len(cnt))
+            #if len(cnt)>0:
+            #  print(cnt[0])
+            print("------------------------")
+            cnt = ensure_3D_contour(cnt)
             if image is None:
                 print("unable to read image from filter: "+instance.meta()["name"])
                 break
             if len(image.shape) != 3:
                 print("Image must have 3 color channels. Filter '{}' must return RGB image for further processing".format(instance.conf_section))
-            result.append({"filter": instance.conf_section, "image":image, "contour": cnt, "gcode": gcode})
+            result.append({"filter": instance.conf_section, "image":image, "contour": cnt })
 
         return result
 

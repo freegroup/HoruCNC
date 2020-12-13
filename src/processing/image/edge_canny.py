@@ -35,7 +35,7 @@ class Filter:
         self.threshold = self.conf_file.get_int("threshold", self.conf_section)
 
 
-    def process(self, image, cnt, code):
+    def process(self, image, cnt):
         try:
             image = image.copy()
             gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
@@ -52,7 +52,7 @@ class Filter:
         except Exception as exc:
             print(self.conf_section, exc)
 
-        return edged, cnt, code
+        return edged, cnt
 
 
     def set_parameter(self, name, val):

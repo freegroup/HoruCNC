@@ -1,6 +1,5 @@
 import cv2
 import numpy as np
-import imutils
 
 class Filter:
     def __init__(self):
@@ -13,7 +12,7 @@ class Filter:
             "filter": self.conf_section,
             "name":"Contours",
             "description":"Generates the contour of your outline image",
-            "parameter": [],
+            "parameters": [],
             "input": "image",
             "output": "contour",
             "icon": self.icon
@@ -23,7 +22,7 @@ class Filter:
         self.conf_section = conf_section
         self.conf_file = conf_file
 
-    def process(self, image, cnt, code):
+    def process(self, image, cnt):
         try:
             outline = np.zeros(image.shape, dtype="uint8")
             if len(image.shape)==3:
@@ -40,13 +39,14 @@ class Filter:
                 c = cnt[i]
                 sq_cnt = np.squeeze(c)
                 if len(sq_cnt.shape)==2:
+                    sq_cnt = np.append(sq_cnt, [[sq_cnt[0][0], sq_cnt[0][1]]], axis=0)
                     validated_cnt.append(sq_cnt)
                 i += 1
             image = outline
         except Exception as exc:
             print(self.conf_section, exc)
 
-        return image, validated_cnt, code
+        return image, validated_cnt
 
     def stop(self):
         pass

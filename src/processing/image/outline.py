@@ -23,7 +23,7 @@ class Filter:
         self.conf_section = conf_section
         self.conf_file = conf_file
 
-    def process(self, image, cnt, code):
+    def process(self, image, cnt):
         try:
             image = image.copy()
             kernel = np.ones((3,3),np.uint8)
@@ -37,7 +37,7 @@ class Filter:
         except Exception as exc:
             print(self.conf_section, exc)
 
-        return image, cnt, code
+        return image, cnt
 
 
     def stop(self):

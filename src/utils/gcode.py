@@ -1,3 +1,5 @@
+from utils.perf import perf_tracker
+
 class GCode:
 
   # Create an instance of GCode
@@ -151,13 +153,14 @@ class GCode:
       # Add a line number before the section
       code = 'N00' + str(self.line) + ' ' +code
       # Increment the line count
-      self.line = self.line+1
+      self.line += 1
 
     # Add the code specified to the code stack
     self.code.append(code)
 
 
   # Return the same output as the eval function
+  @perf_tracker()
   def to_string(self):
     return '\n'.join(self.code)
 

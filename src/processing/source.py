@@ -1,4 +1,5 @@
 import os
+import sys
 import cv2
 from scanner_camera import Camera as Scanner
 import base64
@@ -13,7 +14,8 @@ class ImageSource:
         self.conf_file = None
         self.icon = None
         self.capture = None
-        self.factor = 2
+        self.factor = 1
+        self.width=320
         self.camera = None
         self.uploaded_image = None
 
@@ -22,8 +24,7 @@ class ImageSource:
             "filter": self.conf_section,
             "name":"Camera",
             "description":"Place the image in front of your camera and zoom in to focus",
-            "parameter": "slider",
-            "value": self.factor,
+            "parameters": [],
             "icon": self.icon
         }
 
@@ -32,22 +33,10 @@ class ImageSource:
         self.conf_file = conf_file
 
         self.factor = self.conf_file.get_int("zoom", self.conf_section)
+        self.width = self.conf_file.get_int("width", self.conf_section)
         print("CREATE CAMERA")
         self.camera = Scanner()
         print(self.camera)
-
-
-    def process(self, image, cnt, code):
-        if self.uploaded_image is None:
-            image = self.camera.capture.read()
-        else:
-            image = self.uploaded_image
-
-#        if self.factor>0:
-#            # map 0..255 -> 1..10
-#            image = self.__zoom(image, 1+(5/255)*self.factor)
-
-        return image, cnt, code
 
 
     def set_image(self, val):
@@ -56,19 +45,24 @@ class ImageSource:
         else:
             bytearray = base64.b64decode(val)
             png_as_np = np.frombuffer(bytearray, dtype=np.uint8)
-            width = self.conf_file.get_int("width", self.conf_section)
-            self.uploaded_image = self.__resize(cv2.imdecode(png_as_np, flags=cv2.IMREAD_COLOR), width=width)
+            self.uploaded_image = self.__resize(cv2.imdecode(png_as_np, flags=cv2.IMREAD_COLOR), width=self.width)
 
 
     def get_image(self):
-        if self.uploaded_image is None:
-            return self.camera.capture.read()
-        else:
-            return self.uploaded_image
-
-    def set_parameter(self, name, val):
-        self.factor = int(val)
-        self.conf_file.set("zoom", self.conf_section, str(val))
+        try:
+            if self.uploaded_image is None :
+                readed = self.camera.capture.read()
+                if readed is None:
+                    return None
+                return  self.__resize(readed, width=self.width)
+            else:
+                return self.uploaded_image
+        except Exception as exc:
+            exc_type, exc_obj, exc_tb = sys.exc_info()
+            fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+            print(exc_type, fname, exc_tb.tb_lineno)
+            print(self.conf_section, exc)
+        return None
 
 
     def __resize(self, image, width = None, height = None, inter = cv2.INTER_AREA):

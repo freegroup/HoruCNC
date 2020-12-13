@@ -20,8 +20,8 @@ class Filter:
         self.conf_section = conf_section
         self.conf_file = conf_file
 
-    def process(self, image, cnt, code):
-        return (255-image), cnt, code
+    def process(self, image, cnt):
+        return (255-image), cnt
 
 
     def stop(self):

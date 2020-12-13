@@ -34,7 +34,7 @@ class Filter:
         self.conf_file = conf_file
         self.factor = self.conf_file.get_int("factor", self.conf_section)
 
-    def process(self, image, cnt, code):
+    def process(self, image, cnt):
         try:
             image = image.copy()
             kernel = max(3, int((19 /255*self.factor)/2)*2+1 )
@@ -43,7 +43,7 @@ class Filter:
             print(self.conf_section, exc)
 
 
-        return blur, cnt, code
+        return blur, cnt
 
     def set_parameter(self, name, val):
         self.factor = int(val)

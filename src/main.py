@@ -5,6 +5,8 @@ import json
 import logging
 import os
 import base64
+import time
+
 from flask import Flask, render_template, make_response, send_file, request
 
 from utils.webgui import FlaskUI   # get the FlaskUI class
@@ -32,8 +34,8 @@ app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
 ui = FlaskUI(app= app, port=8080)
 
 # global, thread base variables
-previewImage = None         # the result of each pipeline run
-dataLock = threading.Lock() # sync the access to "previewImage" of the different thread
+pipelineResults = None         # the result of each pipeline run
+dataLock = threading.Lock() # sync the access to "pipelineResults" of the different thread
 pipelineJob = None          # the current, selected pipeline for image processing
 jobThread = None            # runs the pipeline
 millingThread = None        # runs the milling job
@@ -101,7 +103,21 @@ def create_app():
     @app.route('/gcode')
     def gcode():
         global pipelineJob
-        response = make_response(pipelineJob.gcode(pipelineJob.filter_count()-1).to_string())
+        global pipelineResults
+        if pipelineResults is None:
+            return make_response("not found", 404)
+
+        index = pipelineJob.filter_count()-1
+        if (index+1) > len(pipelineResults):
+            return make_response("not found", 404)
+
+        result = pipelineResults[index]
+        if "contour" not in result:
+            return make_response("not found", 404)
+
+        contour_3d = result["contour"]
+        response = make_response(pipelineJob.gcode(contour_3d).to_string())
+        print("===============================================================================================")
         response.headers['Content-Disposition'] = 'attachment; filename="carve.gcode"; filename*="carve.gcode"'
         response.headers['Content-Type'] = 'application/text'
         response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
@@ -112,11 +128,11 @@ def create_app():
 
     @app.route('/image/<index>', methods=['GET'])
     def image(index):
-        global previewImage
+        global pipelineResults
         global dataLock
         with dataLock:
             try:
-                retval, buffer = cv2.imencode('.png', previewImage[int(index)]["image"])
+                retval, buffer = cv2.imencode('.png', pipelineResults[int(index)]["image"])
                 response = make_response(buffer.tobytes())
                 response.headers['Content-Type'] = 'image/png'
                 return response
@@ -258,12 +274,12 @@ def create_app():
 
     def processJob():
         global pipelineJob
-        global previewImage
+        global pipelineResults
         global jobThread
         with dataLock:
             try:
                 if pipelineJob:
-                    previewImage = pipelineJob.process()
+                    pipelineResults = pipelineJob.process()
             except Exception as exc:
                 print(exc)
                 print("error during image processing...ignored")
@@ -287,5 +303,5 @@ def create_app():
     print("Running server on http://127.0.0.1:8080")
     ui.run()
 
-
-create_app()
+if __name__ == "__main__":
+    create_app()

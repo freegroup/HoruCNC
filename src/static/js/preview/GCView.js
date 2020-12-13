@@ -1,6 +1,17 @@
 // GCView - an html5 GCODE viewer which uses Three.js and can display on Canvas or with WebGL
 // Copyright 2015 Andrew Hodel (www.xyzbots.com)
 //
+g0LineMaterial = new THREE.LineBasicMaterial( {
+	linewidth: 0.5,
+	color: 'grey',
+	transparent: true,
+	opacity : 0.2
+} );
+
+g01LineMaterial = new THREE.LineBasicMaterial({
+	color:'#ffa500',
+	linewidth:1
+})
 
 var GCView = function(container) {
 	// container element, needs to be a div
@@ -196,7 +207,7 @@ GCView.prototype.g00 = function (args, line) {
 
 	if (this.lastLine != undefined) {
 		// g0 lines are black
-		this.addSegment(this.lastLine, newLine, new THREE.LineBasicMaterial({color: 'grey', linewidth: .5}));
+		this.addSegment(this.lastLine, newLine, g0LineMaterial /*new THREE.LineBasicMaterial({color: 'grey', linewidth: .5})*/);
 	}
 	this.lastLine = newLine;
 }
@@ -220,7 +231,7 @@ GCView.prototype.g01 = function(args, line) {
             };
 
 	if (this.lastLine != undefined) {
-            this.addSegment(this.lastLine, newLine, new THREE.LineBasicMaterial({color:'#ffa500',linewidth:1}));
+            this.addSegment(this.lastLine, newLine, g01LineMaterial);
 	}
             this.lastLine = newLine;
 }

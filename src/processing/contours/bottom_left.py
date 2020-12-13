@@ -2,6 +2,7 @@ import numpy as np
 import cv2
 import sys, os
 import copy
+from utils.contour import ensure_3D_contour, to_2D_contour
 
 class Filter:
     def __init__(self):
@@ -24,9 +25,10 @@ class Filter:
         self.conf_section = conf_section
         self.conf_file = conf_file
 
-    def process(self, image, cnt, code):
+    def process(self, image, cnt_3d):
         try:
-            if len(cnt)>0:
+            if len(cnt_3d)>0:
+                cnt = to_2D_contour(cnt_3d)
                 # Determine the bounding rectangle of all contours
                 x, y, w, h = cv2.boundingRect(np.concatenate(cnt))
                 image_height, image_width = image.shape[0], image.shape[1]
@@ -75,7 +77,7 @@ class Filter:
             print(exc_type, fname, exc_tb.tb_lineno)
             print(self.conf_section, exc)
 
-        return image, cnt, code
+        return image, cnt
 
     def stop(self):
         pass
