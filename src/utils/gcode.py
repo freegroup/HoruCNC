@@ -6,7 +6,6 @@ class GCode:
   def __init__(self):
 
     self.code = []
-    self.line = 1
 
     self.name = "0001"
     self.unit = 'mm'
@@ -147,14 +146,6 @@ class GCode:
 
   # Add the code to the stack
   def add(self, code):
-
-    # Determine whether to add a line number or not
-    if self.line and (code[0] != '%' and code[0] != 'O'):
-      # Add a line number before the section
-      code = 'N00' + str(self.line) + ' ' +code
-      # Increment the line count
-      self.line += 1
-
     # Add the code specified to the code stack
     self.code.append(code)
 

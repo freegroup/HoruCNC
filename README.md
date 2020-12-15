@@ -32,3 +32,8 @@ pip3 install -r requirements.txt
 
 python3 ./src/main.py
 ```
+
+
+https://nb.paulbutler.org/surface-projection/
+https://trmm.net/Hidden_Wireframe/
+https://hackaday.com/2020/12/13/a-3d-to-2d-converter-to-make-plots-from-stls/
