@@ -1,12 +1,10 @@
 import cv2
 import numpy as np
-import pandas as pd
 import sys
 import os
+import time
 
 from utils.contour import ensure_3D_contour, to_2D_contour
-from utils.perf import perf_tracker
-import time
 
 
 class Filter:
@@ -58,9 +56,9 @@ class Filter:
                 last_contour = None
                 for rle in rle_row:
                     # gray => depth in [micro m]
-                    # 0    => 0 [micro m]
-                    # 255  => self.depth_in_micro_m [micro m]
-                    depth = -normalized_depth * rle[0]
+                    # 255  => 0 [micro m]                     # white means no cutting
+                    #   0  => self.depth_in_micro_m [micro m] # black is full depth
+                    depth = -(self.depth_in_micro_m - (normalized_depth * rle[0]))
                     gray_start = rle[1]
                     gray_end = rle[2] + gray_start
                     if gray_start == last_end:

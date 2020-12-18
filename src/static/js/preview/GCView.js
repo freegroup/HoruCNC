@@ -1,3 +1,4 @@
+
 g00LineMaterial = new THREE.LineBasicMaterial( {
 	linewidth: 0.5,
 	color: 'grey',
@@ -10,6 +11,9 @@ g01LineMaterial = new THREE.LineBasicMaterial({
 	linewidth:1
 })
 
+g00LineColor = {r:200, g:200, b:200}
+g01LineColor = {r:242, g:169, b:60}
+
 let GCView = function(container) {
 	// container element, needs to be a div
 	this.container = container;
@@ -20,8 +24,13 @@ let GCView = function(container) {
 	this.scene;
 	this.renderer;
 
-	this.lastCoordinate = {X:null,Y:null,Z:null,E:null,F:null};
-	this.relative = false;
+	this.lastCoordinate = {X:null,Y:null,Z:null}
+	this.lastMaterial = undefined
+	this.lastGeometry = undefined
+	this.lastPositions = []
+	this.allLines = new THREE.Object3D();
+
+	this.relative = false
 	this.bbbox = {
         min: {
             x: 1000000,
@@ -34,7 +43,6 @@ let GCView = function(container) {
             z: -1000000
         }
     };
-	this.threeLines = new THREE.Object3D();
 
 	// setup container width and height as they are only given as strings with px appended
 	this.containerWidth = this.container.style.width.substr(0,this.container.style.width.length-2);
@@ -91,7 +99,7 @@ GCView.prototype.animate = function() {
 
 	// requestAnimationFrame will pause the animation loop if the tab or window is not focused
 	// basically it will repeatedly call the animate function (this function)
-	requestAnimationFrame(this.animate)
+	requestAnimationFrame(this.animate.bind(this))
 }
 
 GCView.prototype.webglAvailable = function() {
@@ -134,121 +142,25 @@ GCView.prototype.drawAxes = function(dist) {
 	console.timeEnd("drawAxes")
 }
 
-GCView.prototype.gcLine = function(text,line) {
-	text = text.replace(/;.*$/, '').trim(); // remove comments
-	if (text) {
-		// a token is a segment of the line separated by a space
-		let tokens = text.trim().split(' ')
-		if (tokens) {
-			// the command (G or M etc) is always first
-			let args = {'cmd':tokens[0]};
-			tokens.splice(1).forEach(function(token) {
-				// for each argument, add it to the args object
-				args[token[0]] = parseFloat(token.substring(1));
-			});
-			// add it to this.gcodeLines
-			if (this[args['cmd']]) {
-				// a parser for this command exists
-				// parse it
-				this[args['cmd']](args,line);
-			} else {
-				console.log('GCView Error: unsupported command '+args['cmd']);
-			}
-		}
-	}
-}
-
-GCView.prototype.addSegment = function(p1, p2, c) {
-	let g = new THREE.Geometry();
-	g.vertices.push(new THREE.Vector3(p1.X,p1.Y,p1.Z), new THREE.Vector3(p2.X,p2.Y,p2.Z));
-	this.threeLines.add(new THREE.Line(g,c));
-
-	// setup bounding area
-	this.bbbox.min.x = Math.min(this.bbbox.min.x, p2.X)
-	this.bbbox.min.y = Math.min(this.bbbox.min.y, p2.Y);
-	this.bbbox.min.z = Math.min(this.bbbox.min.z, p2.Z);
-	this.bbbox.max.x = Math.max(this.bbbox.max.x, p2.X);
-	this.bbbox.max.y = Math.max(this.bbbox.max.y, p2.Y);
-	this.bbbox.max.z = Math.max(this.bbbox.max.z, p2.Z);
-}
-
-GCView.prototype.delta = function(v1, v2) {
-	return this.relative ? v2 : v2 - v1;
-}
-
-GCView.prototype.absolute = function(v1, v2) {
-	return this.relative ? v1 + v2 : v2;
-}
-
-GCView.prototype.G00 = function (args) {
-	let newCoordinate = {
-		X: args.X !== undefined ? this.absolute(this.lastCoordinate.X, args.X) : this.lastCoordinate.X,
-		Y: args.Y !== undefined ? this.absolute(this.lastCoordinate.Y, args.Y) : this.lastCoordinate.Y,
-		Z: args.Z !== undefined ? this.absolute(this.lastCoordinate.Z, args.Z) : this.lastCoordinate.Z,
-		E: args.E !== undefined ? this.absolute(this.lastCoordinate.E, args.E) : this.lastCoordinate.E,
-		F: args.F !== undefined ? this.absolute(this.lastCoordinate.F, args.F) : this.lastCoordinate.F,
-	}
-
-	if (this.lastCoordinate != undefined) {
-		// g0 lines are black
-		this.addSegment(this.lastCoordinate, newCoordinate, g00LineMaterial)
-	}
-	this.lastCoordinate = newCoordinate
-}
-
-GCView.prototype.G01 = function(args) {
-	let newCoordinate = {
-		X: args.X !== undefined ? this.absolute(this.lastCoordinate.X, args.X) : this.lastCoordinate.X,
-		Y: args.Y !== undefined ? this.absolute(this.lastCoordinate.Y, args.Y) : this.lastCoordinate.Y,
-		Z: args.Z !== undefined ? this.absolute(this.lastCoordinate.Z, args.Z) : this.lastCoordinate.Z,
-		E: args.E !== undefined ? this.absolute(this.lastCoordinate.E, args.E) : this.lastCoordinate.E,
-		F: args.F !== undefined ? this.absolute(this.lastCoordinate.F, args.F) : this.lastCoordinate.F,
-	};
-
-	if (this.lastCoordinate != undefined) {
-		this.addSegment(this.lastCoordinate, newCoordinate, g01LineMaterial);
-	}
-	this.lastCoordinate = newCoordinate;
-}
-
-
-GCView.prototype.M03 = function(args) {
-	//console.log("GCODE: start spindel")
-}
-
-GCView.prototype.M05 = function(args) {
-	//console.log("GCODE: stop spindel")
-}
-
-GCView.prototype.G90 = function(args) {
-	this.relative = false;
-}
-
-GCView.prototype.G91 = function(args) {
-	this.relative = true;
-}
-
-GCView.prototype.G20 = function(args) {
-	// set units to inches
-}
-
-GCView.prototype.G21 = function(args) {
-	// set units to mm
-	// could be used at a later date
-	// to display units on screen
-}
 
 GCView.prototype.loadGC = function(gc) {
 	// loop through each gcode line
 	console.time("gcLines")
 	let l = gc.split('\n');
-	for (let c=0; c<l.length; c++) {
-		this.gcLine(l[c],c);
+	// Add all line segments the scene
+	l.forEach( command => this.gcLine(command))
+	// Add the last open line segment as well to the scene
+	//
+	if(this.lastGeometry) {
+		this.lastGeometry.setAttribute('position', new THREE.Float32BufferAttribute(this.lastPositions, 3))
+		this.lastGeometry.computeBoundingSphere()
+		this.allLines.add(new THREE.Line(this.lastGeometry, this.lastMaterial))
 	}
+
 	console.timeEnd("gcLines")
 
 	console.time("scene.add")
-	this.scene.add(this.threeLines);
+	this.scene.add(this.allLines);
 	console.timeEnd("scene.add")
 
 	// draw the axis lines based on the longest axis of the gcode dimensions
@@ -263,9 +175,7 @@ GCView.prototype.loadGC = function(gc) {
 
 		const box = new THREE.Box3();
 
-		for( const object of selection ) {
-			box.expandByObject(object)
-		}
+		for( const object of selection ) box.expandByObject( object );
 
 		const size = box.getSize( new THREE.Vector3() );
 		const center = box.getCenter( new THREE.Vector3() );
@@ -291,7 +201,106 @@ GCView.prototype.loadGC = function(gc) {
 		controls.update();
 	}
 
-	fitCameraToSelection(this.camera, this.controls, this.threeLines.children)
+	fitCameraToSelection(this.camera, this.controls, this.allLines.children)
 	return {'status':'complete','bounds':this.bbbox};
 
+}
+
+GCView.prototype.gcLine = function(text) {
+	text = text.replace(/;.*$/, '').trim(); // remove comments
+	// a token is a segment of the line separated by a space
+	let tokens = text.split(' ')
+	if (tokens) {
+		// the command (G or M etc) is always first
+		let args = {'cmd':tokens[0]};
+		tokens.splice(1).forEach(function(token) {
+			// for each argument, add it to the args object
+			args[token[0]] = parseFloat(token.substring(1))
+		});
+		try {
+			this[args['cmd']](args)
+		} catch (exc) {
+			console.log('GCView Error: unsupported command '+args['cmd'], exc);
+		}
+	}
+}
+
+GCView.prototype.moveAbsTo = function(args, material) {
+	let newCoordinate = {
+		X: args.X !== undefined ? this.absolute(this.lastCoordinate.X, args.X) : this.lastCoordinate.X,
+		Y: args.Y !== undefined ? this.absolute(this.lastCoordinate.Y, args.Y) : this.lastCoordinate.Y,
+		Z: args.Z !== undefined ? this.absolute(this.lastCoordinate.Z, args.Z) : this.lastCoordinate.Z,
+	}
+
+	// we have not the same move operation and we have to create a new LINE object and apply the material to them
+	//
+	if( material !== this.lastMaterial){
+		if(this.lastGeometry) {
+			this.lastGeometry.setAttribute('position', new THREE.Float32BufferAttribute(this.lastPositions, 3))
+			this.lastGeometry.computeBoundingSphere()
+			this.allLines.add(new THREE.Line(this.lastGeometry, this.lastMaterial))
+			this.lastGeometry = new THREE.BufferGeometry()
+			this.lastPositions = []
+			this.lastPositions.push( this.lastCoordinate.X, this.lastCoordinate.Y, this.lastCoordinate.Z )
+		}else{
+			this.lastGeometry = new THREE.BufferGeometry()
+			this.lastPositions = []
+		}
+	}
+
+	this.lastMaterial = material
+	this.lastCoordinate = newCoordinate
+	this.lastPositions.push( newCoordinate.X, newCoordinate.Y, newCoordinate.Z )
+
+	// setup bounding area
+	this.bbbox.min.x = Math.min(this.bbbox.min.x, newCoordinate.X)
+	this.bbbox.min.y = Math.min(this.bbbox.min.y, newCoordinate.Y);
+	this.bbbox.min.z = Math.min(this.bbbox.min.z, newCoordinate.Z);
+	this.bbbox.max.x = Math.max(this.bbbox.max.x, newCoordinate.X);
+	this.bbbox.max.y = Math.max(this.bbbox.max.y, newCoordinate.Y);
+	this.bbbox.max.z = Math.max(this.bbbox.max.z, newCoordinate.Z);
+}
+
+
+GCView.prototype.delta = function(v1, v2) {
+	return this.relative ? v2 : v2 - v1;
+}
+
+GCView.prototype.absolute = function(v1, v2) {
+	return this.relative ? v1 + v2 : v2;
+}
+
+
+GCView.prototype.G00 = function (args) {
+	this.moveAbsTo(args, g00LineMaterial)
+}
+
+GCView.prototype.G01 = function(args) {
+	this.moveAbsTo(args, g01LineMaterial);
+}
+
+GCView.prototype.M03 = function(args) {
+	//console.log("GCODE: start spindel")
+}
+
+GCView.prototype.M05 = function(args) {
+	//console.log("GCODE: stop spindel")
+}
+
+GCView.prototype.G90 = function(args) {
+	this.relative = false;
+}
+
+GCView.prototype.G91 = function(args) {
+	this.relative = true;
+}
+
+GCView.prototype.G20 = function(args) {
+	// set units to inches
+}
+
+GCView.prototype.G21 = function(args) {
+	// set units to mm
+	// could be used at a later date
+	// to display units on screen
 }
