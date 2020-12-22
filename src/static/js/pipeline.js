@@ -1,41 +1,40 @@
+let filters = []
 fetch('/meta')
     .then(response => response.json())
     .then(data => {
+        filters = data.filters
 
-        startScreen()
+        let element = document.querySelector("#filters")
+
+        // see codepen to make this scenarion draggable
+        // https://codepen.io/chriscoyier/pen/Bjamqg
+
+        element.insertAdjacentHTML('beforeend',
+            `<button class="filter"  onClick="startScreen(this)">
+               <img 
+                    src="/static/images/source.svg"
+                    id="filterStart"
+               />
+             </button>`)
 
         // add all the filters to the pipeline
         //
-        let element = document.querySelector("#filters")
-        data.filters.forEach( (filter, index) => {
+        filters.forEach( (filter, index) => {
             // check if the filter should be visible in the pipeline
             if(filter.menu) {
-                let html = `<section id="section${index}">
-                            <input type="radio" name="sections" id="option${index}">
-                            <label for="option${index}">${icon(filter)}</label>
-                            <article>
-                            ${filterScreen(filter, index)}
-                            </article>
-                        </section>`
+                let html = `<button class='filter'  onClick="filterScreen(this,${index})">
+                                <img src="${filter.icon}" id="filter${index}" />
+                            </button>`
                 element.insertAdjacentHTML('beforeend', html);
             }
         })
 
         // add the final carving screen to the pipeline
         //
-        finalScreen()
-
-        let nodes = document.querySelectorAll(".parameter input[type=range]")
-        console.log(nodes)
-        nodes.forEach( (node)=>{
-            node.addEventListener("input", (event)=>{
-                let element = event.target
-                console.log("test")
-                fetch("/parameter/"+element.dataset.index+"/"+element.dataset.name+"/"+element.value, {
-                    method: "POST"
-                })
-            })
-        })
+        element.insertAdjacentHTML('beforeend',
+            `<button class="filter" onClick="finalScreen(this)">
+               <img src="/static/images/engrave.svg" id="filterFinal"/>
+             </button>`)
 
         // start the initial trigger to update the preview image
         //
@@ -43,13 +42,13 @@ fetch('/meta')
 
         // select the first pane/filter in the navigation to show the first page
         //
-        document.getElementById("optionStart").click()
+        document.getElementById("filterStart").click()
     })
 
 
 function updatePreviewImage() {
     setTimeout(() => {
-        let preview = document.querySelector('.tabordion input[name="sections"]:checked ~ article .update')
+        let preview = document.querySelector('.update')
         if (preview) {
             let image = new Image()
             image.onload = () => {
@@ -82,44 +81,15 @@ function updatePreviewImage() {
     }, 300)
 }
 
-function icon(filter){
-    if(filter.icon){
-        return `<img class="with-shadow" src="${filter.icon}"/>`
-    }
-    return filter.name
-}
 
 
-function inputParameter(filter, index){
-    let paramHTML = ""
-    filter.parameters.forEach( (parameter)=>{
-        if(parameter.type==="slider"){
-            paramHTML+=
-            `<div class="parameter">
-             <label for="param_${index}">${parameter.label}</label>     
-             <input 
-                 id="param_${index}"  
-                 data-index="${index}" 
-                 data-name="${parameter.name}" 
-                 type="range"
-                 min="${parameter.min}" 
-                 max="${parameter.max}" 
-                 value="${parameter.value}" 
-                 step="1">
-             </div>`
-        }
+function startScreen(button){
+    document.querySelectorAll(".blue-button").forEach( el => {
+        el.classList.remove("blue-button");
     })
-    return paramHTML
-}
-
-
-function startScreen(){
-    let element = document.querySelector("#filters")
-    let html=  `<section id="sectionStart">
-                <input type="radio" name="sections" id="optionStart">
-                <label for="optionStart"><img class="with-shadow" src="/static/images/source.svg"/></label>
-                <article id="startWizard">
-                    <div
+    button.classList.add("blue-button");
+    let element = document.querySelector("#filter-settings")
+    let html=  `<div
                        data-image="/sourceImage"  
                        class="preview update"
                        style="background-image:url(/sourceImage)" 
@@ -140,36 +110,70 @@ function startScreen(){
                            id="resetImage"
                            onclick="resetImage(event)">
                            <label>Use Camera</label>
-                         </button>
-                                                  
-                    </div>
-                </article>
-             </section>`
-    element.insertAdjacentHTML('beforeend', html)
+               </div>`
+    element.innerHTML= html
 }
 
 
-function filterScreen(filter, index){
-    return `<div
-           data-image="/image/${index}"  
-           class="preview update"
-           style="background-image:url(/image/${index})" 
-           id="preview${index}" 
-           ></div>
-        <h4 class="description">${filter.description}</h4>
-        <div class="parameters">${inputParameter(filter, index)}</div>`
+function filterScreen(button, index){
+    document.querySelectorAll(".blue-button").forEach( el => {
+        el.classList.remove("blue-button");
+    })
+    button.classList.add("blue-button");
+    function inputParameter(filter, index){
+        let paramHTML = ""
+        filter.parameters.forEach( (parameter)=>{
+            if(parameter.type==="slider"){
+                paramHTML+=
+                    `<div class="parameter">
+                     <label for="param_${index}">${parameter.label}</label>     
+                     <input 
+                         id="param_${index}"  
+                         data-index="${index}" 
+                         data-name="${parameter.name}" 
+                         type="range"
+                         min="${parameter.min}" 
+                         max="${parameter.max}" 
+                         value="${parameter.value}" 
+                         step="1">
+                     </div>`
+            }
+        })
+        return paramHTML
+    }
+
+    let element = document.querySelector("#filter-settings")
+    let filter = filters[index]
+    let html =  `<div
+                   data-image="/image/${index}"  
+                   class="preview update"
+                   style="background-image:url(/image/${index})" 
+                   id="preview${index}" 
+                   ></div>
+                <h4 class="description">${filter.description}</h4>
+                <div class="parameters">${inputParameter(filter, index)}</div>`
+    element.innerHTML = html
+
+    let nodes = document.querySelectorAll(".parameter input[type=range]")
+    nodes.forEach( (node)=>{
+        node.addEventListener("input", (event)=>{
+            let element = event.target
+            fetch("/parameter/"+element.dataset.index+"/"+element.dataset.name+"/"+element.value, {
+                method: "POST"
+            })
+        })
+    })
 }
 
 
-function finalScreen(){
-    let element = document.querySelector("#filters")
-    let html=  `<section id="sectionFinal">
-                <input type="radio" name="sections" id="optionFinal">
-                <label for="optionFinal"><img class="with-shadow" src="/static/images/engrave.svg"/></label>
-                <article id="finalWizard">
-                </article>
-             </section>`
-    element.insertAdjacentHTML('beforeend', html)
+function finalScreen(button){
+    document.querySelectorAll(".blue-button").forEach( el => {
+        el.classList.remove("blue-button");
+    })
+    button.classList.add("blue-button");
+
+    let element = document.querySelector("#filter-settings")
+    element.innerHTML = `<div id="finalWizard" ></div>`
     previewStep()
 }
 

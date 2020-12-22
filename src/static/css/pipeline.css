@@ -5,24 +5,16 @@ body {
     font-family: 'Cantarell', sans-serif;
 }
 
-.screen{
-    position:absolute;
-    left:0;
-    top:0;
-    bottom:0;
-    right:0;
-}
-
-.filter{
+#filter-settings{
     position: absolute;
-    left:0;
-    top:0;
-    bottom:0;
-    right:0;
-    overflow:auto;
+    position: absolute;
+    left: 170px;
+    right: 30px;
+    top: 30px;
+    bottom: 15px;
 }
 
-.preview{
+#filter-settings > .preview {
     position: absolute;
     top: 50px;
     left: 0;
@@ -33,11 +25,6 @@ body {
     background-position: center top;
 }
 
-.step-index{
-    position: absolute;
-    right: 10px;
-    top: 10px;
-}
 
 [type="file"] {
     height: 0;
@@ -46,7 +33,7 @@ body {
 }
 #presetImage, #resetImage {
     width:auto;
-    padding:0px;
+    padding:0;
 }
 
 #presetImage label, #resetImage label{
@@ -86,18 +73,6 @@ body {
 }
 
 
-.output{
-    position: absolute;
-    top: 50px;
-    left: 0;
-    bottom: 150px;
-    right: 0;
-    background-size: contain;
-    background-repeat: no-repeat;
-    background-position: center top;
-}
-
-
 .parameters{
     position: absolute;
     bottom:0;
@@ -131,94 +106,63 @@ body {
 }
 
 
-.tabordion {
-    height:100%;
-    width: 100%;
-    color: #333;
-    display: block;
-    margin: auto;
-    position: relative;
-    padding-left: 10px;
-    padding-top: 10px;
-    padding-bottom: 10px;
-}
-
-.tabordion-background{
-    position: absolute;
-    left:3px;
-    top:3px;
-    bottom:3px;
-    width:110px;
-    margin:0;
-}
-
-.tabordion input[name="sections"] {
-    left: -9999px;
-    position: absolute;
-    top: -9999px;
-}
-
-#sectionINDEX{
-    height:0;
-}
-
-.tabordion section {
-    display: block;
-    height:94px;
-    width:94px;
-    overflow:hidden;
-}
-
-.tabordion section > label {
-    cursor: pointer;
-    display: inline-block;
-    padding: 0;
-    position: relative;
-    z-index:100;
-    margin-left:2px;
-    border-radius: 4px;
-    width:88px;
-    height:88px;
-}
-
-.tabordion section.disabled {
-    opacity: 0.1;
-}
-.tabordion section.disabled > label, .tabordion section.disabled > label > img{
-    cursor: not-allowed;
-}
 
 
-.tabordion section > label img{
-    height:100%;
-    border: 1px solid rgba(0,0,0,0.1);
-    border-radius: 4px;
-}
 
-
-.tabordion section .step {
+#all-filters{
+    background: #E3E7ED;
+    counter-reset: filters;
     position: absolute;
     top: 0;
     left: 0;
+    width: 150px;
+    padding: 3rem 1rem 1rem 2rem;
+    height: 100%;
+    overflow: auto;
 }
 
-.tabordion section article {
-    display: none;
-    left: 120px;
-    position: absolute;
+#filters-title {
+    position: fixed;
+    background: #E3E7ED;
+    z-index: 8;
+    width: 150px;
+    text-align: center;
     top: 0;
-    right:0;
-    bottom:0;
+    left: 0;
+    margin: 0;
+    border-bottom: 1px solid #CDD1D8;
+    color: #8585A2;
+    padding: 0.5rem 0.25rem;
+    font-size: 1rem;
 }
 
-
-.tabordion input[name="sections"]:checked + label {
-    background-color:#367bf0;
+.filter {
+    width: 100px !important;
+    height: 100px !important;
+    position: relative;
+    user-select: none;
+    margin: 0 0 0.75rem 0;
+    z-index: 5;
+    overflow: visible;
 }
 
-.tabordion input[name="sections"]:checked ~ article {
-    display: block;
+.filter > img {
+    cursor:pointer;
+    height:80px;
 }
+
+.filter:before {
+    position: absolute;
+    bottom: 0;
+    right: 100%;
+    counter-increment: filters;
+    content: counter(filters);
+    padding-right: 0.35rem;
+    color: #999;
+    line-height: normal;
+    font-size: 1rem;
+}
+
 
 #finalWizard {
     height:100%;

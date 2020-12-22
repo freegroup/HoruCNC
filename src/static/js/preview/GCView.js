@@ -8,7 +8,8 @@ g00LineMaterial = new THREE.LineBasicMaterial( {
 
 g01LineMaterial = new THREE.LineBasicMaterial({
 	color:'#ffa500',
-	linewidth:1
+	linewidth:0.5,
+	opacity : 1
 })
 
 g00LineColor = {r:200, g:200, b:200}

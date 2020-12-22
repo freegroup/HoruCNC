@@ -15,12 +15,14 @@
     <link rel="stylesheet" href='/static/css/drag-slider.css' />
 </head>
 <body>
-    <div class="screen">
-        <div class="tabordion-background inset"></div>
-        <div class="filter">
-            <div id="filters" class="tabordion">
-            </div>
+
+    <div id='all-filters'>
+        <h2 id='filters-title'>Image Pipeline</h2>
+        <div id='filters'>
         </div>
+    </div>
+    <div id="filter-settings">
+
     </div>
     <button id="index_button">&#8962;</button>
 </body>
@@ -35,6 +37,7 @@
         <button class="bottom-button-right" id="preview-next">&#x276F;</button>
     </div>
 </script>
+
 
 <script id="pendantScreenTemplate" type="text/template">
     <div id="pendantScreen">
@@ -72,6 +75,8 @@
 </script>
 
 
+<script src="/static/js/packery.js"></script>
+<script src="/static/js/draggabilly.js"></script>
 <script src="/static/js/queue.js"></script>
 <script src="/static/js/pendant-slider.js"></script>
 <script src="/static/js/pipeline.js"></script>
