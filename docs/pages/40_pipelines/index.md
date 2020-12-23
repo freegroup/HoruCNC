@@ -1,3 +1,29 @@
+---
+layout: default
+title: Pipelines
+nav_order: 40
+has_toc: false
+---
+
+# Pipelines
+A pipeline is nothing more than a `ini-file` which contains different filter entries. All pipelines are stored in the `./pipelines` directory of the cloned repository and shown in the start screen of the application.
+
+In the screenshot below we have 3 different pipelines with a different purpose.
+ - **Mill Outline of Image**   
+   Carve out the outline shape of a scanned image
+ - **Carves Height Map of an Image**   
+   Converts the image to a height map. Its toolpathing strategy uses many parallel lines of varying depth to convey brightness information of the input image.
+ - **Carve Image Outline**   
+   Engrave the scanned outline of an image. Very suitable if you want to engrave tags or nameplates
+   
+![screenshot](images/screenshot.png)
+
+## Pipeline Definition
+The software is not designed to cover just these three simple use cases. You can easily create your own pipeline and preconfigure it for your specific use case.
+
+Below is a simple pipeline documenting how this is done. Which possible filters can be used, can be seen under **Filters**.
+
+```ini 
 ###########################################################################################
 # The "common" section contains some meta information about the pipeline.
 # This section is required.
@@ -17,15 +43,18 @@ width = 640
 
 
 ###########################################################################################
+# FILTER SECTION
+###########################################################################################
+
+###########################################################################################
 # Converts graylevel to black&white. The user can define the threshold in the UI
 ###########################################################################################
 [processing.image.grayscale.Filter]
 menu = true
+# The threshold defines all values below that "gray level" are not part of the outline to carve
+#
+threshold = 0
 
-
-[processing.image.invert.Filter]
-menu = true
-threshold = 161
 
 ###########################################################################################
 # Truncates the histogram of the image and remove the white and black parts.
@@ -35,7 +64,7 @@ menu = true
 
 
 ###########################################################################################
-# Generates the terrain contour of th image. Black clors goes deeper and white colors
+# Generates the terrain contour of the image. Black colors goes deeper and white colors
 # goes higher with the milling cutter. This generates a reliefe of the gray scale image.
 ###########################################################################################
 [processing.image.to_terrain.Filter]
@@ -68,9 +97,11 @@ display_unit = cm
 [processing.contours.to_gcode.Filter]
 menu = false
 # feed rate of the mill in [mm]/[minutes]
-# feed rapid, move without carving, is two time faster
+# ( move without carving is two time faster )
 feed_rate = 50
 
 # clearance above the workpiece in [mm]
 #
 clearance = 3
+
+```

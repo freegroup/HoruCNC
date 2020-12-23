@@ -1,5 +1,6 @@
 import cv2
 
+
 class Filter:
     def __init__(self):
         self.conf_section = None
@@ -9,9 +10,9 @@ class Filter:
     def meta(self):
         return {
             "filter": self.conf_section,
-            "name":"grayscale",
-            "description":"Grayscale a color image",
-            "parameters": [ ],
+            "name": "grayscale",
+            "description": "Grayscale a color image",
+            "parameters": [],
             "input": "image",
             "output": "image",
             "icon": self.icon
@@ -32,7 +33,5 @@ class Filter:
 
         return image, cnt
 
-
     def stop(self):
         pass
-
