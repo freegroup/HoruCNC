@@ -9,7 +9,7 @@ url: "" # the base hostname & protocol for your site, e.g. http://example.com
 
 # Build settings
 remote_theme: pmarsceill/just-the-docs
-theme: "just-the-docs"
+#theme: "just-the-docs"
 search_enabled: false
 color_scheme: light
 aux_links:
