@@ -7,6 +7,7 @@ The motivation for this project was to reduce the effort of toolpath generation 
 ## What is the philosophy behind HoruCNC?
 Dead simple - design and print your template with any kind of software you like, scan it with your WebCam, and press the **Carve** button to send your GRBL code direct to your CNC mill.
 
+Read more on [documentation page](https://freegroup.github.io/HoruCNC/)
  
 ![teaser](./images/teaser.svg)
 
