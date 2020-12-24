@@ -43,66 +43,50 @@ class Filter:
         self.depth_in_micro_m = self.conf_file.get_float("depth_in_micro_m", self.conf_section)
 
     def process(self, image, cnt):
-        try:
-            single_channel = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+        single_channel = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
-            terrain_cnt = []
+        terrain_cnt = []
 
-            row_index = 0  # [micro m]
-            normalized_depth = self.depth_in_micro_m / 255
-            for row in single_channel:
-                rle_row = [rle for rle in self.rle(row) if rle[0] < 250]
-                last_end = None
-                last_contour = None
-                for rle in rle_row:
-                    # gray => depth in [micro m]
-                    # 255  => 0 [micro m]                     # white means no cutting
-                    #   0  => self.depth_in_micro_m [micro m] # black is full depth
-                    depth = -(self.depth_in_micro_m - (normalized_depth * rle[0]))
-                    gray_start = rle[1]
-                    gray_end = rle[2] + gray_start
-                    if gray_start == last_end:
-                        last_contour = last_contour+[
-                            [gray_start, row_index, depth],
-                            [gray_end,   row_index, depth]
-                        ]
-                    else:
-                        if not last_contour is None:
-                            terrain_cnt.append(np.array(last_contour,  dtype=np.int32))
-                        last_contour = [
-                            [gray_start, row_index, depth],
-                            [gray_end,   row_index, depth]
-                        ]
-                    last_end = gray_end
-                if not last_contour is None:
-                    terrain_cnt.append(np.array(last_contour,  dtype=np.int32))
-                row_index += 1
+        row_index = 0  # [micro m]
+        normalized_depth = self.depth_in_micro_m / 255
+        for row in single_channel:
+            rle_row = [rle for rle in self.rle(row) if rle[0] < 250]
+            last_end = None
+            last_contour = None
+            for rle in rle_row:
+                # gray => depth in [micro m]
+                # 255  => 0 [micro m]                     # white means no cutting
+                #   0  => self.depth_in_micro_m [micro m] # black is full depth
+                depth = -(self.depth_in_micro_m - (normalized_depth * rle[0]))
+                gray_start = rle[1]
+                gray_end = rle[2] + gray_start
+                if gray_start == last_end:
+                    last_contour = last_contour+[
+                        [gray_start, row_index, depth],
+                        [gray_end,   row_index, depth]
+                    ]
+                else:
+                    if not last_contour is None:
+                        terrain_cnt.append(np.array(last_contour,  dtype=np.int32))
+                    last_contour = [
+                        [gray_start, row_index, depth],
+                        [gray_end,   row_index, depth]
+                    ]
+                last_end = gray_end
+            if not last_contour is None:
+                terrain_cnt.append(np.array(last_contour,  dtype=np.int32))
+            row_index += 1
 
-            start_img = time.process_time()
-            newimage = np.zeros(image.shape, dtype="uint8")
-            start = time.process_time()
-            newimage.fill(255)
-            print("  fill:", time.process_time() - start)
-            start = time.process_time()
-            drawing_cnt = to_2D_contour(terrain_cnt)
-            print("  to_2D_contour:", time.process_time() - start)
-            start = time.process_time()
-            cv2.drawContours(newimage, drawing_cnt, -1, (60, 169, 242), 1)
-            print("  drawContours:", time.process_time() - start)
-            start = time.process_time()
-            # draw the carving depth
-            cv2.putText(newimage, "Carving Depth {:.2f} mm".format(self.depth_in_micro_m / 1000), (20, 50),
-                        cv2.FONT_HERSHEY_SIMPLEX, 0.8, (255, 0, 0), 4)
-            print("  putText:", time.process_time() - start)
-            print("drawImage:", time.process_time() - start_img)
+        start_img = time.process_time()
+        newimage = np.zeros(image.shape, dtype="uint8")
+        newimage.fill(255)
+        drawing_cnt = to_2D_contour(terrain_cnt)
+        cv2.drawContours(newimage, drawing_cnt, -1, (60, 169, 242), 1)
+        # draw the carving depth
+        cv2.putText(newimage, "Carving Depth {:.2f} mm".format(self.depth_in_micro_m / 1000), (20, 50),
+                    cv2.FONT_HERSHEY_SIMPLEX, 0.8, (255, 0, 0), 4)
 
-            image = newimage
-
-        except Exception as exc:
-            exc_type, exc_obj, exc_tb = sys.exc_info()
-            fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
-            print(exc_type, fname, exc_tb.tb_lineno)
-            print(self.conf_section, exc)
+        image = newimage
 
         return image, terrain_cnt
 

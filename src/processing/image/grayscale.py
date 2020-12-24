@@ -23,13 +23,10 @@ class Filter:
         self.conf_file = conf_file
 
     def process(self, image, cnt):
-        try:
-            image = image.copy()
-            image = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
-            # Make the grey scale image have three channels
-            image = cv2.cvtColor(image, cv2.COLOR_GRAY2RGB)
-        except Exception as exc:
-            print(self.conf_section, exc)
+        image = image.copy()
+        image = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
+        # Make the grey scale image have three channels
+        image = cv2.cvtColor(image, cv2.COLOR_GRAY2RGB)
 
         return image, cnt
 

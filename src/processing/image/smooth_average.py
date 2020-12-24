@@ -35,13 +35,9 @@ class Filter:
         self.factor = self.conf_file.get_int("factor", self.conf_section)
 
     def process(self, image, cnt):
-        try:
-            image = image.copy()
-            kernel = max(3, int((19 / 255 * self.factor) / 2) * 2 + 1)
-            blur = cv2.blur(image, (kernel, kernel))
-        except Exception as exc:
-            print(self.conf_section, exc)
-
+        image = image.copy()
+        kernel = max(3, int((19 / 255 * self.factor) / 2) * 2 + 1)
+        blur = cv2.blur(image, (kernel, kernel))
         return blur, cnt
 
     def set_parameter(self, name, val):

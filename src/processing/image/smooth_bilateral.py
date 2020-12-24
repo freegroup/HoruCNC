@@ -12,8 +12,8 @@ class Filter:
     def meta(self):
         return {
             "filter": self.conf_section,
-            "name":"Blur",
-            "description":"Remove noise from the image",
+            "name": "Blur",
+            "description": "Remove noise from the image",
             "parameters": [
                 {
                     "name": "threshold",
@@ -35,11 +35,8 @@ class Filter:
         self.factor = self.conf_file.get_int("factor", self.conf_section)
 
     def process(self, image, cnt):
-        try:
-            image = image.copy()
-            image = cv2.bilateralFilter(image,9,self.factor,self.factor)
-        except Exception as exc:
-            print(self.conf_section, exc)
+        image = image.copy()
+        image = cv2.bilateralFilter(image, 9, self.factor, self.factor)
 
         return image, cnt
 
@@ -47,7 +44,5 @@ class Filter:
         self.factor = int(val)
         self.conf_file.set("factor", self.conf_section, str(self.factor))
 
-
     def stop(self):
         pass
-

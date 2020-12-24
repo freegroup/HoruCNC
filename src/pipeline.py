@@ -6,6 +6,8 @@ import base64
 import os.path
 import inspect
 import time
+import sys
+import os
 
 from utils.contour import ensure_3D_contour
 from processing.source import ImageSource
@@ -97,20 +99,25 @@ class VideoPipeline:
 
         for instance in self.filters:
             start = time.process_time()
-            image, cnt = instance.process(image, cnt)
-            end = time.process_time()
-            print(instance.meta()["name"], end - start)
-            print("Contour Count:", len(cnt))
-            #if len(cnt)>0:
-            #  print(cnt[0])
-            print("------------------------")
-            cnt = ensure_3D_contour(cnt)
-            if image is None:
-                print("unable to read image from filter: "+instance.meta()["name"])
-                break
-            if len(image.shape) != 3:
-                print("Image must have 3 color channels. Filter '{}' must return RGB image for further processing".format(instance.conf_section))
-            result.append({"filter": instance.conf_section, "image":image, "contour": cnt })
+            try:
+                print("Running filter: ", type(instance))
+                image, cnt = instance.process(image, cnt)
+                end = time.process_time()
+                print(instance.meta()["name"], end - start)
+                print("Contour Count:", len(cnt))
+                cnt = ensure_3D_contour(cnt)
+                if image is None:
+                    print("unable to read image from filter: "+instance.meta()["name"])
+                    break
+                if len(image.shape) != 3:
+                    print("Image must have 3 color channels. Filter '{}' must return RGB image for further processing".format(instance.conf_section))
+                result.append({"filter": instance.conf_section, "image":image, "contour": cnt })
+                print("------------------------")
+            except Exception as exc:
+                exc_type, exc_obj, exc_tb = sys.exc_info()
+                fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+                print(exc_type, fname, exc_tb.tb_lineno)
+                print(type(instance), exc)
 
         return result
 

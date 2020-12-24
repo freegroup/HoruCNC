@@ -38,11 +38,8 @@ class Filter:
 
 
     def process(self, image, cnt):
-        try:
-            image = image.copy()
-            (thresh, blackAndWhiteImage) = cv2.threshold(image, self.threshold, 255, cv2.THRESH_BINARY)
-        except Exception as exc:
-            print(self.conf_section, exc)
+        image = image.copy()
+        (thresh, blackAndWhiteImage) = cv2.threshold(image, self.threshold, 255, cv2.THRESH_BINARY)
 
         return blackAndWhiteImage, cnt
 

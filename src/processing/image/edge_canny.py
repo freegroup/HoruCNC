@@ -36,21 +36,17 @@ class Filter:
 
 
     def process(self, image, cnt):
-        try:
-            image = image.copy()
-            gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-            blurred = cv2.GaussianBlur(gray, (5, 5), 0)
+        image = image.copy()
+        gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+        blurred = cv2.GaussianBlur(gray, (5, 5), 0)
 
-            sigma = 1/255 * self.threshold # 0.33
-            v = np.median(image)
-            # apply automatic Canny edge detection using the computed median
-            lower = int(max(0, (1.0 - sigma) * v))
-            upper = int(min(255, (1.0 + sigma) * v))
-            edged = cv2.Canny(blurred, lower, upper)
-            edged = 255 - cv2.cvtColor(edged, cv2.COLOR_GRAY2BGR)
-
-        except Exception as exc:
-            print(self.conf_section, exc)
+        sigma = 1/255 * self.threshold # 0.33
+        v = np.median(image)
+        # apply automatic Canny edge detection using the computed median
+        lower = int(max(0, (1.0 - sigma) * v))
+        upper = int(min(255, (1.0 + sigma) * v))
+        edged = cv2.Canny(blurred, lower, upper)
+        edged = 255 - cv2.cvtColor(edged, cv2.COLOR_GRAY2BGR)
 
         return edged, cnt
 

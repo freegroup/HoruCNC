@@ -22,14 +22,10 @@ class Filter:
         self.conf_file = conf_file
 
     def process(self, image, cnt):
-        try:
-            image = image.copy()
-            single_channel =  cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
-            image = cv2.ximgproc.thinning(single_channel)
-            image = cv2.cvtColor(image, cv2.COLOR_GRAY2RGB)
-        except Exception as exc:
-            print(exc)
-
+        image = image.copy()
+        single_channel =  cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
+        image = cv2.ximgproc.thinning(single_channel)
+        image = cv2.cvtColor(image, cv2.COLOR_GRAY2RGB)
         return image, cnt
 
     def stop(self):
