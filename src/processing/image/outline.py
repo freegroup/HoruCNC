@@ -37,7 +37,7 @@ class Filter:
         except Exception as exc:
             print(self.conf_section, exc)
 
-        return image, cnt
+        return (255-image), cnt
 
 
     def stop(self):

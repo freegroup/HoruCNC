@@ -12,8 +12,8 @@ class Filter:
     def meta(self):
         return {
             "filter": self.conf_section,
-            "name":"Blur",
-            "description":"Remove noise from the image and smooth it",
+            "name": "Blur",
+            "description": "Remove noise from the image and smooth it",
             "parameters": [
                 {
                     "name": "threshold",
@@ -37,11 +37,10 @@ class Filter:
     def process(self, image, cnt):
         try:
             image = image.copy()
-            kernel = max(3, int((19 /255*self.factor)/2)*2+1 )
-            blur = cv2.blur(image,(kernel,kernel))
+            kernel = max(3, int((19 / 255 * self.factor) / 2) * 2 + 1)
+            blur = cv2.blur(image, (kernel, kernel))
         except Exception as exc:
             print(self.conf_section, exc)
-
 
         return blur, cnt
 
@@ -49,7 +48,5 @@ class Filter:
         self.factor = int(val)
         self.conf_file.set("factor", self.conf_section, str(self.factor))
 
-
     def stop(self):
         pass
-

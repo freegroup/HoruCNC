@@ -13,4 +13,6 @@ aux_links:
   "HoruCNC on GitHub":
     - "//github.com/freegroup/horucnc"
 
+logo: "/assets/images/logo_text.png"
+
 theme: minima
