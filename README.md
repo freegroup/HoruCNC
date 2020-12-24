@@ -18,23 +18,8 @@ It should be possible that not CNC and CAD users should be able to engrave a sta
 ## Youtube Demo
     
 [![Demo](http://img.youtube.com/vi/Wjtr2Kol8Lw/0.jpg)](http://www.youtube.com/watch?v=Wjtr2Kol8Lw "")    
-    
-## Get the software running
-The software is written in Python3 for convenience. Python has a very good interface to OpenCV for image processing, which is heavily used here.
 
-``` 
-git clone https://github.com/freegroup/HoruCNC.git
-cd HoruCNC
-
-pip3 install opencv-python
-sudo apt install python3-opencv
-sudo apt install libqt4-test
-pip3 install -r requirements.txt
-
-python3 ./src/main.py
-```
-
-
+   
 https://nb.paulbutler.org/surface-projection/
 https://trmm.net/Hidden_Wireframe/
 https://hackaday.com/2020/12/13/a-3d-to-2d-converter-to-make-plots-from-stls/
