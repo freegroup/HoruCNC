@@ -20,7 +20,3 @@ It should be possible that not CNC and CAD users should be able to engrave a sta
 [![Demo](http://img.youtube.com/vi/Wjtr2Kol8Lw/0.jpg)](http://www.youtube.com/watch?v=Wjtr2Kol8Lw "")    
 
    
-https://nb.paulbutler.org/surface-projection/
-https://trmm.net/Hidden_Wireframe/
-https://hackaday.com/2020/12/13/a-3d-to-2d-converter-to-make-plots-from-stls/
-https://www.fwei.tk/blog/opening-black-boxes.html
