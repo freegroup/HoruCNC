@@ -1,6 +1,7 @@
 import cv2
 import numpy as np
 
+
 class Filter:
     def __init__(self):
         self.conf_section = None
@@ -10,8 +11,8 @@ class Filter:
     def meta(self):
         return {
             "filter": self.conf_section,
-            "name":"Contours",
-            "description":"Generates the contour of your outline image",
+            "name": "Contours",
+            "description": "Calculates the contour of the black parts of the image",
             "parameters": [],
             "input": "image",
             "output": "contour",
@@ -24,20 +25,21 @@ class Filter:
 
     def process(self, image, cnt):
         outline = np.zeros(image.shape, dtype="uint8")
-        if len(image.shape)==3:
-            single_channel =  cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-        else:
-            single_channel = image
+
+        single_channel = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+
+        # invert. Normally OpenCV detect on "white"....but we want "black" as contour foundation
+        single_channel = 255-single_channel
 
         cnt, hierarchy = cv2.findContours(single_channel, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-        cv2.drawContours(outline, cnt, -1, (0,255,0), 1)
+        cv2.drawContours(outline, cnt, -1, (0, 255, 0), 1)
         i = 0
         validated_cnt = []
 
         while i < len(cnt):
             c = cnt[i]
             sq_cnt = np.squeeze(c)
-            if len(sq_cnt.shape)==2:
+            if len(sq_cnt.shape) == 2:
                 sq_cnt = np.append(sq_cnt, [[sq_cnt[0][0], sq_cnt[0][1]]], axis=0)
                 validated_cnt.append(sq_cnt)
             i += 1
@@ -47,4 +49,3 @@ class Filter:
 
     def stop(self):
         pass
-
