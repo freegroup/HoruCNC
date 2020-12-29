@@ -12,7 +12,7 @@ class Filter:
         return {
             "filter": self.conf_section,
             "name": "Outline",
-            "description":"Generates the outline of your black-white image",
+            "description": "Generates the outline of your black-white image",
             "parameters": [],
             "input": "image",
             "output": "image",
@@ -25,7 +25,7 @@ class Filter:
 
     def process(self, image, cnt):
         image = image.copy()
-        kernel = np.ones((3,3),np.uint8)
+        kernel = np.ones((3, 3), np.uint8)
 
         # remove white single pixels
         image = cv2.morphologyEx(image, cv2.MORPH_OPEN, kernel)
@@ -33,9 +33,7 @@ class Filter:
         # outline
         image = cv2.morphologyEx(image, cv2.MORPH_GRADIENT, kernel)
 
-        return (255-image), cnt
-
+        return (255 - image), cnt
 
     def stop(self):
         pass
-

@@ -3,7 +3,7 @@ import cv2
 import copy
 import sys
 import os
-from utils.contour import ensure_3D_contour, to_2D_contour
+from utils.contour import ensure_3D_contour, to_2D_contour, contour_into_image
 
 
 class Filter:
@@ -56,46 +56,37 @@ class Filter:
             scaled_factor = self.width_in_micro_m / w
             scaled_cnt = [np.multiply(c.astype(np.float), [scaled_factor, scaled_factor, 1]).astype(np.int32) for c in cnt_3d]
 
-            # create a new cnt for the drawing on the image. The cnt should cover 4/5 of the overall image
-            #
-            height_in_micro_m = self.width_in_micro_m / w * h
-            image_height, image_width = image.shape[0], image.shape[1]
-            drawing_factor_w = (image_width / w) * 0.8
-            drawing_factor_h = (image_height / h) * 0.8
-            # ensure that the drawing fits into the preview image
-            drawing_factor = drawing_factor_w if drawing_factor_w < drawing_factor_h else drawing_factor_h
-            offset_x = (image_width / 2) - (w / 2 + x) * drawing_factor
-            offset_y = (image_height / 2) - (h / 2 + y) * drawing_factor
-            drawing_cnt = [np.add(np.multiply(c.astype(np.float), [drawing_factor, drawing_factor]),
-                                  [offset_x, offset_y]).astype(np.int32) for c in cnt]
-
             # generate a preview image
             #
-            newimage = np.zeros(image.shape, dtype="uint8")
-            newimage.fill(255)
+            preview_image = np.zeros(image.shape, dtype="uint8")
+            preview_image.fill(255)
+
+            # generate a preview contour
+            #
+            preview_cnt = contour_into_image(to_2D_contour(scaled_cnt), preview_image)
 
             # determine the drawing bounding box
-            x, y, w, h = cv2.boundingRect(np.concatenate(drawing_cnt))
+            x, y, w, h = cv2.boundingRect(np.concatenate(preview_cnt))
 
             # draw the centered contour
-            cv2.drawContours(newimage, drawing_cnt, -1, (60, 169, 242), 1)
-            cv2.rectangle(newimage, (x, y), (x + w, y + h), (0, 255, 0), 2)
+            cv2.drawContours(preview_image, preview_cnt, -1, (60, 169, 242), 1)
 
             # draw the width dimension
-            cv2.line(newimage, (x, y + int(h / 2)), (x + w, y + int(h / 2)), (255, 0, 0), 2)
-            cv2.circle(newimage, (x, y + int(h / 2)), 15, (255, 0, 0), -1)
-            cv2.circle(newimage, (x + w, y + int(h / 2)), 15, (255, 0, 0), -1)
-            cv2.putText(newimage, "{:.1f} {}".format(self.width_in_micro_m * display_factor, self.display_unit),
+            cv2.line(preview_image, (x, y + int(h / 2)), (x + w, y + int(h / 2)), (255, 0, 0), 1)
+            cv2.circle(preview_image, (x, y + int(h / 2)), 5, (255, 0, 0), -1)
+            cv2.circle(preview_image, (x + w, y + int(h / 2)), 5, (255, 0, 0), -1)
+            cv2.putText(preview_image, "{:.1f} {}".format(self.width_in_micro_m * display_factor, self.display_unit),
                         (x + 20, y + int(h / 2) - 30), cv2.FONT_HERSHEY_SIMPLEX, 1.65, (255, 0, 0), 4)
 
             # draw the height dimension
-            cv2.line(newimage, (x + int(w / 2), y), (x + int(w / 2), y + h), (255, 0, 0), 2)
-            cv2.circle(newimage, (x + int(w / 2), y), 15, (255, 0, 0), -1)
-            cv2.circle(newimage, (x + int(w / 2), y + h), 15, (255, 0, 0), -1)
-            cv2.putText(newimage, "{:.1f} {}".format(height_in_micro_m * display_factor, self.display_unit),
+            height_in_micro_m = self.width_in_micro_m / w * h
+            cv2.line(preview_image, (x + int(w / 2), y), (x + int(w / 2), y + h), (255, 0, 0), 1)
+            cv2.circle(preview_image, (x + int(w / 2), y), 5, (255, 0, 0), -1)
+            cv2.circle(preview_image, (x + int(w / 2), y + h), 5, (255, 0, 0), -1)
+            cv2.putText(preview_image, "{:.1f} {}".format(height_in_micro_m * display_factor, self.display_unit),
                         (x + int(w / 2) + 20, y + 50), cv2.FONT_HERSHEY_SIMPLEX, 1.65, (255, 0, 0), 4)
 
-            image = newimage
+            image = preview_image
             cnt_3d = scaled_cnt
 
         return image, cnt_3d

@@ -89,29 +89,29 @@ function startScreen(button){
     })
     button.classList.add("blue-button");
     let element = document.querySelector("#filter-settings")
-    let html=  `<div
-                       data-image="/sourceImage"  
-                       class="preview update"
-                       style="background-image:url(/sourceImage)" 
-                       id="previewStart" 
-                       >
-                    </div>
-                    <h4 class="description">Select Image</h4>
-                    <div class="parameter bottom-button-center">
-                         <input 
-                           onchange="uploadImage(event)"
-                           type="file"
-                            id="presetImageInput" 
-                           accept="image/png">
-                         <button id="presetImage">
-                            <label for="presetImageInput"   />Choose Image..</label>
-                         </button>
-                         <button 
-                           id="resetImage"
-                           onclick="resetImage(event)">
-                           <label>Use Camera</label>
-               </div>`
-    element.innerHTML= html
+    element.innerHTML=
+        `<div
+               data-image="/sourceImage"  
+               class="preview update"
+               style="background-image:url(/sourceImage)" 
+               id="previewStart" 
+               >
+            </div>
+            <h4 class="description">Select Image</h4>
+            <div class="parameter bottom-button-center">
+                 <input 
+                   onchange="uploadImage(event)"
+                   type="file"
+                    id="presetImageInput" 
+                   accept="image/png">
+                 <button id="presetImage">
+                    <label for="presetImageInput"   />Choose Image..</label>
+                 </button>
+                 <button 
+                   id="resetImage"
+                   onclick="resetImage(event)">
+                   <label>Use Camera</label>
+       </div>`
 }
 
 
@@ -122,13 +122,15 @@ function filterScreen(button, index){
     button.classList.add("blue-button");
     function inputParameter(filter, index){
         let paramHTML = ""
-        filter.parameters.forEach( (parameter)=>{
+        filter.parameters.forEach( (parameter, pi)=>{
             if(parameter.type==="slider"){
                 paramHTML+=
                     `<div class="parameter">
                      <label for="param_${index}">${parameter.label}</label>     
                      <input 
-                         id="param_${index}"  
+                         id="param_${index}_${pi}"  
+                         data-filter="${index}"
+                         data-param="${pi}" 
                          data-index="${index}" 
                          data-name="${parameter.name}" 
                          type="range"
@@ -158,6 +160,10 @@ function filterScreen(button, index){
     nodes.forEach( (node)=>{
         node.addEventListener("input", (event)=>{
             let element = event.target
+            let pi =element.dataset.param
+            let fi =element.dataset.filter
+            let param = filters[fi].parameters[pi]
+            param.value = element.value
             fetch("/parameter/"+element.dataset.index+"/"+element.dataset.name+"/"+element.value, {
                 method: "POST"
             })

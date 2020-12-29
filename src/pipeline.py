@@ -14,8 +14,9 @@ from processing.source import ImageSource
 from utils.exit import exit_process
 from utils.perf import perf_tracker
 
+
 class VideoPipeline:
-    def __init__(self, global_conf, pipeline_file ):
+    def __init__(self, global_conf, pipeline_file):
         self.pipeline_conf = Configuration(pipeline_file)
         self.filters = []
         self.pipeline = self.pipeline_conf.sections()
@@ -41,13 +42,13 @@ class VideoPipeline:
             if os.path.isfile(svg_file):
                 with open(svg_file, "rb") as image_file:
                     encoded_string = base64.b64encode(image_file.read()).decode('utf-8')
-                    instance.icon = "data:image/svg+xml;base64,"+encoded_string
+                    instance.icon = "data:image/svg+xml;base64," + encoded_string
 
             # check that the output format if the predecessor filter matches with the input if this
             # filter
             meta = instance.meta()
             if not meta["input"] == input_format:
-                print("Filter '{}' is unable to process input format '{}'. Expected was '{}'".format(python_file, input_format, meta["input"] ))
+                print("Filter '{}' is unable to process input format '{}'. Expected was '{}'".format(python_file, input_format, meta["input"]))
                 print("Wrong pipeline definition. Exit")
                 exit_process()
 
@@ -56,41 +57,35 @@ class VideoPipeline:
 
             self.filters.append(instance)
 
-
     def meta(self):
         meta_info = []
         for instance in self.filters:
             menu = self.pipeline_conf.get_boolean("menu", instance.conf_section)
-            meta  =instance.meta()
-            meta["menu"]= menu
+            meta = instance.meta()
+            meta["menu"] = menu
             meta_info.append(meta)
         return {
-            "name":self.pipeline_conf.get("name"),
-            "description":self.pipeline_conf.get("description"),
-            "author":self.pipeline_conf.get("author"),
-            "filters":meta_info
+            "name": self.pipeline_conf.get("name"),
+            "description": self.pipeline_conf.get("description"),
+            "author": self.pipeline_conf.get("author"),
+            "filters": meta_info
         }
-
 
     def filter_count(self):
         return len(self.filters)
 
-
     def override_source_image(self, value):
         self.source.set_image(value)
-
 
     def get_source_image(self):
         return self.source.get_image()
 
-
     def set_parameter(self, index, name, value):
         self.filters[index].set_parameter(name, value)
 
-
     @perf_tracker()
     def gcode(self, contour_3d):
-        return self.filters[len(self.filters)-1].gcode(contour_3d)
+        return self.filters[len(self.filters) - 1].gcode(contour_3d)
 
     def process(self):
         result = []
@@ -107,11 +102,11 @@ class VideoPipeline:
                 print("Contour Count:", len(cnt))
                 cnt = ensure_3D_contour(cnt)
                 if image is None:
-                    print("unable to read image from filter: "+instance.meta()["name"])
+                    print("unable to read image from filter: " + instance.meta()["name"])
                     break
                 if len(image.shape) != 3:
                     print("Image must have 3 color channels. Filter '{}' must return RGB image for further processing".format(instance.conf_section))
-                result.append({"filter": instance.conf_section, "image":image, "contour": cnt })
+                result.append({"filter": instance.conf_section, "image": image, "contour": cnt})
                 print("------------------------")
             except Exception as exc:
                 exc_type, exc_obj, exc_tb = sys.exc_info()

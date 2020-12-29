@@ -1,8 +1,6 @@
 import numpy as np
 import cv2
-import copy
-from utils.contour import ensure_3D_contour, to_2D_contour
-import sys, os
+from utils.contour import ensure_3D_contour, to_2D_contour, contour_into_image
 
 
 class Filter:
@@ -48,36 +46,18 @@ class Filter:
 
             cnt = to_2D_contour(cnt_3d)
 
-            newimage = np.zeros(image.shape, dtype="uint8")
-            newimage.fill(255)
+            preview_image = np.zeros(image.shape, dtype="uint8")
+            preview_image.fill(255)
 
-            # create a new cnt for the drawing on the image. The cnt should cover 4/5 of the overal image
-            #
-            image_height, image_width = image.shape[0], image.shape[1]
-            drawing_cnt = copy.deepcopy(cnt)
-            x, y, w, h = cv2.boundingRect(np.concatenate(drawing_cnt))
-            drawing_factor_w = (image_width / w) * 0.8
-            drawing_factor_h = (image_height / h) * 0.8
-            # ensure that the drawing fits into the preview image
-            drawing_factor = drawing_factor_w if drawing_factor_w < drawing_factor_h else drawing_factor_h
-            offset_x = (w / 2 + x) * drawing_factor
-            offset_y = (h / 2 + y) * drawing_factor
-            for c in drawing_cnt:
-                i = 0
-                while i < len(c):
-                    p = c[i]
-                    p[0] = (p[0] * drawing_factor) + (image_width / 2) - offset_x
-                    p[1] = (p[1] * drawing_factor) + (image_height / 2) - offset_y
-                    i += 1
-
-            cv2.drawContours(newimage, drawing_cnt, -1, (60, 169, 242), 1)
-            cv2.rectangle(newimage, (x, y), (x + w, y + h), (0, 255, 0), 1)
+            # create a new cnt for the drawing on the image. The cnt should cover 4/5 of the overall image
+            preview_cnt = contour_into_image(cnt, preview_image)
+            cv2.drawContours(preview_image, preview_cnt, -1, (60, 169, 242), 1)
 
             # draw the carving depth
-            cv2.putText(newimage, "Carving Depth {:.2f} mm".format(self.depth_in_micro_m / 1000), (20, 50),
+            cv2.putText(preview_image, "Carving Depth {:.2f} mm".format(self.depth_in_micro_m / 1000), (20, 50),
                         cv2.FONT_HERSHEY_SIMPLEX, 0.8, (255, 0, 0), 4)
 
-            image = newimage
+            image = preview_image
 
         return image, cnt_3d
 
