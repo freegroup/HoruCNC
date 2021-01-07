@@ -5,7 +5,7 @@ import os
 import numpy as np
 from utils.image import image_resize
 
-from processing.image.to_caligraph import Filter
+from processing.image.to_calligraphy import Filter
 
 TEST_IMAGE = "./test-images/Jeannette_Logo.png"
 

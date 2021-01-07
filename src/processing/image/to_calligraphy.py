@@ -23,22 +23,22 @@ class Filter:
         self.cutter_bit_angle = 30  # [degree]
         self.cutter_bit_diameter_in_micro_m = 6000  # 6mm shaft
         # length of the cutting blade
-        self.cutter_bit_length_in_micro_m = 10
+        self.cutter_bit_length_in_micro_m = 6000
         # cone circle diameter if the bit goes down the full cutter_bit_length
         self.cutter_bit_max_diameter_in_micro_m = math.tan(math.radians(self.cutter_bit_angle)) * self.cutter_bit_length_in_micro_m * 2  # [mm]
         # user selected max diameter of the cone circles
-        self.max_diameter_in_micro_m = self.cutter_bit_max_diameter_in_micro_m
+        self.max_diameter_in_micro_m = self.cutter_bit_max_diameter_in_micro_m/3
 
     def meta(self):
 
         return {
             "filter": self.conf_section,
-            "name": "Caligraph",
+            "name": "Calligraphy",
             "description": f'Engraves along the skeleton path of the image with {self.cutter_bit_angle}° carving bit',
             "parameters": [
                 {
                     "name": "diameter",
-                    "label": "Max Carve Width",
+                    "label": "Max Stroke",
                     "type": "slider",
                     "min": 0,
                     "max": self.cutter_bit_max_diameter_in_micro_m,
@@ -61,6 +61,7 @@ class Filter:
     def configure(self, global_conf, conf_section, conf_file):
         self.conf_section = conf_section
         self.conf_file = conf_file
+        self.width_in_micro_m = self.conf_file.get_int("width_in_micro_m", self.conf_section)
         self.cutter_bit_angle = self.conf_file.get_float("cutter_bit_angle", self.conf_section)
         self.cutter_bit_length_in_micro_m = self.conf_file.get_float("cutter_bit_length_in_micro_m", self.conf_section)
         # cone circle diameter if the bit goes down the full cutter_bit_length
@@ -72,9 +73,11 @@ class Filter:
         self.display_unit = "cm" if self.display_unit == "cm" else "mm"
 
     def process(self, image, cnt):
+
         try:
+            PADDING = 2
             # add padding to the image to avoid that we run out of index in the np.amax calculation
-            image = cv2.copyMakeBorder(image, 2, 2, 2, 2,  cv2.BORDER_CONSTANT, None, [255,255,255])
+            image = cv2.copyMakeBorder(image, PADDING, PADDING, PADDING, PADDING,  cv2.BORDER_CONSTANT, None, [255, 255, 255])
 
             image_height, image_width = image.shape[0], image.shape[1]
 
@@ -109,10 +112,10 @@ class Filter:
 
             generated_cnt = ensure_3D_contour(cnt)
             dots_in_width = int(self.width_in_micro_m / min(self.cutter_bit_diameter_in_micro_m, self.max_diameter_in_micro_m))
+            print(self.width_in_micro_m, self.cutter_bit_diameter_in_micro_m, self.max_diameter_in_micro_m)
             max_diameter_in_pixel = (image_width / dots_in_width)
             carving_depth = lambda gray: -(self.max_diameter_in_micro_m / 255 * (gray)) / (math.tan(math.radians(self.cutter_bit_angle / 2)) * 2)
             circle_radius = lambda gray: int(((max_diameter_in_pixel / 255) * (gray))/2)
-
             for c in generated_cnt:
                 i = 0
                 while i < len(c):
@@ -125,30 +128,31 @@ class Filter:
                     cv2.circle(preview_image, (col, row), circle_radius(max), (60, 169, 242), -1)
                     i = i+1
 
+            cv2.drawContours(preview_image, to_2D_contour(generated_cnt), -1, (0, 49, 252), 1)
 
-                display_factor = 0.001 if self.display_unit == "mm" else 0.0001
+            display_factor = 0.001 if self.display_unit == "mm" else 0.0001
 
-                # draw the width dimension
-                cv2.line(preview_image, (x, y + int(h / 2)), (x + w, y + int(h / 2)), (255, 0, 0), 1)
-                cv2.circle(preview_image, (x, y + int(h / 2)), 5, (255, 0, 0), -1)
-                cv2.circle(preview_image, (x + w, y + int(h / 2)), 5, (255, 0, 0), -1)
-                cv2.putText(preview_image, "{:.1f} {}".format(self.width_in_micro_m * display_factor, self.display_unit),
-                            (x + 20, y + int(h / 2) - 30), cv2.FONT_HERSHEY_SIMPLEX, 1.65, (255, 0, 0), 4)
+            # draw the width dimension
+            cv2.line(preview_image, (x, y + int(h / 2)), (x + w, y + int(h / 2)), (255, 0, 0), 1)
+            cv2.circle(preview_image, (x, y + int(h / 2)), 5, (255, 0, 0), -1)
+            cv2.circle(preview_image, (x + w, y + int(h / 2)), 5, (255, 0, 0), -1)
+            cv2.putText(preview_image, "{:.1f} {}".format(self.width_in_micro_m * display_factor, self.display_unit),
+                        (x + 20, y + int(h / 2) - 30), cv2.FONT_HERSHEY_SIMPLEX, 1.65, (255, 0, 0), 4)
 
-                # draw the height dimension
-                height_in_micro_m = self.width_in_micro_m / w * h
-                cv2.line(preview_image, (x + int(w / 2), y), (x + int(w / 2), y + h), (255, 0, 0), 1)
-                cv2.circle(preview_image, (x + int(w / 2), y), 5, (255, 0, 0), -1)
-                cv2.circle(preview_image, (x + int(w / 2), y + h), 5, (255, 0, 0), -1)
-                cv2.putText(preview_image, "{:.1f} {}".format(height_in_micro_m * display_factor, self.display_unit),
-                            (x + int(w / 2) + 20, y + 50), cv2.FONT_HERSHEY_SIMPLEX, 1.65, (255, 0, 0), 4)
+            # draw the height dimension
+            height_in_micro_m = self.width_in_micro_m / w * h
+            cv2.line(preview_image, (x + int(w / 2), y), (x + int(w / 2), y + h), (255, 0, 0), 1)
+            cv2.circle(preview_image, (x + int(w / 2), y), 5, (255, 0, 0), -1)
+            cv2.circle(preview_image, (x + int(w / 2), y + h), 5, (255, 0, 0), -1)
+            cv2.putText(preview_image, "{:.1f} {}".format(height_in_micro_m * display_factor, self.display_unit),
+                        (x + int(w / 2) + 20, y + 50), cv2.FONT_HERSHEY_SIMPLEX, 1.65, (255, 0, 0), 4)
 
             # Ensure that width of the contour is the same as the width_in_mm.
             # Scale the contour to the required width.
             scale_factor = self.width_in_micro_m / w
             generated_cnt = [np.multiply(c.astype(np.float), [scale_factor, scale_factor, 1]).astype(np.int32) for c in generated_cnt]
 
-
+            preview_image = preview_image[PADDING:-PADDING, PADDING:-PADDING]
             return preview_image, generated_cnt
         except Exception as exc:
             exc_type, exc_obj, exc_tb = sys.exc_info()

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="96px" height="96px" viewBox="0 0 96 96" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>pipeline_calligraphy</title>
+    <defs>
+        <path d="M22.3262191,30 L71.4395557,30 C72.3506417,30 73.1465842,30.6157561 73.3754344,31.4976321 L86.3506259,81.4976321 C86.6280761,82.5667884 85.9862714,83.6584286 84.9171152,83.9358787 C84.7530528,83.9784535 84.5842437,84 84.4147472,84 L11.4803472,84 C10.3757777,84 9.4803472,83.1045695 9.4803472,82 C9.4803472,81.857459 9.49558552,81.7153265 9.52580241,81.5760252 L20.3716743,31.5760252 C20.5711947,30.6562264 21.3850294,30 22.3262191,30 Z" id="path-1"></path>
+        <rect id="path-2" x="25" y="3" width="46" height="10" rx="1"></rect>
+    </defs>
+    <g id="pipeline_calligraphy" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="Rectangle">
+            <use stroke="#FFFFFF" stroke-width="3" fill="#FFFFFF" fill-rule="evenodd" xlink:href="#path-1"></use>
+            <use stroke="#979797" stroke-width="1" xlink:href="#path-1"></use>
+        </g>
+        <path d="M47.5,60.75 L36.9198655,64.6127124 L38.9404914,56.4313562 L30.3809827,50.6372876 L42.2099327,49.4436438 L47.5,42" id="Path" stroke="#00ACC1" opacity="0.357003348" stroke-linejoin="round" stroke-dasharray="2,1"></path>
+        <g id="Rectangle">
+            <use stroke="#FFFFFF" stroke-width="3" fill="#FFFFFF" fill-rule="evenodd" xlink:href="#path-2"></use>
+            <use stroke="#4A4A4A" stroke-width="2" xlink:href="#path-2"></use>
+        </g>
+        <polygon id="Rectangle" stroke="#4A4A4A" stroke-width="2" fill="#FFFFFF" points="39 3 57 3 57 16.4628906 51.9882812 23 47.5 23 42.8798828 23 39 16.4628906"></polygon>
+        <circle id="Oval" stroke="#4A4A4A" fill="#D8D8D8" cx="47.5" cy="9.5" r="1.5"></circle>
+        <path d="M47.2368164,41.2897949 L53.208,48.968 L65.9278564,50.2485352 C66.2196774,50.2771866 63.463392,52.3791331 57.659,56.5543747 L58.9736328,65.4799805 C59.0345227,65.7198557 55.1541898,64.3002478 47.332634,61.2211567 L47.5,59.4775391 L58.0228271,64.2492676 L54.8192139,55.7718506 L63.6081543,50.996 L51.9089355,50.996 L47.2368164,41.2897949 Z" id="Path" fill="#4A4A4A" fill-rule="nonzero"></path>
+        <polygon id="Triangle" stroke="#4A4A4A" fill="#4A4A4A" transform="translate(47.236816, 32.170654) scale(1, -1) translate(-47.236816, -32.170654) " points="47.5 24.3413086 49.7182617 28.5297852 49.7182617 40 44.7553711 40 44.7553711 28.5297852"></polygon>
+    </g>
+</svg>
