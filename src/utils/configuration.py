@@ -26,7 +26,7 @@ class Configuration:
         try:
             return self.config[section][key]
         except KeyError:
-            print("Unable to find key [{}] in ini file [{}]".format(key, self.file),  file=sys.stderr)
+            print("Unable to find key [{}.{}] in ini file [{}]".format(section, key, self.file),  file=sys.stderr)
             sys.exit(1)
 
     def set(self, key, section, value):

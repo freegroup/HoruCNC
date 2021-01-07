@@ -69,8 +69,8 @@ class Filter:
 
                 # Ensure that width of the contour is the same as the width_in_mm.
                 # Scale the contour to the required width.
-                scaled_factor = self.width_in_micro_m / w
-                scaled_cnt = [np.multiply(c.astype(np.float), [scaled_factor, scaled_factor]).astype(np.int32) for c in validated_cnt]
+                scale_factor = self.width_in_micro_m / w
+                scaled_cnt = [np.multiply(c.astype(np.float), [scale_factor, scale_factor]).astype(np.int32) for c in validated_cnt]
 
                 # generate a preview image
                 #

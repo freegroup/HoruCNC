@@ -5,6 +5,18 @@ import os
 
 from utils.perf import perf_tracker
 
+def normalize_contour(cnt):
+    i = 0
+    validated_cnt = []
+    while i < len(cnt):
+        c = cnt[i]
+        sq_cnt = np.squeeze(c)
+        if len(sq_cnt.shape) == 2:
+            sq_cnt = np.append(sq_cnt, [[sq_cnt[0][0], sq_cnt[0][1]]], axis=0)
+            validated_cnt.append(sq_cnt)
+        i += 1
+    return validated_cnt
+
 @perf_tracker()
 def to_2D_contour(contour):
     if contour is None:

@@ -2,7 +2,7 @@ import numpy as np
 import cv2
 import sys, os
 import copy
-from utils.contour import ensure_3D_contour, to_2D_contour
+from utils.contour import ensure_3D_contour, to_2D_contour, contour_into_image
 
 
 class Filter:
@@ -39,23 +39,21 @@ class Filter:
 
             cnt_3d = [np.subtract(c, [offset_x, offset_y, 0], dtype=np.int32) for c in cnt_3d]
 
-            # shift the contour to the center. Only required for the drawing
+            preview_image = np.zeros(image.shape, dtype="uint8")
+            preview_image.fill(255)
+            # generate a preview contour
             #
-            w2 = int(image_width / 2)-offset_x
-            h2 = int(image_height / 2)-offset_y
-            drawing_cnt = [np.subtract(c, [-w2, -h2], dtype=np.int32) for c in cnt]
-            newimage = np.zeros(image.shape, dtype="uint8")
-            newimage.fill(255)
+            preview_cnt = contour_into_image(to_2D_contour(cnt_3d), preview_image)
 
             # draw the coordinate system of the centered drawing contour
-            x, y, w, h = cv2.boundingRect(np.concatenate(drawing_cnt))
-            cv2.drawContours(newimage, drawing_cnt, -1, (60, 169, 242), 1)
+            x, y, w, h = cv2.boundingRect(np.concatenate(preview_cnt))
+            cv2.drawContours(preview_image, preview_cnt, -1, (60, 169, 242), 1)
             # horizontal
-            cv2.line(newimage, (x + int(w / 2), y + int(h / 2)), (x + w, y + int(h / 2)), (255, 0, 0), 1)
+            cv2.line(preview_image, (x + int(w / 2), y + int(h / 2)), (x + w, y + int(h / 2)), (255, 0, 0), 1)
             # vertical
-            cv2.line(newimage, (x + int(w / 2), y), (x + int(w / 2), y + int(h / 2)), (0, 0, 255), 1)
+            cv2.line(preview_image, (x + int(w / 2), y), (x + int(w / 2), y + int(h / 2)), (0, 0, 255), 1)
 
-            image = newimage
+            image = preview_image
 
         return image, cnt_3d
 

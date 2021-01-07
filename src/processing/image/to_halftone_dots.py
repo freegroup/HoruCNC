@@ -14,7 +14,7 @@ class Filter:
         self.conf_section = None
         self.conf_file = None
         self.icon = None
-        # default configuration settings. Overriden in the "configure" method
+        # default configuration settings. Overridden in the "configure" method
         # and read from the pipeline definition.
         #
         self.width_in_micro_m = 40000

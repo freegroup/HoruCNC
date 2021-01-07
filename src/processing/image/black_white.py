@@ -9,12 +9,11 @@ class Filter:
         self.conf_file = None
         self.icon = None
 
-
     def meta(self):
         return {
             "filter": self.conf_section,
-            "name":"Black & White",
-            "description":"Adjust until you see only the <b>black</b> sections your want carve",
+            "name": "Black & White",
+            "description": "Adjust until you see only the <b>black</b> sections your want carve",
             "parameters": [
                 {
                     "name": "threshold",
@@ -30,12 +29,10 @@ class Filter:
             "icon": self.icon
         }
 
-
     def configure(self, global_conf, conf_section, conf_file):
         self.conf_section = conf_section
         self.conf_file = conf_file
         self.threshold = self.conf_file.get_int("threshold", self.conf_section)
-
 
     def process(self, image, cnt):
         image = image.copy()
@@ -43,12 +40,9 @@ class Filter:
 
         return blackAndWhiteImage, cnt
 
-
     def set_parameter(self, name, val):
         self.threshold = int(val)
         self.conf_file.set("threshold", self.conf_section, str(val))
 
-
     def stop(self):
         pass
-

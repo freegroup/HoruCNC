@@ -45,7 +45,7 @@ class Filter:
         try:
             single_channel = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
-            terrain_cnt = []
+            generated_cnt = []
 
             row_index = 0  # [micro m]
             normalized_depth = self.depth_in_micro_m / 255
@@ -67,14 +67,14 @@ class Filter:
                         ]
                     else:
                         if not last_contour is None:
-                            terrain_cnt.append(np.array(last_contour,  dtype=np.int32))
+                            generated_cnt.append(np.array(last_contour,  dtype=np.int32))
                         last_contour = [
                             [gray_start, row_index, depth],
                             [gray_end,   row_index, depth]
                         ]
                     last_end = gray_end
                 if not last_contour is None:
-                    terrain_cnt.append(np.array(last_contour,  dtype=np.int32))
+                    generated_cnt.append(np.array(last_contour,  dtype=np.int32))
                 row_index += 1
 
             # generate a preview image
@@ -84,7 +84,7 @@ class Filter:
 
             # generate a preview contour
             #
-            preview_cnt = contour_into_image(to_2D_contour(terrain_cnt), preview_image)
+            preview_cnt = contour_into_image(to_2D_contour(generated_cnt), preview_image)
 
             cv2.drawContours(preview_image, preview_cnt, -1, (60, 169, 242), 1)
             # draw the carving depth
@@ -93,7 +93,7 @@ class Filter:
 
             image = preview_image
 
-            return image, terrain_cnt
+            return image, generated_cnt
         except Exception as exc:
             exc_type, exc_obj, exc_tb = sys.exc_info()
             fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
