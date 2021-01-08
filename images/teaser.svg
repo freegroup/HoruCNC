@@ -46,8 +46,8 @@
             <line x1="4.89705882" y1="87" x2="125.102941" y2="87" id="Line" stroke="#FFFFFF" stroke-width="2" stroke-linecap="square"></line>
             <line x1="4" y1="92" x2="124" y2="92" id="Line" stroke="#FFFFFF" stroke-width="2" stroke-linecap="square"></line>
         </g>
-        <text id="WebCam" font-family="Verdana" font-size="18" font-weight="normal" fill="#000000">
-            <tspan x="155" y="247">WebCam</tspan>
+        <text id="Camera-or-Image" font-family="Verdana" font-size="18" font-weight="normal" fill="#000000">
+            <tspan x="109" y="254">Camera or Image</tspan>
         </text>
         <text id="GRBL-Code" font-family="Verdana" font-size="18" font-weight="normal" fill="#000000">
             <tspan x="478" y="258">GRBL Code</tspan>
