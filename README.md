@@ -4,6 +4,8 @@ CNC machines are an essential part of the hacker’s toolset. These computer-con
 
 The motivation for this project was to reduce the effort of toolpath generation and the frustration at the cost of commercial software. 
 
+![screenshot](./images/screenshot.png)
+
 ## What is the philosophy behind HoruCNC?
 Dead simple - design and print your template with any kind of software you like, scan it with your WebCam, and press the **Carve** button to send your GRBL code direct to your CNC mill.
 

@@ -6,7 +6,7 @@ import time
 import math
 
 from utils.image import image_resize
-from utils.contour import ensure_3D_contour, to_2D_contour, normalize_contour
+from utils.contour import ensure_3D_contour, to_2D_contour, normalize_contour, smooth_3D_contour
 
 
 class Filter:
@@ -112,7 +112,6 @@ class Filter:
 
             generated_cnt = ensure_3D_contour(cnt)
             dots_in_width = int(self.width_in_micro_m / min(self.cutter_bit_diameter_in_micro_m, self.max_diameter_in_micro_m))
-            print(self.width_in_micro_m, self.cutter_bit_diameter_in_micro_m, self.max_diameter_in_micro_m)
             max_diameter_in_pixel = (image_width / dots_in_width)
             carving_depth = lambda gray: -(self.max_diameter_in_micro_m / 255 * (gray)) / (math.tan(math.radians(self.cutter_bit_angle / 2)) * 2)
             circle_radius = lambda gray: int(((max_diameter_in_pixel / 255) * (gray))/2)
@@ -151,7 +150,7 @@ class Filter:
             # Scale the contour to the required width.
             scale_factor = self.width_in_micro_m / w
             generated_cnt = [np.multiply(c.astype(np.float), [scale_factor, scale_factor, 1]).astype(np.int32) for c in generated_cnt]
-
+            generated_cnt = smooth_3D_contour(generated_cnt)
             preview_image = preview_image[PADDING:-PADDING, PADDING:-PADDING]
             return preview_image, generated_cnt
         except Exception as exc:

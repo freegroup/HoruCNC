@@ -1,9 +1,36 @@
 import numpy as np
-import cv2
 import sys
 import os
+import cv2
 
-from utils.perf import perf_tracker
+def smooth_3D_contour(cnt):
+    span = 5
+    smoothened = []
+    try:
+
+        for i in range(len(cnt)):
+            c = cnt[i]
+            print(c.size)
+            x,y,z = c.T
+            x = x.tolist()
+            y = y.tolist()
+            z = z.tolist()
+            if len(z)>span:
+                x = [np.average(x[val - span:val + span + 1]) for val in range(len(x))]
+                y = [np.average(y[val - span:val + span + 1]) for val in range(len(y))]
+                z = [np.average(z[val - span:val + span + 1]) for val in range(len(z))]
+                x = [v for v in x if v==v]
+                y = [v for v in y if v==v]
+                z = [v for v in z if v==v]
+                smoothened.append( np.asarray([[int(i[0]), int(i[1]), int(i[2])] for i in zip(x,y,z)] ))
+    except Exception as exc:
+        exc_type, exc_obj, exc_tb = sys.exc_info()
+        fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+        print(exc_type, fname, exc_tb.tb_lineno)
+        print("smooth_contour", exc)
+
+    return smoothened
+
 
 def normalize_contour(cnt):
     i = 0
@@ -17,14 +44,12 @@ def normalize_contour(cnt):
         i += 1
     return validated_cnt
 
-@perf_tracker()
 def to_2D_contour(contour):
     if contour is None:
         return None
     return [np.array(c[:, :-1]) for c in contour]
 
 
-@perf_tracker()
 def ensure_3D_contour(contour):
     if contour is None:
         return None
