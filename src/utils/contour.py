@@ -2,27 +2,46 @@ import numpy as np
 import sys
 import os
 import cv2
+import scipy.stats as st
+
 
 def smooth_3D_contour(cnt):
-    span = 5
-    smoothened = []
-    try:
+    def gauss_kernel(kernlen=21, nsig=3):
+        x = np.linspace(-nsig, nsig, kernlen)
+        kern1d = np.diff(st.norm.cdf(x))
+        return kern1d/kern1d.sum()
 
+    box = gauss_kernel(25)
+    WINDOW = box.size
+    PADDING= int(WINDOW/2)
+    smoothened = []
+
+    # repeat the first and last value in the array n-times
+    #
+    add_padding = lambda array, n: np.insert(np.insert(array, 0, np.full(n, array[0])), -1, np.full(n, array[-1]))
+
+    try:
         for i in range(len(cnt)):
             c = cnt[i]
-            print(c.size)
-            x,y,z = c.T
-            x = x.tolist()
-            y = y.tolist()
-            z = z.tolist()
-            if len(z)>span:
-                x = [np.average(x[val - span:val + span + 1]) for val in range(len(x))]
-                y = [np.average(y[val - span:val + span + 1]) for val in range(len(y))]
-                z = [np.average(z[val - span:val + span + 1]) for val in range(len(z))]
-                x = [v for v in x if v==v]
-                y = [v for v in y if v==v]
-                z = [v for v in z if v==v]
-                smoothened.append( np.asarray([[int(i[0]), int(i[1]), int(i[2])] for i in zip(x,y,z)] ))
+            x, y, z = c.T
+            if len(z) > 0:
+                x_new = np.convolve(add_padding(x, PADDING), box, mode="valid")
+                y_new = np.convolve(add_padding(y, PADDING), box, mode="valid")
+                z_new = np.convolve(add_padding(z, PADDING), box, mode="valid")
+                # replace the starting points and end points of the CNC contour with the original points.
+                # We don't want modify the start / end of an contour. The reason for that is, that this is normaly
+                # cut-into movement into the stock without any tolerances. So - don't modify them.
+                #
+                # Replace the START Points with the original one
+                x_new[0:PADDING] = x[0:PADDING]
+                y_new[0:PADDING] = y[0:PADDING]
+                z_new[0:PADDING] = z[0:PADDING]
+                # Replace the END Points with the original one
+                x_new[-PADDING:] = x[-PADDING:]
+                y_new[-PADDING:] = y[-PADDING:]
+                z_new[-PADDING:] = z[-PADDING:]
+
+                smoothened.append(np.asarray([[int(i[0]), int(i[1]), int(i[2])] for i in zip(x_new, y_new, z_new)]))
     except Exception as exc:
         exc_type, exc_obj, exc_tb = sys.exc_info()
         fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
@@ -43,6 +62,7 @@ def normalize_contour(cnt):
             validated_cnt.append(sq_cnt)
         i += 1
     return validated_cnt
+
 
 def to_2D_contour(contour):
     if contour is None:
@@ -88,5 +108,3 @@ def contour_into_image(cnt, image):
         exc_type, exc_obj, exc_tb = sys.exc_info()
         fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
         print(exc_type, fname, exc_tb.tb_lineno)
-
-

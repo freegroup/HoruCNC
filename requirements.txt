@@ -9,3 +9,5 @@ pyserial==3.4
 configobj==5.0.6
 whichcraft==0.6.1
 Flask==1.1.2
+scipy==1.6.0
+
