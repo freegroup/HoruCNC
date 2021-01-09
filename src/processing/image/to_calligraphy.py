@@ -6,7 +6,7 @@ import time
 import math
 
 from utils.image import image_resize
-from utils.contour import ensure_3D_contour, to_2D_contour, normalize_contour, smooth_3D_contour
+from utils.contour import ensure_3D_contour, to_2D_contour, normalize_contour
 
 
 class Filter:
@@ -150,7 +150,6 @@ class Filter:
             # Scale the contour to the required width.
             scale_factor = self.width_in_micro_m / w
             generated_cnt = [np.multiply(c.astype(np.float), [scale_factor, scale_factor, 1]).astype(np.int32) for c in generated_cnt]
-            generated_cnt = smooth_3D_contour(generated_cnt)
             preview_image = preview_image[PADDING:-PADDING, PADDING:-PADDING]
             return preview_image, generated_cnt
         except Exception as exc:
