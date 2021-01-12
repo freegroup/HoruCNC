@@ -7,18 +7,17 @@ has_toc: false
 
 # Basic Principal of the Software
 
-The basic idea of the software is to use a **filter pipeline** to convert and modify the source image to produce 
- [GCode](https://en.wikipedia.org/wiki/G-code) output. The filter pipeline uses filters to transform the data in discrete steps along the dataflow path.
+The basic idea of the software is to use a **filter pipeline** to process the input image and generate [GCode](https://en.wikipedia.org/wiki/G-code) output. The *pipeline* uses filters to transform the data in filter stages.
 
 ## Pipelines
-Filters are arranged and called in a specific order to create a data flow, called a pipeline. 
-Each filter takes a single action. For example, the Blur Filter takes an incoming video frame, applies a blur action to the frame data and then passes the new frame data to the next filter in the path.
+Filters are arranged and processed in a specific order, called a pipeline. 
+Each filter takes a single action. For example, the Blur Filter takes an incoming video frame, applies a blur action to the image and then passes the new image to the next filter in the process.
 
 
 ![image_to_gcode](images/pipeline.png)
 
 
-The order of the filters matches the order in which they appear in the left-hand side of the window. Each filters effects is immediately visible in the preview video feed and can have some slider to adjust basic filter parameter.
+The order of the filters matches the order on the left-hand side of the UI. Each filters effects is immediately visible in the preview video feed and can have some slider to adjust basic filter parameter.
 
 
 ![image_to_gcode](./images/screenshot.png)

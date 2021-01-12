@@ -18,3 +18,7 @@ has_toc: false
  - [https://www.fwei.tk/blog/opening-black-boxes.html](https://www.fwei.tk/blog/opening-black-boxes.html)
  - [https://nb.paulbutler.org/surface-projection/](https://nb.paulbutler.org/surface-projection/)
  - [https://github.com/Denvi/Candle](https://github.com/Denvi/Candle)
+ - [https://www.learnopencv.com/filling-holes-in-an-image-using-opencv-python-c/](https://www.learnopencv.com/filling-holes-in-an-image-using-opencv-python-c/)
+ - [http://davidbliss.com/tag/genetic-algorithm/](http://davidbliss.com/tag/genetic-algorithm/)
+ - [https://www.mattkeeter.com/projects/contours/](https://www.mattkeeter.com/projects/contours/)
+ - [http://www.inf.u-szeged.hu/~palagyi/skel/skel.html](http://www.inf.u-szeged.hu/~palagyi/skel/skel.html)

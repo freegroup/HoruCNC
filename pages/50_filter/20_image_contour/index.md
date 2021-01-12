@@ -5,7 +5,7 @@ nav_order: 200
 parent: Filter
 ---
 # Image to Contour Filter
-This kind of filters gets an 3 channel image as input and returns a collection of contours of paths as result. 
+This kind of filters gets an 3 channel image as input and returns a collection of contours of paths as result. Once your bitmap or raster image has been converted to vector it can be scaled to any size without any loss in quality. This is kind of filters are required to convert your image to GRBL code.
 
 ![image_to_image](../images/image_contour.png)
 {: .text-center}

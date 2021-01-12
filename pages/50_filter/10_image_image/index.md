@@ -7,7 +7,7 @@ parent: Filter
 ---
 # Image to Image Filter
 
-Image filters gets an 3 channel image as input and returns a 3-channel image as result. 
+Image filters gets an 3 channel image as input and returns a 3-channel image as result. This kind of filter are allways placed at the beginning of the pipeline.  
 
 ![image_to_image](../images/image_image.png)
 {: .text-center}
@@ -106,7 +106,7 @@ menu = false
 
 ## Outline
 {: .filter-header}
-It is the difference between the dilation and the erosion of an grayscale image. The result is more detailed than that of Canny Edge. Here you can see the "belly button" of the mocha pot.
+It is the difference between the dilation and the erosion of an grayscale image. The result is more detailed than that of Canny Edge. Here you can see the "belly button" of the mocha pot. This kind of detail is not visible in other edge detection filters.
 
 Additional the result is grayscale in comparison to the canny edge, which is black&white.
 
