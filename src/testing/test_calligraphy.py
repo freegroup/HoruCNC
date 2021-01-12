@@ -10,7 +10,7 @@ from processing.image.to_calligraphy import Filter
 
 TEST_IMAGE = "./test-images/Jeannette_Logo.png"
 
-configuration_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "config", "configuration.ini"))
+configuration_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "config", "configuration.ini"))
 conf = Configuration(configuration_dir)
 
 filter = Filter()

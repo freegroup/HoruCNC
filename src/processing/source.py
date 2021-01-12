@@ -1,7 +1,7 @@
 import os
 import sys
 import cv2
-from scanner_camera import Camera as Scanner
+from utils.scanner_camera import Camera as Scanner
 import base64
 import numpy as np
 from utils.image import image_resize

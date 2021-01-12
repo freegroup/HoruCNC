@@ -3,8 +3,9 @@ import os
 from utils.configuration import Configuration
 from utils.videostream import VideoStream
 
-configuration_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "config","configuration.ini"))
+configuration_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "config", "configuration.ini"))
 conf = Configuration(configuration_dir)
+
 
 class Camera(object):
 

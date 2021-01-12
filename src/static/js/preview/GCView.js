@@ -46,8 +46,8 @@ let GCView = function(container) {
     };
 
 	// setup container width and height as they are only given as strings with px appended
-	this.containerWidth = this.container.style.width.substr(0,this.container.style.width.length-2);
-	this.containerHeight = this.container.style.height.substr(0,this.container.style.height.length-2);
+	this.containerWidth = this.container.clientWidth;
+	this.containerHeight = this.container.clientHeight;
 
 	// setup a camera view
 	this.camera = new THREE.PerspectiveCamera( 70, this.containerWidth / this.containerHeight, 1, 1000 );
@@ -56,6 +56,9 @@ let GCView = function(container) {
 	this.controls = new THREE.TrackballControls( this.camera, this.container );
 	this.controls.rotateSpeed = 7;
 	this.controls.zoomSpeed = .1;
+
+	this.camera.position.set( 10.146052156807395, -17.7150085840143, 12.464691871888595 );
+	this.controls.update();
 
 	// create the scene object
 	this.scene = new THREE.Scene();
@@ -88,16 +91,16 @@ let GCView = function(container) {
 
 GCView.prototype.onWindowResize = function() {
 	// this just updates the viewport when the window is resized
-	this.camera.aspect = this.containerWidth / this.containerHeight;
+	this.camera.aspect = this.container.clientWidth / this.container.clientHeight;
 	this.camera.updateProjectionMatrix();
-	this.renderer.setSize( this.containerWidth, this.containerHeight );
+	this.renderer.setSize( this.container.clientWidth, this.container.clientHeight );
 }
 
 GCView.prototype.animate = function() {
 	// this renders the scene with the camera
 	this.controls.update();
 	this.renderer.render( this.scene, this.camera );
-
+	// console.log(this.camera.position)
 	// requestAnimationFrame will pause the animation loop if the tab or window is not focused
 	// basically it will repeatedly call the animate function (this function)
 	requestAnimationFrame(this.animate.bind(this))
@@ -146,7 +149,6 @@ GCView.prototype.drawAxes = function(dist) {
 
 GCView.prototype.loadGC = function(gc) {
 	// loop through each gcode line
-	console.time("gcLines")
 	let l = gc.split('\n');
 	// Add all line segments the scene
 	l.forEach( command => this.gcLine(command))
@@ -158,19 +160,13 @@ GCView.prototype.loadGC = function(gc) {
 		this.allLines.add(new THREE.Line(this.lastGeometry, this.lastMaterial))
 	}
 
-	console.timeEnd("gcLines")
-
-	console.time("scene.add")
 	this.scene.add(this.allLines);
-	console.timeEnd("scene.add")
 
 	// draw the axis lines based on the longest axis of the gcode dimensions
 	this.drawAxes(Math.max(this.bbbox.max.x, this.bbbox.max.y, this.bbbox.max.z));
 
 	// display it all
-	console.time("animate")
 	this.animate();
-	console.timeEnd("animate")
 
 	function fitCameraToSelection( camera, controls, selection, fitOffset = 1.2 ) {
 
@@ -202,7 +198,7 @@ GCView.prototype.loadGC = function(gc) {
 		controls.update();
 	}
 
-	fitCameraToSelection(this.camera, this.controls, this.allLines.children)
+	fitCameraToSelection(this.camera, this.controls, this.allLines.children, 1.2)
 	return {'status':'complete','bounds':this.bbbox};
 
 }
