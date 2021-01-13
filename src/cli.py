@@ -20,12 +20,7 @@ def validate_pipeline(ctx, param, value):
         raise click.BadParameter("Must be a valid processing pipeline")
     return value
 
-
-@click.command()
-@click.option("--preview",  help="Previews the generated GCode in a browser window", default=False,  is_flag=True)
-@click.option("--image",    help="The image to convert",           callback=validate_image)
-@click.option("--pipeline", help="The processing pipeline to use", callback=validate_pipeline)
-def convert(preview, image, pipeline):
+def process(image, pipeline):
     """Converts Images into GCode by a given 'pipeline'"""
     pipeline_conf = Configuration(pipeline)
     pipeline_sections = pipeline_conf.sections()
@@ -62,23 +57,38 @@ def convert(preview, image, pipeline):
         img, cnt = instance.process(img, cnt)
         cnt = ensure_3D_contour(cnt)
 
-    if(preview):
-        gcode = instance.gcode(cnt).to_string()
-        gcode_file = os.path.abspath(os.path.join(os.path.dirname(__file__), "static", "assets", "preview.nc"))
-        with open(gcode_file, 'w', encoding='utf-8') as f:
-            f.write(gcode)
+    gcode = instance.gcode(cnt).to_string()
+    return img, cnt, gcode
 
-        app = Flask(__name__)
-        app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
-        ui = FlaskUI(app=app, port=8080)
-        @app.route('/')
-        def index():
-            return send_file('static/html/preview.html', cache_timeout=-1)
 
-        ui.run()
-    else:
-        print(instance.gcode(cnt).to_string())
+@click.group()
+def cli():
+    pass
+
+
+@cli.command()
+@click.option("--image", "-i",    help="The image to convert",           callback=validate_image)
+@click.option("--pipeline", "-p", help="The processing pipeline to use", callback=validate_pipeline)
+def preview(image, pipeline):
+    """Preview the GCODE in a preview window"""
+    img, cnt, gcode = process(image, pipeline)
+    gcode = "var gcode= `"+gcode+"`;"
+    gcode_file = os.path.abspath(os.path.join(os.path.dirname(__file__), "static", "assets", "gcode_data.js"))
+    with open(gcode_file, 'w', encoding='utf-8') as f:
+        f.write(gcode)
+
+    click.launch('./src/static/html/preview.html')
+
+
+@cli.command()
+@click.option("--image", "-i",    help="The image to convert",           callback=validate_image)
+@click.option("--pipeline", "-p", help="The processing pipeline to use", callback=validate_pipeline)
+def generate(image, pipeline):
+    """Output the GCODE to the console"""
+
+    img, cnt, gcode = process(image, pipeline)
+    print(gcode)
 
 
 if __name__ == '__main__':
-    convert()
+    cli()

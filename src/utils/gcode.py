@@ -1,5 +1,3 @@
-from utils.perf import perf_tracker
-
 class GCode:
 
   # Create an instance of GCode
@@ -151,7 +149,6 @@ class GCode:
 
 
   # Return the same output as the eval function
-  @perf_tracker()
   def to_string(self):
     return '\n'.join(self.code)
 
