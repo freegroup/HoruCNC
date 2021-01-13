@@ -20,7 +20,7 @@ class Filter:
         return {
             "filter": self.conf_section,
             "name": "HeightMap",
-            "description": "Generates Terrain from Grayscale Image",
+            "description": "Generates height map terrain toolpaths from an grayscale Image",
             "parameters": [
                 {
                     "name": "depth",

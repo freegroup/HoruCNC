@@ -14,7 +14,7 @@ class Filter:
         return {
             "filter": self.conf_section,
             "name": "Center Contour",
-            "description": "Center the calculated contour",
+            "description": "Center the calculated contour into the image",
             "parameters": [],
             "input": "contour",
             "output": "contour",

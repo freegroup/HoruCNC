@@ -2,10 +2,9 @@ import cv2
 import numpy as np
 import sys
 import os
-import time
 import math
 
-from utils.image import image_resize
+
 from utils.contour import ensure_3D_contour, to_2D_contour, normalize_contour
 
 
@@ -34,7 +33,7 @@ class Filter:
         return {
             "filter": self.conf_section,
             "name": "Calligraphy",
-            "description": f'Engraves along the skeleton path of the image with {self.cutter_bit_angle}° carving bit',
+            "description": f'Calculates toolpath aong the skeleton path of the image with an {self.cutter_bit_angle}° carving bit',
             "parameters": [
                 {
                     "name": "diameter",

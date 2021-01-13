@@ -16,7 +16,7 @@ class Filter:
 
         return {
             "filter": self.conf_section,
-            "name": "Smooth The Contour",
+            "name": "Smooth Contour",
             "description": "Smooth the contour with an gaussian convolve kernel",
             "parameters": [
                 {

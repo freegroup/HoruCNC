@@ -17,7 +17,7 @@ class Filter:
         return {
             "filter": self.conf_section,
             "name": "Contours",
-            "description": "Calculates and scales the contour of the image",
+            "description": "Calculates the toolpath of the shape contour of the image",
             "parameters": [
                 {
                     "name": "width",

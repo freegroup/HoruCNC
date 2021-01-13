@@ -13,7 +13,7 @@ class Filter:
         return {
             "filter": self.conf_section,
             "name": "Black & White",
-            "description": "Adjust until you see only the <b>black</b> sections your want carve",
+            "description": "Converts the image to black&white by a given threshold",
             "parameters": [
                 {
                     "name": "threshold",

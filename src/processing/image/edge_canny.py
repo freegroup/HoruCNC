@@ -13,8 +13,8 @@ class Filter:
     def meta(self):
         return {
             "filter": self.conf_section,
-            "name": "EdgeCanny",
-            "description": "Adjust until you see only the edges your want carve",
+            "name": "CannyEdge",
+            "description": "Calculates the edge with a given threshold",
             "parameters": [
                 {
                     "name": "threshold",

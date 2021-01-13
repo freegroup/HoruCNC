@@ -12,7 +12,7 @@ class Filter:
         return {
             "filter": self.conf_section,
             "name": "Outline",
-            "description": "Skeletonize the black area in the image",
+            "description": "Skeletonize the black shapes in the image",
             "parameters": [],
             "input": "image",
             "output": "image",

@@ -12,7 +12,7 @@ class Filter:
         return {
             "filter": self.conf_section,
             "name": "Outline",
-            "description": "Generates the outline of your black-white image",
+            "description": "Calculates the shape outlines of an black&white image",
             "parameters": [],
             "input": "image",
             "output": "image",

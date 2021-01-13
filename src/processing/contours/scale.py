@@ -19,7 +19,7 @@ class Filter:
         return {
             "filter": self.conf_section,
             "name": "Scale The Contour",
-            "description": "Resize the contour until it fits your needs",
+            "description": "Resizes the contour by the given Width",
             "parameters": [
                 {
                     "name": "width",

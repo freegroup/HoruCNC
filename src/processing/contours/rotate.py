@@ -18,7 +18,7 @@ class Filter:
         return {
             "filter": self.conf_section,
             "name": "Rotate Contour",
-            "description": "Move the slider to rotate the contour",
+            "description": "Rotate the contour by a given angle",
             "parameters": [
                 {
                     "name": "angle",

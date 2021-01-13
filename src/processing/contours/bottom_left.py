@@ -1,7 +1,5 @@
 import numpy as np
 import cv2
-import sys, os
-import copy
 from utils.contour import ensure_3D_contour, to_2D_contour, contour_into_image
 
 
@@ -15,7 +13,7 @@ class Filter:
         return {
             "filter": self.conf_section,
             "name": "BottomLeft",
-            "description": "Align the contour bottom-left to the center point [0,0]",
+            "description": "Align the bottom/left corner of the contour to the center point [0,0]",
             "parameters": [],
             "input": "contour",
             "output": "contour",

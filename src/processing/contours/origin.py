@@ -15,7 +15,7 @@ class Filter:
         return {
             "filter": self.conf_section,
             "name": "Origin Contour",
-            "description": "Moves the contour to the center point [0,0]",
+            "description": "Moves the center of the contour to the coordinate [0,0]",
             "parameters": [],
             "input": "contour",
             "output": "contour",

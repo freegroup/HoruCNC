@@ -1,4 +1,3 @@
-
 class Filter:
     def __init__(self):
         self.conf_section = None
@@ -8,8 +7,8 @@ class Filter:
     def meta(self):
         return {
             "filter": self.conf_section,
-            "name":"Invers Black&White",
-            "description":"The filter inverts a Black&White image",
+            "name": "Invers Black&White",
+            "description": "Inverts the color of the image",
             "parameters": [],
             "input": "image",
             "output": "image",
@@ -21,9 +20,7 @@ class Filter:
         self.conf_file = conf_file
 
     def process(self, image, cnt):
-        return (255-image), cnt
-
+        return (255 - image), cnt
 
     def stop(self):
         pass
-
