@@ -2,12 +2,13 @@ import click
 import os.path
 import utils.clazz as clazz
 import cv2
+import json
+import base64
+
 from utils.image import image_resize
 from utils.exit import exit_process
 from utils.configuration import Configuration
 from utils.contour import ensure_3D_contour
-from flask import Flask, render_template, make_response, send_file, request
-from utils.webgui import FlaskUI  # get the FlaskUI class
 
 
 def validate_image(ctx, param, value):
@@ -29,10 +30,18 @@ def process(image, pipeline):
 
     input_format = "image"
 
+    result = []
+
     img = cv2.imread(image, cv2.IMREAD_COLOR)
     img = image_resize(img, height=600)
     cnt = None
 
+    result.append({"filter": "source",
+                   "image": img,
+                   "contour": cnt,
+                   "name": "Image Source",
+                   "description": "Original Image without any modification"
+                   })
     for pipeline_section in pipeline_sections:
         # ignore the common section
         if pipeline_section == "common":
@@ -56,9 +65,16 @@ def process(image, pipeline):
         input_format = meta["output"]
         img, cnt = instance.process(img, cnt)
         cnt = ensure_3D_contour(cnt)
+        result.append({
+            "filter": pipeline_section,
+            "image": img,
+            "name": meta["name"],
+            "description": meta["description"],
+            "contour": cnt
+        })
 
     gcode = instance.gcode(cnt).to_string()
-    return img, cnt, gcode
+    return result, gcode
 
 
 @click.group()
@@ -71,12 +87,11 @@ def cli():
 @click.option("--pipeline", "-p", help="The processing pipeline to use", callback=validate_pipeline)
 def preview(image, pipeline):
     """Preview the GCODE in a preview window"""
-    img, cnt, gcode = process(image, pipeline)
-    gcode = "var gcode= `"+gcode+"`;"
+    filter_results, gcode = process(image, pipeline)
+    gcode = "var gcode_data= `"+gcode+"`;"
     gcode_file = os.path.abspath(os.path.join(os.path.dirname(__file__), "static", "assets", "gcode_data.js"))
     with open(gcode_file, 'w', encoding='utf-8') as f:
         f.write(gcode)
-
     click.launch('./src/static/html/preview.html')
 
 
@@ -85,9 +100,28 @@ def preview(image, pipeline):
 @click.option("--pipeline", "-p", help="The processing pipeline to use", callback=validate_pipeline)
 def generate(image, pipeline):
     """Output the GCODE to the console"""
-
-    img, cnt, gcode = process(image, pipeline)
+    filter_results, gcode = process(image, pipeline)
     print(gcode)
+
+
+@cli.command()
+@click.option("--image", "-i",    help="The image to convert",           callback=validate_image)
+@click.option("--pipeline", "-p", help="The processing pipeline to use", callback=validate_pipeline)
+def trace(image, pipeline):
+    """Shows the conversion steps in an HTML-page"""
+    filter_results, gcode = process(image, pipeline)
+    meta_data = []
+    for r in filter_results:
+        retval, buffer = cv2.imencode('.png', r["image"])
+        r["image"] = 'data:image/png;base64,' + base64.b64encode( buffer.tobytes()).decode()
+        del r["contour"]
+        meta_data.append(r)
+    filter_results = "var trace_data= "+json.dumps(meta_data, indent=2)+";"
+    gcode_file = os.path.abspath(os.path.join(os.path.dirname(__file__), "static", "assets", "trace_data.js"))
+    with open(gcode_file, 'w', encoding='utf-8') as f:
+        f.write(filter_results)
+    click.launch('./src/static/html/trace.html')
+
 
 
 if __name__ == '__main__':

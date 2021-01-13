@@ -15,8 +15,8 @@ class Filter:
     def meta(self):
         return {
             "filter": self.conf_section,
-            "name": "To GCODE",
-            "description": "Define the carving depth and the count of milling passes",
+            "name": "Generate GCODE",
+            "description": "Generates GCODE from the calculated contour data",
             "parameters": [],
             "input": "contour",
             "output": "gcode",
