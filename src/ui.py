@@ -46,6 +46,13 @@ except Exception as exc:
 def create_app():
     @app.route('/')
     def index():
+        global pipelineJob
+        global dataLock
+        with dataLock:
+            if pipelineJob:
+                pipelineJob.stop()
+                pipelineJob = None
+                print("pipline deleted.---------------")
         return send_file('static/html/index.html', cache_timeout=-1)
 
     @app.route('/pipeline/<name>')
