@@ -1,11 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <svg width="96px" height="96px" viewBox="0 0 96 96" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-    <title>to_gcode</title>
-    <g id="to_gcode" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
-        <polygon id="Combined-Shape" stroke="#000000" fill="#FFFFFF" stroke-linejoin="round" points="48 59 35.6565097 65.7983739 38.0139066 51.3991869 28.0278132 41.2016261 41.8282549 39.1008131 48 26 54.1717451 39.1008131 67.9721868 41.2016261 57.9860934 51.3991869 60.3434903 65.7983739"></polygon>
-        <rect id="Rectangle" stroke="#000000" x="16" y="11" width="63" height="71" rx="3"></rect>
-        <text id="gcode" font-family="Verdana" font-size="10" font-weight="normal" fill="#000000">
-            <tspan x="45" y="78">gcode</tspan>
+    <title>to_contours</title>
+    <g id="to_contours" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <polygon id="Combined-Shape" stroke="#F5A623" fill="#FFFFFF" stroke-linejoin="round" points="48 59 35.6565097 65.7983739 38.0139066 51.3991869 28.0278132 41.2016261 41.8282549 39.1008131 48 26 54.1717451 39.1008131 67.9721868 41.2016261 57.9860934 51.3991869 60.3434903 65.7983739"></polygon>
+        <text id="contour" font-family="Verdana" font-size="10" font-weight="normal" fill="#000000">
+            <tspan x="38" y="78">contour</tspan>
         </text>
     </g>
 </svg>

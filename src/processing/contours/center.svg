@@ -2,11 +2,11 @@
 <svg width="96px" height="96px" viewBox="0 0 96 96" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
     <title>center</title>
     <g id="center" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
-        <path id="Line" d="M43.5,95.5 L43.5,94.5 L47.5,94.5 L47.5,71 L43.5,71 L43.5,70 L52.5,70 L52.5,71 L48.5,71 L48.5,94.5 L52.5,94.5 L52.5,95.5 L43.5,95.5 Z" fill="#E70F0F" fill-rule="nonzero"></path>
-        <path id="Line" d="M2.499,47.5 L21.5,47.5 L21.5,43.5 L22.5,43.5 L22.5,52.5 L21.5,52.5 L21.5,48.5 L2.5,48.5 L2.5,52.5 L1.5,52.5 L1.5,52 L1.5,44 L1.5,43.5 L2.5,43.5 L2.499,47.5 Z" fill="#E70F0F" fill-rule="nonzero"></path>
-        <path id="Line" d="M94.5,52.5 L93.5,52.5 L93.5,48.5 L75.5,48.5 L75.5,52.5 L74.5,52.5 L74.5,43.5 L75.5,43.5 L75.5,47.5 L93.5,47.5 L93.5,43.5 L94.5,43.5 L94.5,52.5 Z" fill="#E70F0F" fill-rule="nonzero"></path>
+        <path id="Line" d="M43,87 L43,86 L47,86 L47,72 L43,72 L43,71 L52,71 L52,72 L48,72 L48,86 L52,86 L52,87 L43,87 Z" fill="#E70F0F" fill-rule="nonzero"></path>
+        <path id="Line" d="M24,54 L23,54 L23,50 L13,50 L13,54 L12,54 L12,45 L13,45 L13,49 L23,49 L23,45 L24,45 L24,54 Z" fill="#E70F0F" fill-rule="nonzero"></path>
+        <path id="Line" d="M86,52 L85,52 L85,48 L74,48 L74,52 L73,52 L73,43 L74,43 L74,47 L85,47 L85,43 L86,43 L86,52 Z" fill="#E70F0F" fill-rule="nonzero"></path>
         <polygon id="Combined-Shape" stroke="#F5A623" stroke-linejoin="round" points="48 61.5 32.1297982 69.8434588 35.160737 52.1717294 22.3214741 39.6565412 40.0648991 37.0782706 48 21 55.9351009 37.0782706 73.6785259 39.6565412 60.839263 52.1717294 63.8702018 69.8434588"></polygon>
         <path d="M22.3214741,21 L73.3214741,21 L73.3214741,70 L22.3214741,70 L22.3214741,21 Z" id="Rectangle" stroke="#000000" opacity="0.0626627604" stroke-linejoin="round" stroke-dasharray="2,2"></path>
-        <path id="Line" d="M48.5,1.499 L48.5,18 L52.5,18 L52.5,19 L43.5,19 L43.5,18 L47.5,18 L47.5,1.5 L43.5,1.5 L43.5,0.5 L44,0.5 L52,0.5 L52.5,0.5 L52.5,1.5 L48.5,1.499 Z" fill="#E70F0F" fill-rule="nonzero"></path>
+        <path id="Line" d="M43,20 L43,19 L47,19 L47,10 L43,10 L43,9 L52,9 L52,10 L48,10 L48,19 L52,19 L52,20 L43,20 Z" fill="#E70F0F" fill-rule="nonzero"></path>
     </g>
 </svg>

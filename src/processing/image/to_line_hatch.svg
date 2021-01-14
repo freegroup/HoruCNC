@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="96px" height="96px" viewBox="0 0 96 96" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>to_line_hatch</title>
+    <defs>
+        <polygon id="path-1" points="20 33 7.6565097 39.7983739 10.0139066 25.3991869 0.0278131578 15.2016261 13.8282549 13.1008131 20 0 26.1717451 13.1008131 39.9721868 15.2016261 29.9860934 25.3991869 32.3434903 39.7983739"></polygon>
+    </defs>
+    <g id="to_line_hatch" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <polygon id="Combined-Shape" stroke="#F5A623" fill="#FFFFFF" stroke-linejoin="round" points="48 59 35.6565097 65.7983739 38.0139066 51.3991869 28.0278132 41.2016261 41.8282549 39.1008131 48 26 54.1717451 39.1008131 67.9721868 41.2016261 57.9860934 51.3991869 60.3434903 65.7983739"></polygon>
+        <g id="Line" transform="translate(28.000000, 26.000000)">
+            <mask id="mask-2" fill="white">
+                <use xlink:href="#path-1"></use>
+            </mask>
+            <use id="Mask" fill="#FFFFFF" xlink:href="#path-1"></use>
+            <line x1="-17.5" y1="3.5" x2="60.5" y2="2.5" stroke="#F5A623" stroke-linecap="square" mask="url(#mask-2)"></line>
+            <line x1="-17.5" y1="6.5" x2="60.5" y2="5.5" stroke="#F5A623" stroke-linecap="square" mask="url(#mask-2)"></line>
+            <line x1="-17.5" y1="9.5" x2="60.5" y2="8.5" stroke="#F5A623" stroke-linecap="square" mask="url(#mask-2)"></line>
+            <line x1="-17.5" y1="12.5" x2="60.5" y2="11.5" stroke="#F5A623" stroke-linecap="square" mask="url(#mask-2)"></line>
+            <line x1="-17.5" y1="15.5" x2="60.5" y2="14.5" stroke="#F5A623" stroke-linecap="square" mask="url(#mask-2)"></line>
+            <line x1="-17.5" y1="18.5" x2="60.5" y2="17.5" stroke="#F5A623" stroke-linecap="square" mask="url(#mask-2)"></line>
+            <line x1="-17.5" y1="21.5" x2="60.5" y2="20.5" stroke="#F5A623" stroke-linecap="square" mask="url(#mask-2)"></line>
+            <line x1="-17.5" y1="24.5" x2="60.5" y2="23.5" stroke="#F5A623" stroke-linecap="square" mask="url(#mask-2)"></line>
+            <line x1="-17.5" y1="27.5" x2="60.5" y2="26.5" stroke="#F5A623" stroke-linecap="square" mask="url(#mask-2)"></line>
+            <line x1="-17.5" y1="30.5" x2="60.5" y2="29.5" stroke="#F5A623" stroke-linecap="square" mask="url(#mask-2)"></line>
+            <line x1="-17.5" y1="33.5" x2="60.5" y2="32.5" stroke="#F5A623" stroke-linecap="square" mask="url(#mask-2)"></line>
+            <line x1="-17.5" y1="36.5" x2="60.5" y2="35.5" stroke="#F5A623" stroke-linecap="square" mask="url(#mask-2)"></line>
+            <line x1="-17.5" y1="39.5" x2="60.5" y2="38.5" stroke="#F5A623" stroke-linecap="square" mask="url(#mask-2)"></line>
+        </g>
+        <text id="hatch" font-family="Verdana" font-size="10" font-weight="normal" fill="#000000">
+            <tspan x="48" y="78">hatch</tspan>
+        </text>
+    </g>
+</svg>

@@ -68,6 +68,7 @@ def process(image, pipeline):
         result.append({
             "filter": pipeline_section,
             "image": img,
+            "parameters": meta["parameters"],
             "name": meta["name"],
             "description": meta["description"],
             "contour": cnt
@@ -107,7 +108,7 @@ def generate(image, pipeline):
 @cli.command()
 @click.option("--image", "-i",    help="The image to convert",           callback=validate_image)
 @click.option("--pipeline", "-p", help="The processing pipeline to use", callback=validate_pipeline)
-def trace(image, pipeline):
+def debug(image, pipeline):
     """Shows the conversion steps in an HTML-page"""
     filter_results, gcode = process(image, pipeline)
     meta_data = []
