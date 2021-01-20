@@ -11,3 +11,8 @@ The motivation for this project was to reduce the effort of toolpath generation 
 
 
 Read more on the [Project Page](https://freegroup.github.io/HoruCNC/)
+
+
+
+##
+ pyside6-rcc ./src/qt_ui/resources.qrc -o ./src/qt_ui/resources.py

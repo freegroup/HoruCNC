@@ -18,7 +18,7 @@ class Filter:
             "icon": self.icon
         }
 
-    def configure(self, global_conf, conf_section, conf_file):
+    def configure(self, conf_section, conf_file):
         self.conf_section = conf_section
         self.conf_file = conf_file
 
@@ -29,6 +29,3 @@ class Filter:
         image = cv2.cvtColor(image, cv2.COLOR_GRAY2RGB)
 
         return image, cnt
-
-    def stop(self):
-        pass

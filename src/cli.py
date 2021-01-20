@@ -51,7 +51,7 @@ def process(image, pipeline):
             continue
 
         instance = clazz.instance_by_name(pipeline_section)
-        instance.configure(global_conf, pipeline_section, pipeline_conf)
+        instance.configure(pipeline_section, pipeline_conf)
 
         # check that the output format if the predecessor filter matches with the input if this
         # filter

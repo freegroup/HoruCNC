@@ -10,7 +10,12 @@ class Configuration:
             sys.exit(1)
 
         self.file = inifile
-        self.config = ConfigObj(self.file)
+        print(self.file)
+        try:
+            self.config = ConfigObj(self.file)
+        except Exception as exc:
+            print(exc)
+            sys.exit(1)
 
 
     def get_boolean(self, key, section="common"):

@@ -35,7 +35,7 @@ class Filter:
             "icon": self.icon
         }
 
-    def configure(self, global_conf, conf_section, conf_file):
+    def configure(self, conf_section, conf_file):
         self.conf_section = conf_section
         self.conf_file = conf_file
         self.width_in_micro_m = self.conf_file.get_int("width_in_micro_m", self.conf_section)

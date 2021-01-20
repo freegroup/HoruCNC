@@ -36,6 +36,3 @@ class Filter:
         newimage[:, :, 1] = image_thinned
         newimage[:, :, 2] = image_thinned
         return newimage, cnt
-
-    def stop(self):
-        pass

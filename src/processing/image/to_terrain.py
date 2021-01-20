@@ -36,7 +36,7 @@ class Filter:
             "icon": self.icon
         }
 
-    def configure(self, global_conf, conf_section, conf_file):
+    def configure(self, conf_section, conf_file):
         self.conf_section = conf_section
         self.conf_file = conf_file
         self.depth_in_micro_m = self.conf_file.get_float("depth_in_micro_m", self.conf_section)
@@ -119,5 +119,3 @@ class Filter:
             self.depth_in_micro_m = val
             self.conf_file.set("depth_in_micro_m", self.conf_section, str(self.depth_in_micro_m))
 
-    def stop(self):
-        pass

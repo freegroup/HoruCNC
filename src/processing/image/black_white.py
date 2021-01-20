@@ -29,7 +29,7 @@ class Filter:
             "icon": self.icon
         }
 
-    def configure(self, global_conf, conf_section, conf_file):
+    def configure(self, conf_section, conf_file):
         self.conf_section = conf_section
         self.conf_file = conf_file
         self.threshold = self.conf_file.get_int("threshold", self.conf_section)
@@ -43,6 +43,3 @@ class Filter:
     def set_parameter(self, name, val):
         self.threshold = int(val)
         self.conf_file.set("threshold", self.conf_section, str(val))
-
-    def stop(self):
-        pass

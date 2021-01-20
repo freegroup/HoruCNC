@@ -15,12 +15,9 @@ class Filter:
             "icon": self.icon
         }
 
-    def configure(self, global_conf, conf_section, conf_file):
+    def configure(self, conf_section, conf_file):
         self.conf_section = conf_section
         self.conf_file = conf_file
 
     def process(self, image, cnt):
         return (255 - image), cnt
-
-    def stop(self):
-        pass
