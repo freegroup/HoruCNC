@@ -2,8 +2,8 @@ import sys
 import os
 
 from PySide2.QtUiTools import QUiLoader
-from PySide2.QtCore import QFile, QIODevice
-from PySide2.QtWidgets import QVBoxLayout, QFileDialog
+from PySide2.QtCore import QFile, QIODevice, QPoint, QObject, Qt
+from PySide2.QtWidgets import QVBoxLayout, QFileDialog, QWidget, QMainWindow
 from PySide2 import QtCore
 
 from ui.pages.source import SourceWidget
@@ -16,8 +16,9 @@ from ui.utils import clickable
 from ui.pipeline import VideoPipeline
 
 
-class MainWindow():
+class MainWindow(QMainWindow):
     def __init__(self):
+        super().__init__()
         path = os.path.dirname(__file__)
         ui_file = QFile(os.path.join(path, "mainwindow.ui"))
         ui_file.open(QFile.ReadOnly)
@@ -28,12 +29,25 @@ class MainWindow():
             print(loader.errorString())
             sys.exit(-1)
 
-        clickable(self.window.frame_pipelineselect).connect(lambda: self.loadPipeline())
+        #self.window.setWindowFlags(Qt.FramelessWindowHint)
+        self.setCentralWidget(self.window.centralwidget)
+
+
+        #clickable(self.window.frame_pipelineselect).connect(lambda: self.loadPipeline())
 
         self.pipeline_model = PipelineModel()
         self.window.list_filters.setModel(self.pipeline_model)
         self.selModel = self.window.list_filters.selectionModel()
         self.selModel.currentRowChanged.connect(lambda i: self.window.pages_widget.setCurrentIndex(i.row()))
+
+    def mousePressEvent(self, event):
+        self.oldPos = event.globalPos()
+
+    def mouseMoveEvent(self, event):
+        if self.window.topBar.rect().contains(event.pos()):
+            delta = QPoint(event.globalPos() - self.oldPos)
+            self.move(self.x() + delta.x(), self.y() + delta.y())
+            self.oldPos = event.globalPos()
 
     def loadPipeline(self, path_to_file=None):
         if not path_to_file:
@@ -72,8 +86,6 @@ class MainWindow():
     def update_header(self):
         if self.pipeline:
             self.window.label_pipelinetitle.setText(self.pipeline.meta()["name"])
-
-    def show(self):
-        self.window.show()
+            self.window.label_pipelinedesc.setText(self.pipeline.meta()["description"])
 
 
