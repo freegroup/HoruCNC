@@ -1,5 +1,5 @@
 from PySide2 import QtCore
-from PySide2.QtGui import QImage
+from PySide2.QtGui import QImage, QIcon, QPixmap
 from PySide2.QtCore import Qt
 
 
@@ -19,8 +19,12 @@ class PipelineModel(QtCore.QAbstractListModel):
                 return self.video_pipeline.filter(index.row()).meta()["name"]
             if role == Qt.DecorationRole:
                 try:
-                    return QImage(self.video_pipeline.filter(index.row()).icon_path)
-                except:
+                    icon = QIcon()
+                    icon.addPixmap(QPixmap.fromImage(QImage(self.video_pipeline.filter(index.row()).icon_path)), QIcon.Mode.Normal)
+                    icon.addPixmap(QPixmap.fromImage(QImage(self.video_pipeline.filter(index.row()).icon_path)), QIcon.Mode.Selected)
+                    return icon
+                except Exception as exc:
+                    print(exc)
                     pass
 
     def rowCount(self, index):

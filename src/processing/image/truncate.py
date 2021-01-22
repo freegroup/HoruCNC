@@ -1,18 +1,16 @@
-import cv2
+
 import numpy as np
+from processing.filter import BaseFilter
 
 
-class Filter:
-    def __init__(self):
-        self.conf_section = None
-        self.conf_file = None
-        self.icon = None
+class Filter(BaseFilter):
+    def __init__(self, conf_section, conf_file):
+        BaseFilter.__init__(self, conf_section, conf_file)
         self.white = 0
         self.black = 0
 
     def meta(self):
         return {
-            "filter": self.conf_section,
             "name": "Truncate",
             "description": "Truncate the upper and lower values of gray and make them pure black and white",
             "parameters": [
@@ -34,15 +32,10 @@ class Filter:
                 }
             ],
             "input": "image",
-            "output": "image",
-            "icon": self.icon
+            "output": "image"
         }
 
-    def configure(self, conf_section, conf_file):
-        self.conf_section = conf_section
-        self.conf_file = conf_file
-
-    def process(self, image, cnt):
+    def _process(self, image, cnt):
         invert_white = 255 - self.white
         image = np.where(image > invert_white, 255, image)
         image = np.where(image < self.black, 0, image)

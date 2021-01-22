@@ -6,31 +6,25 @@ import math
 
 from utils.image import image_resize
 from utils.contour import ensure_3D_contour, to_2D_contour, contour_into_image
+from processing.filter import BaseFilter
 
 
-class Filter:
-    def __init__(self):
-        self.conf_section = None
-        self.conf_file = None
-        self.icon = None
-        # default configuration settings. Overridden in the "configure" method
-        # and read from the pipeline definition.
-        #
-        self.width_in_micro_m = 40000
-        self.display_unit = "mm"
-        # angle of the cutter
-        self.cutter_bit_angle = 30  # [degree]
-        # length of the cutting blade
-        self.cutter_bit_length_in_micro_m = 10
+class Filter(BaseFilter):
+    def __init__(self, conf_section, conf_file):
+        BaseFilter.__init__(self, conf_section, conf_file)
+        self.cutter_bit_angle = self.conf_file.get_float("cutter_bit_angle", self.conf_section)
+        self.width_in_micro_m = self.conf_file.get_float("width_in_micro_m", self.conf_section)
+        self.cutter_bit_length_in_micro_m = self.conf_file.get_float("cutter_bit_length_in_micro_m", self.conf_section)
         # cone circle diameter if the bit goes down the full cutter_bit_length
-        self.cutter_bit_max_diameter_in_micro_m = math.tan(math.radians(self.cutter_bit_angle)) * self.cutter_bit_length_in_micro_m * 2  # [mm]
-        # user selected max diameter of the cone circles
-        self.max_diameter_in_micro_m = self.cutter_bit_max_diameter_in_micro_m
+        self.cutter_bit_max_diameter_in_micro_m = math.tan(math.radians(self.cutter_bit_angle)) * self.cutter_bit_length_in_micro_m * 2
+        self.max_diameter_in_micro_m = min(self.cutter_bit_max_diameter_in_micro_m, self.conf_file.get_float("max_diameter_in_micro_m", self.conf_section))
+        self.display_unit = self.conf_file.get("display_unit", self.conf_section)
+        # only "cm" and "mm" are allowed
+        self.display_unit = "cm" if self.display_unit == "cm" else "mm"
 
     def meta(self):
 
         return {
-            "filter": self.conf_section,
             "name": "HalftoneDot",
             "description": f'Generates half tone dot pattern with a {self.cutter_bit_angle}° carving bit',
             "parameters": [
@@ -52,23 +46,10 @@ class Filter:
                 }
             ],
             "input": "image",
-            "output": "contour",
-            "icon": self.icon
+            "output": "contour"
         }
 
-    def configure(self, conf_section, conf_file):
-        self.conf_section = conf_section
-        self.conf_file = conf_file
-        self.cutter_bit_angle = self.conf_file.get_float("cutter_bit_angle", self.conf_section)
-        self.cutter_bit_length_in_micro_m = self.conf_file.get_float("cutter_bit_length_in_micro_m", self.conf_section)
-        # cone circle diameter if the bit goes down the full cutter_bit_length
-        self.cutter_bit_max_diameter_in_micro_m = math.tan(math.radians(self.cutter_bit_angle)) * self.cutter_bit_length_in_micro_m * 2
-        self.max_diameter_in_micro_m = min(self.cutter_bit_max_diameter_in_micro_m, self.conf_file.get_float("max_diameter_in_micro_m", self.conf_section))
-        self.display_unit = self.conf_file.get("display_unit", self.conf_section)
-        # only "cm" and "mm" are allowed
-        self.display_unit = "cm" if self.display_unit == "cm" else "mm"
-
-    def process(self, image, cnt):
+    def _process(self, image, cnt):
         try:
             image_height, image_width = image.shape[0], image.shape[1]
             height_in_micro_m = self.width_in_micro_m / image_width * image_height

@@ -2,23 +2,20 @@ import cv2
 import numpy as np
 import sys
 import os
-import time
 
 from utils.contour import ensure_3D_contour, to_2D_contour, contour_into_image
+from processing.filter import BaseFilter
 
-class Filter:
-    def __init__(self):
-        self.conf_section = None
-        self.conf_file = None
-        self.icon = None
-        self.depth_in_micro_m = 1000
+class Filter(BaseFilter):
+    def __init__(self, conf_section, conf_file):
+        BaseFilter.__init__(self, conf_section, conf_file)
+        self.depth_in_micro_m = self.conf_file.get_float("depth_in_micro_m", self.conf_section)
 
     def meta(self):
         range_min = self.conf_file.get_float("depth_range_min", self.conf_section)
         range_max = self.conf_file.get_float("depth_range_max", self.conf_section)
 
         return {
-            "filter": self.conf_section,
             "name": "HeightMap",
             "description": "Generates height map terrain toolpaths from an grayscale Image",
             "parameters": [
@@ -32,16 +29,10 @@ class Filter:
                 }
             ],
             "input": "image",
-            "output": "contour",
-            "icon": self.icon
+            "output": "contour"
         }
 
-    def configure(self, conf_section, conf_file):
-        self.conf_section = conf_section
-        self.conf_file = conf_file
-        self.depth_in_micro_m = self.conf_file.get_float("depth_in_micro_m", self.conf_section)
-
-    def process(self, image, cnt):
+    def _process(self, image, cnt):
         try:
             single_channel = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 

@@ -1,23 +1,21 @@
 import numpy as np
 import cv2
-import copy
-import sys
-import os
+
 from utils.contour import ensure_3D_contour, to_2D_contour, contour_into_image
+from processing.filter import BaseFilter
 
 
-class Filter:
-    def __init__(self):
-        self.conf_section = None
-        self.conf_file = None
-        self.icon = None
-        self.width_in_micro_m = 20000
-        self.display_unit = "mm"
+class Filter(BaseFilter):
+    def __init__(self, conf_section, conf_file):
+        BaseFilter.__init__(self, conf_section, conf_file)
+        self.width_in_micro_m = self.conf_file.get_int("width_in_micro_m", self.conf_section)
+        self.display_unit = self.conf_file.get("display_unit", self.conf_section)
+        # only "cm" and "mm" are allowed
+        self.display_unit = "cm" if self.display_unit == "cm" else "mm"
 
     def meta(self):
 
         return {
-            "filter": self.conf_section,
             "name": "Scale The Contour",
             "description": "Resizes the contour by the given Width",
             "parameters": [
@@ -31,19 +29,10 @@ class Filter:
                 }
             ],
             "input": "contour",
-            "output": "contour",
-            "icon": self.icon
+            "output": "contour"
         }
 
-    def configure(self, conf_section, conf_file):
-        self.conf_section = conf_section
-        self.conf_file = conf_file
-        self.width_in_micro_m = self.conf_file.get_int("width_in_micro_m", self.conf_section)
-        self.display_unit = self.conf_file.get("display_unit", self.conf_section)
-        # only "cm" and "mm" are allowed
-        self.display_unit = "cm" if self.display_unit == "cm" else "mm"
-
-    def process(self, image, cnt_3d):
+    def _process(self, image, cnt_3d):
         if len(cnt_3d) > 0:
             cnt = to_2D_contour(cnt_3d)
             display_factor = 0.001 if self.display_unit == "mm" else 0.0001
@@ -91,13 +80,7 @@ class Filter:
 
         return image, cnt_3d
 
-    def centered_contour(self, cnt, width, height):
-        pass
-
     def set_parameter(self, name, val):
         if name == "width":
             self.width_in_micro_m = int(val)
             self.conf_file.set("width_in_micro_m", self.conf_section, str(self.width_in_micro_m))
-
-    def stop(self):
-        pass

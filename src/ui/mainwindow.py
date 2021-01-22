@@ -5,6 +5,7 @@ from PySide2.QtUiTools import QUiLoader
 from PySide2.QtCore import QFile, QIODevice, QPoint, QObject, Qt
 from PySide2.QtWidgets import QVBoxLayout, QFileDialog, QWidget, QMainWindow
 from PySide2 import QtCore
+from PySide2.QtGui import QImage, QPixmap
 
 from ui.pages.source import SourceWidget
 from ui.pages.filter import FilterWidget
@@ -31,9 +32,10 @@ class MainWindow(QMainWindow):
 
         #self.window.setWindowFlags(Qt.FramelessWindowHint)
         self.setCentralWidget(self.window.centralwidget)
-
+        self.setMinimumSize(950,700)
 
         #clickable(self.window.frame_pipelineselect).connect(lambda: self.loadPipeline())
+        self.window.button_select_pipeline.clicked.connect(lambda: self.loadPipeline())
 
         self.pipeline_model = PipelineModel()
         self.window.list_filters.setModel(self.pipeline_model)
@@ -80,6 +82,7 @@ class MainWindow(QMainWindow):
                 self.window.list_filters.selectionModel().select(ix, QtCore.QItemSelectionModel.SelectCurrent)
 
                 self.update_header()
+                self.pipeline.process()
             except Exception as exc:
                 print("invalid pipeline configuration", exc)
 
@@ -87,5 +90,8 @@ class MainWindow(QMainWindow):
         if self.pipeline:
             self.window.label_pipelinetitle.setText(self.pipeline.meta()["name"])
             self.window.label_pipelinedesc.setText(self.pipeline.meta()["description"])
+            self.window.label_pipelinedesc.setText(self.pipeline.meta()["description"])
+            image = QImage(self.pipeline.icon_path)
+            self.window.label_pipelineicon.setPixmap(QPixmap.fromImage(image))
 
 

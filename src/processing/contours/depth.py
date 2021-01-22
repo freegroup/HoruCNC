@@ -1,22 +1,20 @@
 import numpy as np
 import cv2
 from utils.contour import ensure_3D_contour, to_2D_contour, contour_into_image
+from processing.filter import BaseFilter
 
 
-class Filter:
-    def __init__(self):
-        self.conf_section = None
-        self.conf_file = None
-        self.icon = None
-        self.depth_in_micro_m = 1000
+class Filter(BaseFilter):
+    def __init__(self, conf_section, conf_file):
+        BaseFilter.__init__(self, conf_section, conf_file)
+        self.depth_in_micro_m = self.conf_file.get_float("depth_in_micro_m", self.conf_section)
 
     def meta(self):
         range_min = self.conf_file.get_float("depth_range_min", self.conf_section)
         range_max = self.conf_file.get_float("depth_range_max", self.conf_section)
 
         return {
-            "filter": self.conf_section,
-            "name": "CarveDepth",
+            "name": "Set Carving Depth",
             "description": "Define the carving depth of the contour",
             "parameters": [
                 {
@@ -29,16 +27,10 @@ class Filter:
                 }
             ],
             "input": "contour",
-            "output": "contour",
-            "icon": self.icon
+            "output": "contour"
         }
 
-    def configure(self, conf_section, conf_file):
-        self.conf_section = conf_section
-        self.conf_file = conf_file
-        self.depth_in_micro_m = self.conf_file.get_float("depth_in_micro_m", self.conf_section)
-
-    def process(self, image, cnt_3d):
+    def _process(self, image, cnt_3d):
         if len(cnt_3d) > 0:
             for c in cnt_3d:
                 for p in c:
@@ -66,6 +58,3 @@ class Filter:
             val = float(val)
             self.depth_in_micro_m = val
             self.conf_file.set("depth_in_micro_m", self.conf_section, str(self.depth_in_micro_m))
-
-    def stop(self):
-        pass

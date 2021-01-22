@@ -1,17 +1,15 @@
 import cv2
+from processing.filter import BaseFilter
 
 
-class Filter:
-    def __init__(self):
+class Filter(BaseFilter):
+    def __init__(self, conf_section, conf_file):
+        BaseFilter.__init__(self, conf_section, conf_file)
         self.slider_max = 100
-        self.factor = 75
-        self.conf_section = None
-        self.conf_file = None
-        self.icon = None
+        self.factor = self.conf_file.get_int("factor", self.conf_section)
 
     def meta(self):
         return {
-            "filter": self.conf_section,
             "name": "Blur",
             "description": "Remove noise from the image and smooth it",
             "parameters": [
@@ -25,16 +23,10 @@ class Filter:
                 }
             ],
             "input": "image",
-            "output": "image",
-            "icon": self.icon
+            "output": "image"
         }
 
-    def configure(self, conf_section, conf_file):
-        self.conf_section = conf_section
-        self.conf_file = conf_file
-        self.factor = self.conf_file.get_int("factor", self.conf_section)
-
-    def process(self, image, cnt):
+    def _process(self, image, cnt):
         image = image.copy()
         kernel = max(3, int((19 / 255 * self.factor) / 2) * 2 + 1)
         blur = cv2.blur(image, (kernel, kernel))

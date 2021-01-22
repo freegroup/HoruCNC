@@ -1,29 +1,22 @@
 import cv2
 import numpy as np
+from processing.filter import BaseFilter
 
 
-class Filter:
-    def __init__(self):
-        self.conf_section = None
-        self.conf_file = None
-        self.icon = None
+class Filter(BaseFilter):
+    def __init__(self, conf_section, conf_file):
+        BaseFilter.__init__(self, conf_section, conf_file)
 
     def meta(self):
         return {
-            "filter": self.conf_section,
             "name": "Outline",
             "description": "Skeletonize the black shapes in the image",
             "parameters": [],
             "input": "image",
-            "output": "image",
-            "icon": self.icon
+            "output": "image"
         }
 
-    def configure(self, global_conf, conf_section, conf_file):
-        self.conf_section = conf_section
-        self.conf_file = conf_file
-
-    def process(self, image, cnt):
+    def _process(self, image, cnt):
         image_thinned = image.copy()  # deepcopy to protect the original image
         image_thinned = cv2.threshold(image_thinned, 127, 255, cv2.THRESH_BINARY_INV)[1]
         image_thinned, _, _ = cv2.split(image_thinned)

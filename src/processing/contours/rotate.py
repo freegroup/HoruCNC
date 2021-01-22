@@ -1,22 +1,19 @@
 import numpy as np
 import cv2
 import sys, os
-import copy
 import math
 
 from utils.contour import ensure_3D_contour, to_2D_contour, contour_into_image
+from processing.filter import BaseFilter
 
 
-class Filter:
-    def __init__(self):
-        self.conf_section = None
-        self.conf_file = None
-        self.icon = None
-        self.angle_in_degree = 0
+class Filter(BaseFilter):
+    def __init__(self, conf_section, conf_file):
+        BaseFilter.__init__(self, conf_section, conf_file)
+        self.angle_in_degree = self.conf_file.get_float("angle_in_degree", self.conf_section)
 
     def meta(self):
         return {
-            "filter": self.conf_section,
             "name": "Rotate Contour",
             "description": "Rotate the contour by a given angle",
             "parameters": [
@@ -30,17 +27,10 @@ class Filter:
                 }
             ],
             "input": "contour",
-            "output": "contour",
-            "icon": self.icon
+            "output": "contour"
         }
 
-    def configure(self, conf_section, conf_file):
-        self.conf_section = conf_section
-        self.conf_file = conf_file
-        self.angle_in_degree = self.conf_file.get_float("angle_in_degree", self.conf_section)
-
-
-    def process(self, image, cnt_3d):
+    def _process(self, image, cnt_3d):
         try:
             if len(cnt_3d) > 0:
                 cnt = to_2D_contour(cnt_3d)
@@ -90,6 +80,3 @@ class Filter:
         if name == "angle":
             self.angle_in_degree = int(val)
             self.conf_file.set("angle_in_degree", self.conf_section, str(self.angle_in_degree))
-
-    def stop(self):
-        pass

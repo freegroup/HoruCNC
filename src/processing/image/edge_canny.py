@@ -1,18 +1,16 @@
 import cv2
 import numpy as np
+from processing.filter import BaseFilter
 
 
-class Filter:
-    def __init__(self):
+class Filter(BaseFilter):
+    def __init__(self, conf_section, conf_file):
+        BaseFilter.__init__(self, conf_section, conf_file)
         self.slider_max = 255
-        self.threshold = 75
-        self.conf_section = None
-        self.conf_file = None
-        self.icon = None
+        self.threshold = self.conf_file.get_int("threshold", self.conf_section)
 
     def meta(self):
         return {
-            "filter": self.conf_section,
             "name": "CannyEdge",
             "description": "Calculates the edge with a given threshold",
             "parameters": [
@@ -26,16 +24,10 @@ class Filter:
                 }
             ],
             "input": "image",
-            "output": "image",
-            "icon": self.icon
+            "output": "image"
         }
 
-    def configure(self, conf_section, conf_file):
-        self.conf_section = conf_section
-        self.conf_file = conf_file
-        self.threshold = self.conf_file.get_int("threshold", self.conf_section)
-
-    def process(self, image, cnt):
+    def _process(self, image, cnt):
         image = image.copy()
         gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
         blurred = cv2.GaussianBlur(gray, (5, 5), 0)

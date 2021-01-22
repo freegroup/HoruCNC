@@ -13,7 +13,6 @@ class SourceWidget(QWidget):
 
         self.image_label = ImageWidget()
         self.image_label.setScaledContents(True)
-        #self.image_label.setFixedSize(self.video_size)
 
         self.select_button = QPushButton("Select..")
         self.select_button.clicked.connect(self.select_image)
@@ -40,6 +39,7 @@ class SourceWidget(QWidget):
             self.image_label.setPixmap(QPixmap.fromImage(image))
 
         self.filter.set_parameter("path", path_to_file)
+        self.pipeline.process()
 
 
 

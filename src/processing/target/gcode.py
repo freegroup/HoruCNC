@@ -1,33 +1,25 @@
 import numpy as np
 import cv2
 from utils.contour import ensure_3D_contour, to_2D_contour
-import sys, os
 
 from utils.gcode import GCode
+from processing.filter import BaseFilter
 
 
-class Filter:
-    def __init__(self):
-        self.conf_section = None
-        self.conf_file = None
-        self.icon = None
+class Filter(BaseFilter):
+    def __init__(self, conf_section, conf_file):
+        BaseFilter.__init__(self, conf_section, conf_file)
 
     def meta(self):
         return {
-            "filter": self.conf_section,
-            "name": "Generate GCODE",
+            "name": "Download GCODE",
             "description": "Generates GCODE from the calculated contour data",
             "parameters": [],
             "input": "contour",
-            "output": "gcode",
-            "icon": self.icon
+            "output": "gcode"
         }
 
-    def configure(self, conf_section, conf_file):
-        self.conf_section = conf_section
-        self.conf_file = conf_file
-
-    def process(self, image, cnt_3d):
+    def _process(self, image, cnt_3d):
         return image, cnt_3d
 
     def gcode(self, cnt_3d):
@@ -84,9 +76,3 @@ class Filter:
             code.feed_rapid({"x": 0, "y": 0})
 
         return code
-
-    def set_parameter(self, name, val):
-        pass
-
-    def stop(self):
-        pass

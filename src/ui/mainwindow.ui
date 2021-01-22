@@ -44,18 +44,18 @@
       <property name="minimumSize">
        <size>
         <width>0</width>
-        <height>80</height>
+        <height>96</height>
        </size>
       </property>
       <property name="maximumSize">
        <size>
         <width>16777215</width>
-        <height>80</height>
+        <height>96</height>
        </size>
       </property>
       <property name="styleSheet">
        <string notr="true">background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
-                                stop: 0 rgb(248, 248, 248), stop: 1 rgb(206, 205, 206));
+                                stop: 0 rgb(51, 51, 51), stop: 1 rgb(0, 0, 0));
 </string>
       </property>
       <property name="frameShape">
@@ -85,10 +85,16 @@
        </property>
        <item>
         <widget class="QFrame" name="frame_pipelineselect">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
          <property name="minimumSize">
           <size>
-           <width>180</width>
-           <height>80</height>
+           <width>0</width>
+           <height>0</height>
           </size>
          </property>
          <property name="maximumSize">
@@ -114,7 +120,7 @@
            <number>0</number>
           </property>
           <property name="leftMargin">
-           <number>0</number>
+           <number>10</number>
           </property>
           <property name="topMargin">
            <number>0</number>
@@ -129,14 +135,14 @@
            <widget class="QLabel" name="label_pipelineicon">
             <property name="minimumSize">
              <size>
-              <width>80</width>
-              <height>80</height>
+              <width>96</width>
+              <height>96</height>
              </size>
             </property>
             <property name="maximumSize">
              <size>
-              <width>80</width>
-              <height>80</height>
+              <width>96</width>
+              <height>96</height>
              </size>
             </property>
             <property name="text">
@@ -149,7 +155,7 @@
             <property name="styleSheet">
              <string notr="true">
 QLabel {
-   color: rgb(73, 73, 73);
+   color: white;
 }</string>
             </property>
             <property name="frameShape">
@@ -163,7 +169,7 @@ QLabel {
               <number>0</number>
              </property>
              <property name="leftMargin">
-              <number>0</number>
+              <number>30</number>
              </property>
              <property name="topMargin">
               <number>0</number>
@@ -181,15 +187,21 @@ QLabel {
                  <pointsize>30</pointsize>
                 </font>
                </property>
+               <property name="styleSheet">
+                <string notr="true">letter-spacing:3px;</string>
+               </property>
                <property name="text">
-                <string>HoruCNC</string>
+                <string>Horu&lt;span style=&quot; color:#2d9795;&quot;&gt;CNC&lt;/span&gt;</string>
+               </property>
+               <property name="alignment">
+                <set>Qt::AlignBottom|Qt::AlignLeading|Qt::AlignLeft</set>
                </property>
               </widget>
              </item>
              <item>
               <widget class="QLabel" name="label_desciption">
                <property name="text">
-                <string>Image to GCODE</string>
+                <string>Convert any Image to GCODE for your CNC machine</string>
                </property>
               </widget>
              </item>
@@ -250,7 +262,7 @@ QLabel {
           </size>
          </property>
          <property name="styleSheet">
-          <string notr="true">background-color: rgb(245, 246, 248);</string>
+          <string notr="true">background-color: rgb(243, 246, 249);</string>
          </property>
          <property name="frameShape">
           <enum>QFrame::StyledPanel</enum>
@@ -282,27 +294,83 @@ QLabel {
               <verstretch>0</verstretch>
              </sizepolicy>
             </property>
+            <property name="styleSheet">
+             <string notr="true">background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
+                                stop: 0 rgb(228, 232, 236), stop: 1 rgb(243, 246, 249));
+</string>
+            </property>
             <layout class="QVBoxLayout" name="verticalLayout_4">
              <item>
-              <widget class="QLabel" name="label_pipelinetitle">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
+              <widget class="QFrame" name="frame">
+               <property name="styleSheet">
+                <string notr="true">QFrame {
+  background-color:transparent;
+}</string>
                </property>
-               <property name="font">
-                <font>
-                 <pointsize>20</pointsize>
-                 <weight>50</weight>
-                 <italic>false</italic>
-                 <bold>false</bold>
-                 <stylestrategy>PreferAntialias</stylestrategy>
-                </font>
+               <property name="frameShape">
+                <enum>QFrame::NoFrame</enum>
                </property>
-               <property name="text">
-                <string>TextLabel</string>
+               <property name="frameShadow">
+                <enum>QFrame::Raised</enum>
                </property>
+               <layout class="QHBoxLayout" name="horizontalLayout_4">
+                <property name="spacing">
+                 <number>0</number>
+                </property>
+                <property name="leftMargin">
+                 <number>0</number>
+                </property>
+                <property name="topMargin">
+                 <number>0</number>
+                </property>
+                <property name="rightMargin">
+                 <number>0</number>
+                </property>
+                <property name="bottomMargin">
+                 <number>0</number>
+                </property>
+                <item>
+                 <widget class="QLabel" name="label_pipelinetitle">
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+                    <horstretch>0</horstretch>
+                    <verstretch>0</verstretch>
+                   </sizepolicy>
+                  </property>
+                  <property name="font">
+                   <font>
+                    <pointsize>20</pointsize>
+                    <weight>50</weight>
+                    <italic>false</italic>
+                    <bold>false</bold>
+                    <stylestrategy>PreferAntialias</stylestrategy>
+                    <kerning>false</kerning>
+                   </font>
+                  </property>
+                  <property name="text">
+                   <string>TextLabel</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QPushButton" name="button_select_pipeline">
+                  <property name="maximumSize">
+                   <size>
+                    <width>80</width>
+                    <height>16777215</height>
+                   </size>
+                  </property>
+                  <property name="font">
+                   <font>
+                    <kerning>false</kerning>
+                   </font>
+                  </property>
+                  <property name="text">
+                   <string>Select..</string>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
               </widget>
              </item>
              <item>
@@ -319,8 +387,14 @@ QLabel {
                  <height>70</height>
                 </size>
                </property>
+               <property name="font">
+                <font>
+                 <kerning>false</kerning>
+                </font>
+               </property>
                <property name="styleSheet">
-                <string notr="true"/>
+                <string notr="true">color: rgb(94, 95, 96);
+background-color:transparent;</string>
                </property>
                <property name="text">
                 <string>TextLabel</string>
@@ -356,7 +430,7 @@ QLabel {
 }
 
 QListView::item {
-	color: rgb(139, 139, 139);
+	color: rgb(25, 25, 25);
 }
 
 QListView::item:selected {
@@ -372,6 +446,15 @@ QListView::item:hover {
     background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
                                 stop: 0 rgba(233, 246, 254, 224), stop: 1 rgba(225, 239, 247, 217));
 }</string>
+            </property>
+            <property name="frameShape">
+             <enum>QFrame::NoFrame</enum>
+            </property>
+            <property name="iconSize">
+             <size>
+              <width>64</width>
+              <height>64</height>
+             </size>
             </property>
            </widget>
           </item>

@@ -5,20 +5,20 @@ import os
 import pyclipper
 
 from utils.contour import ensure_3D_contour, to_2D_contour, contour_into_image, normalize_contour
+from processing.filter import BaseFilter
 
 
-class Filter:
-    def __init__(self):
-        self.conf_section = None
-        self.conf_file = None
-        self.icon = None
-        self.width_in_micro_m = 20000
-        self.hatch_in_micro_m = 200
-        self.display_unit = "mm"
+class Filter(BaseFilter):
+    def __init__(self, conf_section, conf_file):
+        BaseFilter.__init__(self, conf_section, conf_file)
+        self.width_in_micro_m = self.conf_file.get_int("width_in_micro_m", self.conf_section)
+        self.hatch_in_micro_m = self.conf_file.get_int("hatch_in_micro_m", self.conf_section)
+        self.display_unit = self.conf_file.get("display_unit", self.conf_section)
+        # only "cm" and "mm" are allowed
+        self.display_unit = "cm" if self.display_unit == "cm" else "mm"
 
     def meta(self):
         return {
-            "filter": self.conf_section,
             "name": "Line Hatch",
             "description": "Calculates the toolpath of the shape and fill them with a line strip hatch",
             "parameters": [
@@ -40,20 +40,10 @@ class Filter:
                 }
             ],
             "input": "image",
-            "output": "contour",
-            "icon": self.icon
+            "output": "contour"
         }
 
-    def configure(self, conf_section, conf_file):
-        self.conf_section = conf_section
-        self.conf_file = conf_file
-        self.width_in_micro_m = self.conf_file.get_int("width_in_micro_m", self.conf_section)
-        self.hatch_in_micro_m = self.conf_file.get_int("hatch_in_micro_m", self.conf_section)
-        self.display_unit = self.conf_file.get("display_unit", self.conf_section)
-        # only "cm" and "mm" are allowed
-        self.display_unit = "cm" if self.display_unit == "cm" else "mm"
-
-    def process(self, image, cnt):
+    def _process(self, image, cnt):
         try:
             # generate an inverted, single channel image. Normally OpenCV detect on "white"....but we
             # want use "black" as contour foundation

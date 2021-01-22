@@ -1,30 +1,22 @@
 import numpy as np
 import cv2
 from utils.contour import ensure_3D_contour, to_2D_contour, contour_into_image
+from processing.filter import BaseFilter
 
-
-class Filter:
-    def __init__(self):
-        self.conf_section = None
-        self.conf_file = None
-        self.icon = None
+class Filter(BaseFilter):
+    def __init__(self, conf_section, conf_file):
+        BaseFilter.__init__(self, conf_section, conf_file)
 
     def meta(self):
         return {
-            "filter": self.conf_section,
             "name": "BottomLeft",
             "description": "Align the bottom/left corner of the contour to the center point [0,0]",
             "parameters": [],
             "input": "contour",
-            "output": "contour",
-            "icon": self.icon
+            "output": "contour"
         }
 
-    def configure(self, conf_section, conf_file):
-        self.conf_section = conf_section
-        self.conf_file = conf_file
-
-    def process(self, image, cnt_3d):
+    def _process(self, image, cnt_3d):
         if len(cnt_3d) > 0:
             cnt = to_2D_contour(cnt_3d)
             # Determine the bounding rectangle of all contours
@@ -52,6 +44,3 @@ class Filter:
             image = preview_image
 
         return image, cnt_3d
-
-    def stop(self):
-        pass

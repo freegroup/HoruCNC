@@ -3,19 +3,17 @@ import cv2
 import scipy.stats as st
 
 from utils.contour import ensure_3D_contour, to_2D_contour, contour_into_image
+from processing.filter import BaseFilter
 
 
-class Filter:
-    def __init__(self):
-        self.conf_section = None
-        self.conf_file = None
-        self.icon = None
-        self.window = 20
+class Filter(BaseFilter):
+    def __init__(self, conf_section, conf_file):
+        BaseFilter.__init__(self, conf_section, conf_file)
+        self.window = self.conf_file.get_int("window", self.conf_section)
 
     def meta(self):
 
         return {
-            "filter": self.conf_section,
             "name": "Smooth Contour",
             "description": "Smooth the contour with an gaussian convolve kernel",
             "parameters": [
@@ -29,16 +27,10 @@ class Filter:
                 }
             ],
             "input": "contour",
-            "output": "contour",
-            "icon": self.icon
+            "output": "contour"
         }
 
-    def configure(self, conf_section, conf_file):
-        self.conf_section = conf_section
-        self.conf_file = conf_file
-        self.window = self.conf_file.get_int("window", self.conf_section)
-
-    def process(self, image, cnt_3d):
+    def _process(self, image, cnt_3d):
         if len(cnt_3d) > 0:
 
             def gauss_kernel(kernlen=21, nsig=3):
@@ -96,13 +88,7 @@ class Filter:
 
         return image, cnt_3d
 
-    def centered_contour(self, cnt, width, height):
-        pass
-
     def set_parameter(self, name, val):
         if name == "window":
             self.window = int(val)
             self.conf_file.set("window", self.conf_section, str(self.window))
-
-    def stop(self):
-        pass
