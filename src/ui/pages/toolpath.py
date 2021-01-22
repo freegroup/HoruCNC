@@ -27,35 +27,23 @@ class ToolpathWidget(gl.GLViewWidget):
         self.pipeline = pipeline
 
         self.opts['distance'] = 40
-
-        self.i = 0
-        crankshaft = np.array((
-            [0, 0, 0],
-            [2, 0, 0],
-            [2, np.cos(self.i), np.sin(self.i)],
-            [2.5, np.cos(self.i), np.sin(self.i)],
-            [2.5, -np.cos(self.i), -np.sin(self.i)],
-            [3, -np.cos(self.i), -np.sin(self.i)],
-            [3, 0, 0],
-            [6, 0, 0]))
-        self.plt = gl.GLLinePlotItem(pos=crankshaft)
-        self.addItem(self.plt)
-
-        conrod1 = np.array(([2.25, np.cos(self.i), np.sin(self.i)], [2.25, np.cos(self.i) + 2.5, 0]))
-        self.plt1 = gl.GLLinePlotItem(pos=conrod1)
-        self.addItem(self.plt1)
-
-        ## create three grids, add each to the view
         xgrid = gl.GLGridItem()
+        xgrid.rotate(0, 0, 1, 0)
+        xgrid.scale(10, 10, 0.1)
         self.addItem(xgrid)
+        self.filter.processed.connect(self.processed)
 
-        ## rotate x and y grids to face the correct direction
-        xgrid.rotate(90, 0, 1, 0)
+    def processed(self, image, cnt):
+        itm_cnt = len(self.items)
+        idx = itm_cnt - 1
+        while idx >= 0:
+            if type(self.items [idx]) == gl.GLLinePlotItem:
+                del self.items [idx]
+            idx -= 1
 
-        ## scale each grid differently
-        xgrid.scale(1, 1, 0.1)
+        for c in cnt:
+            c = c/1000
+            self.plt = gl.GLLinePlotItem(pos=c, width=2, antialias=True, color="559895")
+            self.addItem(self.plt)
 
-        conrod2 = np.array(([3.25, -np.cos(self.i), -np.sin(self.i)], [3.25, -np.cos(self.i) - 2.5, 0]))
-        self.plt2 = gl.GLLinePlotItem(pos=conrod2)
-        self.addItem(self.plt2)
 
