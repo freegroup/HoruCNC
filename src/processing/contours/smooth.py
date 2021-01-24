@@ -88,7 +88,7 @@ class Filter(BaseFilter):
 
         return image, cnt_3d
 
-    def set_parameter(self, name, val):
+    def _set_parameter(self, name, val):
         if name == "window":
             self.window = int(val)
             self.conf_file.set("window", self.conf_section, str(self.window))

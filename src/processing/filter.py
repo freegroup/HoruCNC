@@ -10,6 +10,7 @@ from utils.contour import ensure_3D_contour
 
 class BaseFilter(QObject):
     processed = Signal(object, object)
+    param_changed = Signal()
 
     def __init__(self, conf_section, conf_file):
         QObject.__init__(self)
@@ -28,6 +29,14 @@ class BaseFilter(QObject):
     def _process(self, image, contour):
         raise NotImplementedError
 
+    def _set_parameter(self, name, value):
+        raise NotImplementedError
+
+
+    def set_parameter(self, name, value):
+        self._set_parameter(name, value)
+        self.param_changed.emit()
+
     def process(self, image, cnt):
         start = time.process_time()
         try:
@@ -39,8 +48,8 @@ class BaseFilter(QObject):
             cnt = ensure_3D_contour(cnt)
 
             if image is None:
-                print("unable to read image from filter: " + instance.meta()["name"])
-            if len(image.shape) != 3:
+                print("unable to read image from filter: " + self.meta()["name"])
+            elif len(image.shape) != 3:
                 print("Image must have 3 color channels. Filter '{}' must return RGB image".format(instance.conf_section))
 
             self.processed.emit(image, cnt)
@@ -53,6 +62,6 @@ class BaseFilter(QObject):
 
         return image, cnt
 
-    def set_parameter(self, name, val):
+    def _set_parameter(self, name, val):
         pass
 

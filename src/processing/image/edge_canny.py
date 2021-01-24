@@ -42,6 +42,6 @@ class Filter(BaseFilter):
 
         return edged, cnt
 
-    def set_parameter(self, name, val):
+    def _set_parameter(self, name, val):
         self.threshold = int(val)
         self.conf_file.set("threshold", self.conf_section, str(val))

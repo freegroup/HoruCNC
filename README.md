@@ -15,4 +15,4 @@ Read more on the [Project Page](https://freegroup.github.io/HoruCNC/)
 
 
 ##
- pyside6-rcc ./src/qt_ui/resources.qrc -o ./src/qt_ui/resources.py
+ pyside2-rcc ./src/ui/resources.qrc -o ./src/ui/resources.py

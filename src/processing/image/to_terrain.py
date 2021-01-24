@@ -104,7 +104,7 @@ class Filter(BaseFilter):
         p = np.cumsum(np.append(0, z))[:-1]  # positions
         return np.stack((ia[i], p, z), axis=1)
 
-    def set_parameter(self, name, val):
+    def _set_parameter(self, name, val):
         if name == "depth":
             val = float(val)
             self.depth_in_micro_m = val

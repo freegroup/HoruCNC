@@ -76,7 +76,7 @@ class Filter(BaseFilter):
 
         return image, cnt_3d
 
-    def set_parameter(self, name, val):
+    def _set_parameter(self, name, val):
         if name == "angle":
             self.angle_in_degree = int(val)
             self.conf_file.set("angle_in_degree", self.conf_section, str(self.angle_in_degree))

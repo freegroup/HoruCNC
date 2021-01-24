@@ -30,11 +30,9 @@ class MainWindow(QMainWindow):
             print(loader.errorString())
             sys.exit(-1)
 
-        #self.window.setWindowFlags(Qt.FramelessWindowHint)
         self.setCentralWidget(self.window.centralwidget)
-        self.setMinimumSize(950,700)
+        self.setMinimumSize(950, 700)
 
-        #clickable(self.window.frame_pipelineselect).connect(lambda: self.loadPipeline())
         self.window.button_select_pipeline.clicked.connect(lambda: self.loadPipeline())
 
         self.pipeline_model = PipelineModel()
@@ -92,6 +90,4 @@ class MainWindow(QMainWindow):
             self.window.label_pipelinedesc.setText(self.pipeline.meta()["description"])
             self.window.label_pipelinedesc.setText(self.pipeline.meta()["description"])
             image = QImage(self.pipeline.icon_path)
-            self.window.label_pipelineicon.setPixmap(QPixmap.fromImage(image))
-
-
+            # self.window.label_pipelineicon.setPixmap(QPixmap.fromImage(image))

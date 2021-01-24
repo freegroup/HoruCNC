@@ -80,7 +80,7 @@ class Filter(BaseFilter):
 
         return image, cnt_3d
 
-    def set_parameter(self, name, val):
+    def _set_parameter(self, name, val):
         if name == "width":
             self.width_in_micro_m = int(val)
             self.conf_file.set("width_in_micro_m", self.conf_section, str(self.width_in_micro_m))

@@ -54,8 +54,8 @@
        </size>
       </property>
       <property name="styleSheet">
-       <string notr="true">background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
-                                stop: 0 rgb(51, 51, 51), stop: 1 rgb(0, 0, 0));
+       <string notr="true">
+background-color:qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:0, stop:0 rgb(49, 52, 67), stop:1 rgb(56, 63, 76))
 </string>
       </property>
       <property name="frameShape">
@@ -132,21 +132,14 @@
            <number>0</number>
           </property>
           <item>
-           <widget class="QLabel" name="label_pipelineicon">
-            <property name="minimumSize">
-             <size>
-              <width>96</width>
-              <height>96</height>
-             </size>
-            </property>
-            <property name="maximumSize">
-             <size>
-              <width>96</width>
-              <height>96</height>
-             </size>
+           <widget class="QLabel" name="label_4">
+            <property name="styleSheet">
+             <string notr="true">background-image: url(:/all/icons/logo.png);
+  background-repeat: no-repeat;
+ background-position: top left;</string>
             </property>
             <property name="text">
-             <string>TextLabel</string>
+             <string/>
             </property>
            </widget>
           </item>
@@ -180,31 +173,6 @@ QLabel {
              <property name="bottomMargin">
               <number>0</number>
              </property>
-             <item>
-              <widget class="QLabel" name="label_title">
-               <property name="font">
-                <font>
-                 <pointsize>30</pointsize>
-                </font>
-               </property>
-               <property name="styleSheet">
-                <string notr="true">letter-spacing:3px;</string>
-               </property>
-               <property name="text">
-                <string>Horu&lt;span style=&quot; color:#2d9795;&quot;&gt;CNC&lt;/span&gt;</string>
-               </property>
-               <property name="alignment">
-                <set>Qt::AlignBottom|Qt::AlignLeading|Qt::AlignLeft</set>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QLabel" name="label_desciption">
-               <property name="text">
-                <string>Convert any Image to GCODE for your CNC machine</string>
-               </property>
-              </widget>
-             </item>
             </layout>
            </widget>
           </item>
@@ -262,10 +230,13 @@ QLabel {
           </size>
          </property>
          <property name="styleSheet">
-          <string notr="true">background-color: rgb(243, 246, 249);</string>
+          <string notr="true">background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0.3, y2:1, 
+     stop:0 rgb(68, 76, 93), 
+     stop:0.7 rgb(69, 76, 93), 
+     stop:1 rgb(42, 47, 55));</string>
          </property>
          <property name="frameShape">
-          <enum>QFrame::StyledPanel</enum>
+          <enum>QFrame::NoFrame</enum>
          </property>
          <property name="frameShadow">
           <enum>QFrame::Raised</enum>
@@ -295,8 +266,7 @@ QLabel {
              </sizepolicy>
             </property>
             <property name="styleSheet">
-             <string notr="true">background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
-                                stop: 0 rgb(228, 232, 236), stop: 1 rgb(243, 246, 249));
+             <string notr="true">background: none;
 </string>
             </property>
             <layout class="QVBoxLayout" name="verticalLayout_4">
@@ -407,6 +377,17 @@ background-color:transparent;</string>
                </property>
               </widget>
              </item>
+             <item>
+              <widget class="QLabel" name="label">
+               <property name="styleSheet">
+                <string notr="true">background-color: transparent;
+color: rgb(211, 215, 219)</string>
+               </property>
+               <property name="text">
+                <string>Pipeline Steps</string>
+               </property>
+              </widget>
+             </item>
             </layout>
            </widget>
           </item>
@@ -427,6 +408,7 @@ background-color:transparent;</string>
             <property name="styleSheet">
              <string notr="true">QListView {
     show-decoration-selected: 1; /* make the selection span the entire width of the view */
+    background-color: transparent;
 }
 
 QListView::item {
@@ -463,8 +445,11 @@ QListView::item:hover {
        </item>
        <item>
         <widget class="QFrame" name="frame_pages">
+         <property name="styleSheet">
+          <string notr="true">background-color: white;</string>
+         </property>
          <property name="frameShape">
-          <enum>QFrame::StyledPanel</enum>
+          <enum>QFrame::NoFrame</enum>
          </property>
          <property name="frameShadow">
           <enum>QFrame::Raised</enum>
@@ -487,40 +472,15 @@ QListView::item:hover {
           </property>
           <item>
            <widget class="QStackedWidget" name="pages_widget">
-            <property name="currentIndex">
-             <number>1</number>
+            <property name="styleSheet">
+             <string notr="true">background-color: white;</string>
             </property>
-            <widget class="QWidget" name="page_1">
-             <widget class="QLabel" name="label_2">
-              <property name="geometry">
-               <rect>
-                <x>220</x>
-                <y>140</y>
-                <width>58</width>
-                <height>16</height>
-               </rect>
-              </property>
-              <property name="text">
-               <string>PAge 1</string>
-              </property>
-             </widget>
-            </widget>
+            <property name="currentIndex">
+             <number>0</number>
+            </property>
+            <widget class="QWidget" name="page_1"/>
             <widget class="QWidget" name="page_2"/>
-            <widget class="QWidget" name="page_3">
-             <widget class="QLabel" name="label_3">
-              <property name="geometry">
-               <rect>
-                <x>150</x>
-                <y>220</y>
-                <width>58</width>
-                <height>16</height>
-               </rect>
-              </property>
-              <property name="text">
-               <string>Page 3</string>
-              </property>
-             </widget>
-            </widget>
+            <widget class="QWidget" name="page_3"/>
            </widget>
           </item>
          </layout>

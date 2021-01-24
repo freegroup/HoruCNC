@@ -1,5 +1,21 @@
 <RCC>
-  <qresource prefix="all">
-    <file>./icons/basic_photo.png</file>
-  </qresource>
+    <qresource prefix="/all">
+        <file>icons/basic_photo.png</file>
+        <file>icons/logo.svg</file>
+        <file>icons/logo.png</file>
+    </qresource>
+    <qresource prefix="/fonts">
+        <file>font/Roboto/Roboto-Black.ttf</file>
+        <file>font/Roboto/Roboto-BlackItalic.ttf</file>
+        <file>font/Roboto/Roboto-Bold.ttf</file>
+        <file>font/Roboto/Roboto-BoldItalic.ttf</file>
+        <file>font/Roboto/Roboto-Italic.ttf</file>
+        <file>font/Roboto/Roboto-Light.ttf</file>
+        <file>font/Roboto/Roboto-LightItalic.ttf</file>
+        <file>font/Roboto/Roboto-Medium.ttf</file>
+        <file>font/Roboto/Roboto-MediumItalic.ttf</file>
+        <file>font/Roboto/Roboto-Regular.ttf</file>
+        <file>font/Roboto/Roboto-Thin.ttf</file>
+        <file>font/Roboto/Roboto-ThinItalic.ttf</file>
+    </qresource>
 </RCC>

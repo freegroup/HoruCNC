@@ -15,6 +15,7 @@ class SplashScreen():
         ui_file.open(QFile.ReadOnly)
         loader = QUiLoader()
         self.window = loader.load(ui_file)
+        ui_file.close()
 
         if not self.window:
             print(loader.errorString())

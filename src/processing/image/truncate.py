@@ -41,7 +41,7 @@ class Filter(BaseFilter):
         image = np.where(image < self.black, 0, image)
         return image, cnt
 
-    def set_parameter(self, name, val):
+    def _set_parameter(self, name, val):
         if name == "white":
             self.white = int(val)
         if name == "black":

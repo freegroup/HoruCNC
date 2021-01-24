@@ -31,7 +31,7 @@ class Filter(BaseFilter):
 
         return image, cnt
 
-    def set_parameter(self, name, val):
+    def _set_parameter(self, name, val):
         self.path = val
         self.conf_file.set(name, self.conf_section, val)
 

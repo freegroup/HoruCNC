@@ -32,6 +32,6 @@ class Filter(BaseFilter):
         blur = cv2.blur(image, (kernel, kernel))
         return blur, cnt
 
-    def set_parameter(self, name, val):
+    def _set_parameter(self, name, val):
         self.factor = int(val)
         self.conf_file.set("factor", self.conf_section, str(self.factor))

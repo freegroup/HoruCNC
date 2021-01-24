@@ -136,7 +136,7 @@ class Filter(BaseFilter):
             print(exc_type, fname, exc_tb.tb_lineno)
             print(type(self), exc)
 
-    def set_parameter(self, name, val):
+    def _set_parameter(self, name, val):
         if name == "diameter":
             val = float(val)
             self.max_diameter_in_micro_m = min(self.cutter_bit_diameter_in_micro_m,val)

@@ -46,10 +46,13 @@ class VideoPipeline(QObject):
                 print("Wrong pipeline definition. Exit")
                 exit_process()
 
+            instance.param_changed.connect(self.process)
+
             # the output if this filter is the input of the next filter
             input_format = meta["output"]
 
             self.filters.append(instance)
+
 
     def meta(self):
         meta_info = []

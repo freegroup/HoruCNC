@@ -24,7 +24,7 @@ class Filter(BaseFilter):
             "parameters": [
                 {
                     "name": "width",
-                    "label": "Size",
+                    "label": "Image Size",
                     "type": "slider",
                     "min": 1000,
                     "max": "200000",
@@ -32,7 +32,7 @@ class Filter(BaseFilter):
                 },
                 {
                     "name": "hatch",
-                    "label": "Hatch Dist",
+                    "label": "Hatch Distance",
                     "type": "slider",
                     "min": 100,
                     "max": "20000",
@@ -148,7 +148,7 @@ class Filter(BaseFilter):
 
         return image, validated_cnt
 
-    def set_parameter(self, name, val):
+    def _set_parameter(self, name, val):
         if name == "width":
             self.width_in_micro_m = int(val)
             self.conf_file.set("width_in_micro_m", self.conf_section, str(self.width_in_micro_m))

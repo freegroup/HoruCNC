@@ -53,7 +53,7 @@ class Filter(BaseFilter):
 
         return image, cnt_3d
 
-    def set_parameter(self, name, val):
+    def _set_parameter(self, name, val):
         if name == "depth":
             val = float(val)
             self.depth_in_micro_m = val
