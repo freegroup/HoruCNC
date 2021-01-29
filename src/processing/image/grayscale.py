@@ -9,7 +9,7 @@ class Filter(BaseFilter):
     def meta(self):
         return {
             "name": "Convert to Grayscale",
-            "description": "Grayscale a color image",
+            "description": "Converts an image into grayscale",
             "parameters": [],
             "input": "image",
             "output": "image"

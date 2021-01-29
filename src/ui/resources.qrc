@@ -3,6 +3,8 @@
         <file>icons/basic_photo.png</file>
         <file>icons/logo.svg</file>
         <file>icons/logo.png</file>
+        <file>icons/list_normal.png</file>
+        <file>icons/list_selected.png</file>
     </qresource>
     <qresource prefix="/fonts">
         <file>font/Roboto/Roboto-Black.ttf</file>

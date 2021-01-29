@@ -1,17 +1,18 @@
 import sys
 import os
 
+from PySide2.QtGui  import QColor
 from PySide2.QtUiTools import QUiLoader
 from PySide2.QtCore import QFile, QIODevice, QPoint, QObject, Qt
-from PySide2.QtWidgets import QVBoxLayout, QFileDialog, QWidget, QMainWindow
+from PySide2.QtWidgets import QVBoxLayout, QFileDialog, QWidget, QMainWindow, QGraphicsDropShadowEffect
 from PySide2 import QtCore
-from PySide2.QtGui import QImage, QPixmap
 
 from ui.pages.source import SourceWidget
 from ui.pages.filter import FilterWidget
 from ui.pages.toolpath import ToolpathWidget
 
 from ui.pipelinemodel import PipelineModel
+from ui.pipelinesmodel import PipelinesModel
 
 from ui.utils import clickable
 from ui.pipeline import VideoPipeline
@@ -25,6 +26,7 @@ class MainWindow(QMainWindow):
         ui_file.open(QFile.ReadOnly)
         loader = QUiLoader()
         self.window = loader.load(ui_file)
+        ui_file.close()
 
         if not self.window:
             print(loader.errorString())
@@ -33,8 +35,23 @@ class MainWindow(QMainWindow):
         self.setCentralWidget(self.window.centralwidget)
         self.setMinimumSize(950, 700)
 
-        self.window.button_select_pipeline.clicked.connect(lambda: self.loadPipeline())
+        self.window.shadow = QGraphicsDropShadowEffect()
+        self.window.shadow.setBlurRadius(20)
+        self.window.shadow.setXOffset(10)
+        self.window.shadow.setYOffset(10)
+        self.window.shadow.setColor(QColor(255, 120, 0, 120))
+        self.window.frame_left_menu.setGraphicsEffect(self.window.shadow)
 
+#        self.window.button_select_pipeline.clicked.connect(lambda: self.loadPipeline())
+        self.window.combobox_pipelines.currentIndexChanged.connect(self.on_combobox_changed)
+
+        # create the model for all pipelines
+        #
+        self.pipelines_model = PipelinesModel()
+        self.window.combobox_pipelines.setModel(self.pipelines_model)
+
+        # create the Model for the filters within the loaded pipeline
+        #
         self.pipeline_model = PipelineModel()
         self.window.list_filters.setModel(self.pipeline_model)
         self.selModel = self.window.list_filters.selectionModel()
@@ -48,6 +65,9 @@ class MainWindow(QMainWindow):
             delta = QPoint(event.globalPos() - self.oldPos)
             self.move(self.x() + delta.x(), self.y() + delta.y())
             self.oldPos = event.globalPos()
+
+    def on_combobox_changed(self, value):
+        self.loadPipeline(self.pipelines_model.filename(value))
 
     def loadPipeline(self, path_to_file=None):
         if not path_to_file:
@@ -86,8 +106,6 @@ class MainWindow(QMainWindow):
 
     def update_header(self):
         if self.pipeline:
-            self.window.label_pipelinetitle.setText(self.pipeline.meta()["name"])
+            #self.window.label_pipelinetitle.setText(self.pipeline.meta()["name"])
             self.window.label_pipelinedesc.setText(self.pipeline.meta()["description"])
-            self.window.label_pipelinedesc.setText(self.pipeline.meta()["description"])
-            image = QImage(self.pipeline.icon_path)
-            # self.window.label_pipelineicon.setPixmap(QPixmap.fromImage(image))
+

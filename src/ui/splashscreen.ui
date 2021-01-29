@@ -48,10 +48,10 @@
       <widget class="QLabel" name="label_title">
        <property name="geometry">
         <rect>
-         <x>0</x>
-         <y>100</y>
+         <x>10</x>
+         <y>130</y>
          <width>611</width>
-         <height>101</height>
+         <height>61</height>
         </rect>
        </property>
        <property name="font">
@@ -60,6 +60,9 @@
          <pointsize>45</pointsize>
          <strikeout>false</strikeout>
         </font>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">background-color:transparent;</string>
        </property>
        <property name="text">
         <string>&lt;b&gt;Horu&lt;/b&gt;CNC</string>
@@ -85,7 +88,8 @@
         </font>
        </property>
        <property name="styleSheet">
-        <string notr="true">color:rgb(154, 152, 157)</string>
+        <string notr="true">color:rgb(154, 152, 157);
+background-color:transparent;</string>
        </property>
        <property name="text">
         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Image -&amp;gt; GCode -&amp;gt; Milling&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>

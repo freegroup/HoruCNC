@@ -19,7 +19,7 @@ class Filter(BaseFilter):
             "parameters": [
                 {
                     "name": "depth",
-                    "label": "Depth",
+                    "label": "Carving Depth",
                     "type": "slider",
                     "min": range_min,
                     "max": range_max,

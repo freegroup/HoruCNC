@@ -14,7 +14,6 @@ class FilterWidget(QWidget):
         super().__init__(*args, **kwargs)
         self.filter = filter
         self.pipeline = pipeline
-#        self.setStyleSheet("background-color:transparent;")
 
         # Load the header file
         path = os.path.dirname(__file__)
@@ -22,6 +21,7 @@ class FilterWidget(QWidget):
         ui_file.open(QFile.ReadOnly)
         loader = QUiLoader()
         self.header = loader.load(ui_file)
+        ui_file.close()
 
         # Load the footer file
         path = os.path.dirname(__file__)
@@ -33,10 +33,12 @@ class FilterWidget(QWidget):
 
         self.header.label_filtertitle.setText(self.filter.meta()["name"])
         self.header.label_filterdescription.setText(self.filter.meta()["description"])
-        ui_file.close()
+        if self.filter.index+1 < 10:
+            self.header.label_filterindex.setText("0"+str(self.filter.index+1))
+        else:
+            self.header.label_filterindex.setText(str(self.filter.index+1))
 
         self.image_label = ImageWidget()
-        self.image_label.setScaledContents(True)
 
         self.layout = QVBoxLayout()
         self.layout.setContentsMargins(0, 0, 0, 0)

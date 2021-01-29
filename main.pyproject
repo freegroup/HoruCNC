@@ -1,3 +1,3 @@
 {
-    "files": ["src/ui/resources.qrc","form.ui","main.py","src/ui/pages/filterheader.ui","src/ui/mainwindow.ui","src/ui/splashscreen.ui","src/ui/pages/filterfooter.ui"]
+    "files": ["src/ui/pages/filterheader.ui","main.py","src/ui/splashscreen.ui","src/ui/pages/sourcefooter.ui","src/ui/pages/filterfooter.ui","src/ui/mainwindow.ui","form.ui","src/ui/resources.qrc","src/ui/filter_entry.ui"]
 }

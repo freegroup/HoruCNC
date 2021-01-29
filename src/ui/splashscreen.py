@@ -26,10 +26,10 @@ class SplashScreen():
 
         ## DROP SHADOW EFFECT
         self.window.shadow = QGraphicsDropShadowEffect(self.window)
-        self.window.shadow.setBlurRadius(20)
+        self.window.shadow.setBlurRadius(30)
         self.window.shadow.setXOffset(0)
         self.window.shadow.setYOffset(0)
-        self.window.shadow.setColor(QColor(0, 0, 0, 60))
+        self.window.shadow.setColor(QColor(0, 0, 0, 90))
         self.window.dropShadowFrame.setGraphicsEffect(self.window.shadow)
         self.counter = 0
 
@@ -38,7 +38,7 @@ class SplashScreen():
 
     def show(self):
         self.window.show()
-        self.timer.start(15)  # [ms]
+        self.timer.start(25)  # [ms]
 
     def progress(self):
         #self.window.progressBar.setValue(self.counter)
