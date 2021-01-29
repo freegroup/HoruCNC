@@ -9,12 +9,32 @@ from processing.filter import BaseFilter
 class Filter(BaseFilter):
     def __init__(self, conf_section, conf_file):
         BaseFilter.__init__(self, conf_section, conf_file)
+        self.clearance = self.conf_file.get_float(key="clearance", section=self.conf_section)
+        self.feed_rate = self.conf_file.get_float(key="feed_rate", section=self.conf_section)
 
     def meta(self):
+
         return {
             "name": "Generate CNC GCODE",
             "description": "Generates GCODE from the calculated contour data",
-            "parameters": [],
+            "parameters": [
+                {
+                    "name": "feed_rate",
+                    "label": "Feedrate",
+                    "type": "slider",
+                    "min": 10,
+                    "max": "500",
+                    "value": self.feed_rate
+                },
+                {
+                    "name": "clearance",
+                    "label": "C",
+                    "type": "slider",
+                    "min": 1,
+                    "max": "20",
+                    "value": self.clearance
+                }
+            ],
             "input": "contour",
             "output": "gcode"
         }
@@ -25,13 +45,10 @@ class Filter(BaseFilter):
     def gcode(self, cnt_3d):
         cnt = to_2D_contour(cnt_3d)
 
-        clearance = self.conf_file.get_float(key="clearance", section=self.conf_section)
-        feed_rate = self.conf_file.get_float(key="feed_rate", section=self.conf_section)
-
         code = GCode()
-        code.feed_rate = feed_rate
-        code.rapid_rate = feed_rate * 2
-        code.clearance = clearance
+        code.feed_rate = self.feed_rate
+        code.rapid_rate = self.feed_rate * 2
+        code.clearance = self.clearance
 
         if cnt_3d and len(cnt_3d) > 0:
             # Determine the bounding rectangle
