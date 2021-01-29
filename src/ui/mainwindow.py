@@ -42,8 +42,7 @@ class MainWindow(QMainWindow):
         self.window.shadow.setColor(QColor(255, 120, 0, 120))
         self.window.frame_left_menu.setGraphicsEffect(self.window.shadow)
 
-#        self.window.button_select_pipeline.clicked.connect(lambda: self.loadPipeline())
-        self.window.combobox_pipelines.currentIndexChanged.connect(self.on_combobox_changed)
+        self.window.combobox_pipelines.currentIndexChanged.connect(self.loadPipelineByIndex)
 
         # create the model for all pipelines
         #
@@ -66,10 +65,10 @@ class MainWindow(QMainWindow):
             self.move(self.x() + delta.x(), self.y() + delta.y())
             self.oldPos = event.globalPos()
 
-    def on_combobox_changed(self, value):
-        self.loadPipeline(self.pipelines_model.filename(value))
+    def loadPipelineByIndex(self, value):
+        self.loadPipelineByFile(self.pipelines_model.filename(value))
 
-    def loadPipeline(self, path_to_file=None):
+    def loadPipelineByFile(self, path_to_file=None):
         if not path_to_file:
             path_to_file, _ = QFileDialog.getOpenFileName(self.window,
                                                           self.window.tr("Load Pipeline"),

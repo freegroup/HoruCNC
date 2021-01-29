@@ -12,7 +12,7 @@ class Filter(BaseFilter):
 
     def meta(self):
         return {
-            "name": "Download GCODE",
+            "name": "Generate CNC GCODE",
             "description": "Generates GCODE from the calculated contour data",
             "parameters": [],
             "input": "contour",

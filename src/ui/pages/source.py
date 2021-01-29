@@ -3,7 +3,6 @@ import os
 from PySide2.QtUiTools import QUiLoader
 from PySide2.QtWidgets import QLabel, QPushButton, QWidget, QVBoxLayout, QFileDialog
 from PySide2.QtCore import QFile, Qt
-from PySide2.QtGui import QImage, QPixmap, QColor
 
 import cv2
 from ui.widgets.imagewidget import ImageWidget
@@ -34,10 +33,7 @@ class SourceWidget(QWidget):
 
         self.header.label_filtertitle.setText(self.filter.meta()["name"])
         self.header.label_filterdescription.setText(self.filter.meta()["description"])
-        if self.filter.index+1 < 10:
-            self.header.label_filterindex.setText("0"+str(self.filter.index+1))
-        else:
-            self.header.label_filterindex.setText(str(self.filter.index+1))
+        self.header.label_filterindex.setText("{:02}".format(self.filter.index+1))
 
         self.image_label = ImageWidget()
         self.image_label.setScaledContents(True)
@@ -46,6 +42,7 @@ class SourceWidget(QWidget):
 
         self.layout = QVBoxLayout()
         self.layout.setContentsMargins(0, 0, 0, 0)
+        self.layout.setSpacing(0)
         self.layout.addWidget(self.header)
         self.layout.addWidget(self.image_label)
         self.layout.addWidget(self.footer)

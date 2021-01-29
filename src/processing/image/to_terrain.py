@@ -16,12 +16,12 @@ class Filter(BaseFilter):
         range_max = self.conf_file.get_float("depth_range_max", self.conf_section)
 
         return {
-            "name": "HeightMap",
+            "name": "Carve Height Map",
             "description": "Generates height map terrain toolpaths from an grayscale Image",
             "parameters": [
                 {
                     "name": "depth",
-                    "label": "Depth",
+                    "label": "Maximal Carving Depth",
                     "type": "slider",
                     "min": range_min,
                     "max": range_max,

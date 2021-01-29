@@ -2,7 +2,6 @@ import os
 
 from PySide2.QtUiTools import QUiLoader
 from PySide2.QtWidgets import QLabel, QWidget, QVBoxLayout, QGridLayout, QSlider
-from PySide2.QtGui import QImage, QPixmap
 from PySide2.QtCore import Qt, QFile
 
 from ui.widgets.imagewidget import ImageWidget
@@ -33,10 +32,7 @@ class FilterWidget(QWidget):
 
         self.header.label_filtertitle.setText(self.filter.meta()["name"])
         self.header.label_filterdescription.setText(self.filter.meta()["description"])
-        if self.filter.index+1 < 10:
-            self.header.label_filterindex.setText("0"+str(self.filter.index+1))
-        else:
-            self.header.label_filterindex.setText(str(self.filter.index+1))
+        self.header.label_filterindex.setText("{:02}".format(self.filter.index+1))
 
         self.image_label = ImageWidget()
 
@@ -47,7 +43,6 @@ class FilterWidget(QWidget):
         self.layout.addWidget(self.footer)
         self.setLayout(self.layout)
 
-
         self.show_parameters()
 
         self.filter.processed.connect(self.processed)
@@ -56,6 +51,7 @@ class FilterWidget(QWidget):
         self.param_widget = QWidget()
         self.param_layout = QGridLayout()
         self.param_layout.setContentsMargins(0, 0, 0, 0)
+        self.layout.setSpacing(0)
         self.param_widget.setLayout(self.param_layout)
         self.footer.layout().addWidget(self.param_widget)
 

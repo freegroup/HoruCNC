@@ -25,12 +25,12 @@ class Filter(BaseFilter):
     def meta(self):
 
         return {
-            "name": "HalftoneDot",
+            "name": "Calculate Halftone Dot",
             "description": f'Generates half tone dot pattern with a {self.cutter_bit_angle}° carving bit',
             "parameters": [
                 {
                     "name": "diameter",
-                    "label": "Diameter",
+                    "label": "Maximal Hole Diameter",
                     "type": "slider",
                     "min": 0,
                     "max": self.cutter_bit_max_diameter_in_micro_m,
@@ -38,7 +38,7 @@ class Filter(BaseFilter):
                 },
                 {
                     "name": "width",
-                    "label": "Size",
+                    "label": "Image Size",
                     "type": "slider",
                     "min": 1000,
                     "max": "200000",

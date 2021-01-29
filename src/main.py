@@ -23,7 +23,9 @@ if __name__ == "__main__":
     main = MainWindow()
     main.show()
 
-    if len(sys.argv)>1:
-        main.loadPipeline(sys.argv[1])
+    if len(sys.argv) > 1:
+        main.loadPipelinePyFile(sys.argv[1])
+    else:
+        main.loadPipelineByIndex(0)
 
     sys.exit(app.exec_())

@@ -21,7 +21,7 @@ class Filter(BaseFilter):
             "parameters": [
                 {
                     "name": "width",
-                    "label": "Size",
+                    "label": "Image Size",
                     "type": "slider",
                     "min": 1000,
                     "max": "200000",
