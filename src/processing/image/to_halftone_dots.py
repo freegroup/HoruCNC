@@ -32,7 +32,7 @@ class Filter(BaseFilter):
                     "name": "diameter",
                     "label": "Maximal Hole Diameter",
                     "type": "slider",
-                    "min": 0,
+                    "min": 500,
                     "max": self.cutter_bit_max_diameter_in_micro_m,
                     "value": self.max_diameter_in_micro_m
                 },
