@@ -1,3 +1,4 @@
 bo.txt
 secrets
-/src/static/assets/gcode_data.js
+/src_old/static/assets/gcode_data.js
+target

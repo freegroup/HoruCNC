@@ -15,5 +15,7 @@ Read more on the [Project Page](https://freegroup.github.io/HoruCNC/)
 
 
 ##
- pyside2-rcc ./src/ui/resources.qrc -o ./src/ui/resources.py
+ pyside2-rcc ./src/main/resources/base/ui/resources.qrc -o ./src/main/python/ui/resources.py
+ pip install fbs PyInstaller==3.4
+ 
  

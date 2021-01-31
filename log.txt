@@ -1,0 +1,153 @@
+/Users/d023280/Documents/workspace/HoruCNC/src/main/resources/base/pipelines/pipeline_engrave_dots.ini
+/Users/d023280/Documents/workspace/HoruCNC/src/main/resources/base/pipelines/pipeline_mill_outline.ini
+/Users/d023280/Documents/workspace/HoruCNC/src/main/resources/base/pipelines/pipeline_engrave_heightmap.ini
+/Users/d023280/Documents/workspace/HoruCNC/src/main/resources/base/pipelines/pipeline_line_hatch.ini
+/Users/d023280/Documents/workspace/HoruCNC/src/main/resources/base/pipelines/pipeline_calligraphy.ini
+/Users/d023280/Documents/workspace/HoruCNC/src/main/resources/base/pipelines/pipeline_engrave_outline.ini
+/Users/d023280/Documents/workspace/HoruCNC/src/main/resources/base/pipelines/pipeline_engrave_dots.ini
+Running filter:  <class 'processing.source.file.Filter'>
+Select Image 0.014070999999999945
+Contour Count: 0
+------------------------
+Running filter:  <class 'processing.image.grayscale.Filter'>
+Convert to Grayscale 0.002347000000000321
+Contour Count: 0
+------------------------
+Running filter:  <class 'processing.image.truncate.Filter'>
+Truncate 0.002702999999999456
+Contour Count: 0
+------------------------
+Running filter:  <class 'processing.image.to_halftone_dots.Filter'>
+Calculate Halftone Dot 0.02327900000000005
+Contour Count: 746
+------------------------
+Running filter:  <class 'processing.contours.origin.Filter'>
+Origin Contour 0.009599999999999831
+Contour Count: 746
+------------------------
+Running filter:  <class 'processing.target.gcode.Filter'>
+Generate CNC GCODE 5.000000000254801e-06
+Contour Count: 746
+------------------------
+Running filter:  <class 'processing.source.file.Filter'>
+Select Image 0.011235000000000106
+Contour Count: 0
+------------------------
+Running filter:  <class 'processing.image.grayscale.Filter'>
+Convert to Grayscale 0.001438999999999524
+Contour Count: 0
+------------------------
+Running filter:  <class 'processing.image.truncate.Filter'>
+Truncate 0.0026930000000002785
+Contour Count: 0
+------------------------
+Running filter:  <class 'processing.image.to_halftone_dots.Filter'>
+Calculate Halftone Dot 0.01931800000000017
+Contour Count: 746
+------------------------
+Running filter:  <class 'processing.contours.origin.Filter'>
+Origin Contour 0.009315999999999214
+Contour Count: 746
+------------------------
+Running filter:  <class 'processing.target.gcode.Filter'>
+Generate CNC GCODE 4.000000000115023e-06
+Contour Count: 746
+------------------------
+Running filter:  <class 'processing.source.file.Filter'>
+Select Image 0.015333000000000041
+Contour Count: 0
+------------------------
+Running filter:  <class 'processing.image.grayscale.Filter'>
+Convert to Grayscale 0.0006250000000003197
+Contour Count: 0
+------------------------
+Running filter:  <class 'processing.image.truncate.Filter'>
+Truncate 0.002914000000000083
+Contour Count: 0
+------------------------
+Running filter:  <class 'processing.image.to_halftone_dots.Filter'>
+Calculate Halftone Dot 0.02714400000000028
+Contour Count: 746
+------------------------
+Running filter:  <class 'processing.contours.origin.Filter'>
+Origin Contour 0.011705000000000076
+Contour Count: 746
+------------------------
+Running filter:  <class 'processing.target.gcode.Filter'>
+Generate CNC GCODE 7.0000000005343566e-06
+Contour Count: 746
+------------------------
+/Users/d023280/Documents/workspace/HoruCNC/src/main/resources/base/pipelines/pipeline_engrave_dots.ini
+Running filter:  <class 'processing.source.file.Filter'>
+Select Image 0.013089999999999602
+Contour Count: 0
+------------------------
+Running filter:  <class 'processing.image.grayscale.Filter'>
+Convert to Grayscale 0.0006249999999998757
+Contour Count: 0
+------------------------
+Running filter:  <class 'processing.image.truncate.Filter'>
+Truncate 0.003932000000000269
+Contour Count: 0
+------------------------
+Running filter:  <class 'processing.image.to_halftone_dots.Filter'>
+Calculate Halftone Dot 0.021369999999999667
+Contour Count: 746
+------------------------
+Running filter:  <class 'processing.contours.origin.Filter'>
+Origin Contour 0.010194000000000258
+Contour Count: 746
+------------------------
+Running filter:  <class 'processing.target.gcode.Filter'>
+Generate CNC GCODE 4.999999999810711e-06
+Contour Count: 746
+------------------------
+Running filter:  <class 'processing.source.file.Filter'>
+Select Image 0.012157000000000195
+Contour Count: 0
+------------------------
+Running filter:  <class 'processing.image.grayscale.Filter'>
+Convert to Grayscale 0.0006749999999997591
+Contour Count: 0
+------------------------
+Running filter:  <class 'processing.image.truncate.Filter'>
+Truncate 0.0021770000000000955
+Contour Count: 0
+------------------------
+Running filter:  <class 'processing.image.to_halftone_dots.Filter'>
+Calculate Halftone Dot 0.020772000000000013
+Contour Count: 746
+------------------------
+Running filter:  <class 'processing.contours.origin.Filter'>
+Origin Contour 0.009351999999999805
+Contour Count: 746
+------------------------
+Running filter:  <class 'processing.target.gcode.Filter'>
+Generate CNC GCODE 5.000000000254801e-06
+Contour Count: 746
+------------------------
+Running filter:  <class 'processing.source.file.Filter'>
+Select Image 0.011489999999999778
+Contour Count: 0
+------------------------
+Running filter:  <class 'processing.image.grayscale.Filter'>
+Convert to Grayscale 0.0008069999999995581
+Contour Count: 0
+------------------------
+Running filter:  <class 'processing.image.truncate.Filter'>
+Truncate 0.0023320000000000007
+Contour Count: 0
+------------------------
+Running filter:  <class 'processing.image.to_halftone_dots.Filter'>
+Calculate Halftone Dot 0.01965199999999978
+Contour Count: 746
+------------------------
+Running filter:  <class 'processing.contours.origin.Filter'>
+Origin Contour 0.00951000000000013
+Contour Count: 746
+------------------------
+Running filter:  <class 'processing.target.gcode.Filter'>
+Generate CNC GCODE 3.999999999226844e-06
+Contour Count: 746
+------------------------
+Unable to load numpy_formathandler accelerator from OpenGL_accelerate

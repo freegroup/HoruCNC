@@ -1,3 +1,11 @@
 {
-    "files": ["src/ui/pages/filterheader.ui","src/ui/pages/toolpathfooter.ui","main.py","src/ui/splashscreen.ui","src/ui/pages/sourcefooter.ui","src/ui/pages/filterfooter.ui","src/ui/filter_entry.ui","src/ui/mainwindow.ui","form.ui","src/ui/resources.qrc"]
+    "files": [
+    "src/main/resources/base/ui/filterheader.ui",
+    "src/main/resources/base/ui/filterfooter.ui",
+    "src/main/resources/base/ui/toolpathfooter.ui",
+    "src/main/resources/base/ui/sourcefooter.ui",
+    "src/main/resources/base/ui/splashscreen.ui",
+    "src/main/resources/base/ui/mainwindow.ui",
+    "src/main/resources/base/ui/resources.qrc"
+    ]
 }
