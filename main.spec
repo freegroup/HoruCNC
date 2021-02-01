@@ -43,5 +43,5 @@ coll = COLLECT(exe,
 
 app = BUNDLE(coll,
          name='HoruCNC.app',
-         icon=None,
+         icon='./resources/HoruCNC.icns',
          bundle_identifier=None)
