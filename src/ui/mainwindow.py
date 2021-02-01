@@ -18,11 +18,10 @@ from ui.pipeline import VideoPipeline
 
 
 class MainWindow(QMainWindow):
-    def __init__(self, appctxt):
+    def __init__(self,):
         super().__init__()
-        self.appctxt = appctxt
 
-        ui_file = QFile(appctxt.get_resource("ui/mainwindow.ui"))
+        ui_file = QFile("resources/ui/mainwindow.ui")
         ui_file.open(QFile.ReadOnly)
         loader = QUiLoader()
         self.window = loader.load(ui_file)
@@ -57,7 +56,7 @@ class MainWindow(QMainWindow):
 
         # create the model for all pipelines
         #
-        self.pipelines_model = PipelinesModel(appctxt)
+        self.pipelines_model = PipelinesModel()
         self.window.combobox_pipelines.setModel(self.pipelines_model)
 
 
@@ -94,11 +93,11 @@ class MainWindow(QMainWindow):
                 #
                 for filter in self.pipeline.filters:
                     if filter.meta()["input"] == "filepicker":
-                        self.window.pages_widget.addWidget(SourceWidget(self.appctxt, self.pipeline, filter))
+                        self.window.pages_widget.addWidget(SourceWidget(self.pipeline, filter))
                     elif filter.meta()["output"] == "gcode":
-                        self.window.pages_widget.addWidget(ToolpathWidget(self.appctxt, self.pipeline, filter))
+                        self.window.pages_widget.addWidget(ToolpathWidget( self.pipeline, filter))
                     else:
-                        self.window.pages_widget.addWidget(FilterWidget(self.appctxt, self.pipeline, filter))
+                        self.window.pages_widget.addWidget(FilterWidget(self.pipeline, filter))
 
                 ix = self.pipeline_model.index(0, 0)
                 self.window.list_filters.selectionModel().select(ix, QtCore.QItemSelectionModel.SelectCurrent)

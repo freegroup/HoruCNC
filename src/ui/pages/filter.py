@@ -9,14 +9,14 @@ from ui.widgets.imagewidget import ImageWidget
 
 class FilterWidget(QWidget):
 
-    def __init__(self, appctxt, pipeline, filter, *args, **kwargs):
+    def __init__(self, pipeline, filter, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.filter = filter
         self.pipeline = pipeline
 
         # Load the header file
         path = os.path.dirname(__file__)
-        ui_file = QFile( appctxt.get_resource("ui/filterheader.ui"))
+        ui_file = QFile("resources/ui/filterheader.ui")
         ui_file.open(QFile.ReadOnly)
         loader = QUiLoader()
         self.header = loader.load(ui_file)
@@ -24,7 +24,7 @@ class FilterWidget(QWidget):
 
         # Load the footer file
         path = os.path.dirname(__file__)
-        ui_file = QFile(appctxt.get_resource("ui/filterfooter.ui"))
+        ui_file = QFile("resources/ui/filterfooter.ui")
         ui_file.open(QFile.ReadOnly)
         loader = QUiLoader()
         self.footer = loader.load(ui_file)

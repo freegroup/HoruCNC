@@ -9,8 +9,8 @@ from PySide2.QtCore import QFile, QIODevice
 
 
 class SplashScreen():
-    def __init__(self, appctxt):
-        ui_file = QFile(appctxt.get_resource("ui/splashscreen.ui"))
+    def __init__(self, ):
+        ui_file = QFile("resources/ui/splashscreen.ui")
         ui_file.open(QFile.ReadOnly)
         loader = QUiLoader()
         self.window = loader.load(ui_file)

@@ -7,9 +7,9 @@ from utils.configuration import Configuration
 
 class PipelinesModel(QtCore.QAbstractListModel):
 
-    def __init__(self, appctxt, *args, **kwargs):
+    def __init__(self, *args, **kwargs):
         super(PipelinesModel, self).__init__(*args, **kwargs)
-        pipeline_folder = appctxt.get_resource("pipelines")
+        pipeline_folder = "resources/pipelines"
         self.pipelines = []
         onlyfiles = [join(pipeline_folder, f) for f in listdir(pipeline_folder) if isfile(join(pipeline_folder, f))]
         for f in onlyfiles:

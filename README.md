@@ -15,7 +15,15 @@ Read more on the [Project Page](https://freegroup.github.io/HoruCNC/)
 
 
 ##
- pyside2-rcc ./src/main/resources/base/ui/resources.qrc -o ./src/main/python/ui/resources.py
- pip install fbs PyInstaller==3.4
- 
- 
+pyside2-rcc ./src/main/resources/base/ui/resources.qrc -o ./src/main/python/ui/resources.py
+pip install fbs PyInstaller==3.4
+
+pyinstaller -y --clean --windowed main.spec
+
+rm -rf dist/HoruCNC && hdiutil create -volname HoruCNC -srcfolder dist -ov -format UDZO HoruCNC-1.1.3.dmg
+
+pushd dist
+hdiutil create ./HoruCNC.dmg -srcfolder HoruCNC.app -ov
+popd
+
+
