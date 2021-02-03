@@ -14,3 +14,5 @@ pyqtgraph==0.11.1
 PyOpenGL==3.1.5
 PyOpenGL-accelerate==3.1.5
 pyinstaller==4.2
+dmgbuild==1.4.2
+biplist==1.0.3

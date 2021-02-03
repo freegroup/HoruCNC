@@ -14,18 +14,26 @@ Read more on the [Project Page](https://freegroup.github.io/HoruCNC/)
 
 
 
-## configuration snippets
+## Build the distribution
 
+``` 
+# Update the Qt resource file
+#
 pyside2-rcc ./src/main/resources/base/ui/resources.qrc -o ./src/main/python/ui/resources.py
-pip install fbs PyInstaller==3.4
 
-pyinstaller -y --clean --windowed main.spec
-
-
+# Update the ICNS Icons if anything within the iconset folder has changed
+#
 iconutil -c icns ./HoruCNC.iconset
 
-pushd dist
-hdiutil create ./HoruCNC.dmg -srcfolder HoruCNC.app -ov
-popd
+# build the HoruCNC.app
+#
+rm -r ./build
+rm -rf ./dist
+pyinstaller -y --clean --windowed main.spec
 
+# build the DMG Image
+#
+dmgbuild -s ./src/dmg.py "HoruCNC" ./dist/HoruCNC.dmg
+
+```
 
