@@ -29,7 +29,7 @@ iconutil -c icns ./HoruCNC.iconset
 #
 rm -r ./build
 rm -rf ./dist
-pyinstaller -y --clean --windowed main.spec
+./venv/bin/pyinstaller --hidden-import=pkg_resources.py2_warn -y --clean --windowed main.spec
 
 # build the DMG Image
 #

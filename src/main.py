@@ -4,10 +4,13 @@ import io
 import os.path
 import tempfile
 
-#fp = tempfile.NamedTemporaryFile(delete=False)
+DEBUG = False
 
-#sys.stdout = io.TextIOWrapper(fp, write_through=True)
-#sys.stderr = sys.stdout
+if DEBUG:
+    fp = tempfile.NamedTemporaryFile(delete=False)
+    print(fp.name)
+    sys.stdout = io.TextIOWrapper(fp, write_through=True)
+    sys.stderr = sys.stdout
 
 from PySide2 import QtCore
 from PySide2.QtWidgets import QMessageBox
@@ -19,6 +22,7 @@ import ui.resources
 
 # required for fbs installer
 import processing
+import OpenGL
 
 from PySide2.QtWidgets import QApplication
 
@@ -38,9 +42,10 @@ if __name__ == "__main__":
 
     app.exec_()
 
-    #QMessageBox.warning(None, app.tr("HoruCNC"),
-    #                app.tr(fp.name),
-    #                QMessageBox.Close)
+    if DEBUG:
+        QMessageBox.warning(None, app.tr("HoruCNC"),
+                        app.tr(fp.name),
+                        QMessageBox.Close)
 
     # check that the resources has been extracted. Otherwise we
     # are running direct from the "*.dmg" image -which is not supported-

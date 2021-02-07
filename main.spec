@@ -5,11 +5,17 @@ block_cipher = None
 
 
 a = Analysis(['./src/main.py'],
-             pathex=['/Users/d023280/Documents/workspace/HoruCNC'],
+             pathex=[
+                '/Users/d023280/Documents/workspace/HoruCNC'
+                ],
              binaries=[],
-             datas=[('resources', 'resources')],
+             datas=[
+                ('resources', 'resources')
+             ],
              hiddenimports= [
                 "PySide2.QtXml",
+                "PySide2.QtUiTools",
+                "shiboken2",
                 "scipy.special.cython_special"
              ],
              hookspath=[],
@@ -30,7 +36,7 @@ exe = EXE(pyz,
           debug=False,
           bootloader_ignore_signals=False,
           strip=False,
-          upx=True,
+          upx=False,
           console=False )
 
 coll = COLLECT(exe,

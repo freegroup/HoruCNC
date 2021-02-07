@@ -36,7 +36,7 @@ class ImageWidget(QLabel):
             # e.g. one pixel line are not dropped in the OpenCV version
             #image = image_resize(self.image, height=new_height, inter=cv2.INTER_NEAREST)
             image = image_resize(self.image, height=new_height, inter=cv2.INTER_LINEAR)
-
+            image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
             image = QImage(image, image.shape[1], image.shape[0],
                            image.strides[0], QImage.Format_RGB888)
             pixmap = QPixmap.fromImage(image)
