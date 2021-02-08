@@ -31,9 +31,6 @@ class VideoPipeline(QObject):
             # ignore the common section
             if pipeline_section == "common":
                 continue
-            # ignore the source section
-            if pipeline_section == "source":
-                continue
 
             instance = clazz.instance_by_name(pipeline_section, pipeline_section, self.pipeline_conf)
             instance.index = len(self.filters)

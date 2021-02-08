@@ -87,7 +87,9 @@ class MainWindow(QMainWindow):
                 # remove all stack pages
                 #
                 for _ in range(self.window.pages_widget.count()):
-                    self.window.pages_widget.removeWidget(self.window.pages_widget.widget(0))
+                    page = self.window.pages_widget.widget(0)
+                    self.window.pages_widget.removeWidget(page)
+                    del page
 
                 # add a new widget to the stack for each filter
                 #

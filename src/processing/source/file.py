@@ -1,12 +1,18 @@
+import os
 import cv2
 from utils.image import image_resize
 from processing.filter import BaseFilter
 
 
+from utils.configuration import Configuration
+conf = Configuration("resources/config/configuration.ini")
+
 class Filter(BaseFilter):
     def __init__(self, conf_section, conf_file):
         BaseFilter.__init__(self, conf_section, conf_file)
-        self.path = self.conf_file.get("path", self.conf_section)
+        self.path = conf.get("path","common")
+        if not os.access(self.path, os.R_OK):
+            self.path="resources/default-image.png"
 
     def meta(self):
         return {
@@ -33,5 +39,5 @@ class Filter(BaseFilter):
 
     def _set_parameter(self, name, val):
         self.path = val
-        self.conf_file.set(name, self.conf_section, val)
+        conf.set(name, "common", val)
 

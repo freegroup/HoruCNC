@@ -15,7 +15,6 @@ class FilterWidget(QWidget):
         self.pipeline = pipeline
 
         # Load the header file
-        path = os.path.dirname(__file__)
         ui_file = QFile("resources/ui/filterheader.ui")
         ui_file.open(QFile.ReadOnly)
         loader = QUiLoader()
@@ -23,7 +22,6 @@ class FilterWidget(QWidget):
         ui_file.close()
 
         # Load the footer file
-        path = os.path.dirname(__file__)
         ui_file = QFile("resources/ui/filterfooter.ui")
         ui_file.open(QFile.ReadOnly)
         loader = QUiLoader()

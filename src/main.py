@@ -1,3 +1,5 @@
+# see: https://stackoverflow.com/questions/63475461/unable-to-import-opengl-gl-in-python-on-macos
+# Patch OpenGL loading on Apple Big Sur
 try:
     import OpenGL as ogl
     try:
@@ -21,6 +23,13 @@ import io
 import os.path
 import tempfile
 
+# required to find the right packages and resources in the extracted directory of PyInstaller
+#
+
+if getattr(sys, 'frozen', False) and hasattr(sys, '_MEIPASS'):
+    os.chdir(sys._MEIPASS)
+
+
 DEBUG = False
 
 if DEBUG:
@@ -40,6 +49,7 @@ import ui.resources
 # required for fbs installer
 import processing
 import OpenGL
+import OpenGL_accelerate
 
 from PySide2.QtWidgets import QApplication
 
@@ -47,9 +57,6 @@ from ui.splashscreen import SplashScreen
 from ui.mainwindow import MainWindow
 
 if __name__ == "__main__":
-    if getattr(sys, 'frozen', False) and hasattr(sys, '_MEIPASS'):
-        os.chdir(sys._MEIPASS)
-
     QtCore.QCoreApplication.setAttribute(Qt.AA_ShareOpenGLContexts)
     app = QApplication()
 

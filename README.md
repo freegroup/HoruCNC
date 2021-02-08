@@ -29,7 +29,13 @@ iconutil -c icns ./HoruCNC.iconset
 #
 rm -r ./build
 rm -rf ./dist
+
 ./venv/bin/pyinstaller --hidden-import=pkg_resources.py2_warn -y --clean --windowed main.spec
+# python setup.py py2app
+
+cp -R ./venv/lib/python3.9/site-packages/shiboken2 ./dist/main.app/Contents/Resources/lib/python3.9/lib-dynload/shiboken2
+
+cp ./venv/lib/python3.9/site-packages/shiboken2/libshiboken2.abi3.5.15.dylib ./dist/main.app/Contents/Resources/lib/python3.9/lib-dynload/shiboken2
 
 # build the DMG Image
 #
