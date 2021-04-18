@@ -1,7 +1,4 @@
 # HoruCNC ([horu](https://glosbe.com/ja/en/horu))
- 
-![teaser](./images/teaser.svg)
-
 
 CNC machines are an essential part of the hacker’s toolset. These computer-controlled cutters of wood, metal and other materials can translate a design into a prototype in short order, making the process of iterating a project much easier. However, the software to create these designs can be expensive and complex.
 
