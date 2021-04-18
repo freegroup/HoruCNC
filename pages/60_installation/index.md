@@ -17,7 +17,7 @@ sudo apt install python3-opencv
 sudo apt install libqt4-test
 pip3 install -r requirements.txt
 
-python3 ./src/ui.py
+python3 ./src/main.py
 ```
 
 
