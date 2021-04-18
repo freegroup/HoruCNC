@@ -10,6 +10,17 @@ The motivation for this project was to reduce the effort of toolpath generation 
 Read more on the [Project Page](https://freegroup.github.io/HoruCNC/)
 
 
+## Run the software (on Mac OS)
+
+``` 
+git clone https://github.com/freegroup/HoruCNC.git HoruCNC
+cd HoruCNC
+
+pip3 install -r requirements.txt
+
+python3 ./src/main.py
+
+```
 
 ## Build the distribution
 
