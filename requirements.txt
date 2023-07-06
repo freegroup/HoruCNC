@@ -6,7 +6,7 @@ gevent==21.1.2
 imutils==0.5.4
 pyserial==3.5
 configobj==5.0.6
-scipy==1.6.0
+scipy==1.10.0
 pyclipper==1.2.1
 PySide2==5.15.2
 pyqtgraph==0.11.1
