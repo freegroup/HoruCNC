@@ -8,7 +8,7 @@ import os
 
 from utils.exit import exit_process
 
-from PySide2.QtCore import Signal, QObject
+from PySide6.QtCore import Signal, QObject
 
 class VideoPipeline(QObject):
     processed = Signal(object)

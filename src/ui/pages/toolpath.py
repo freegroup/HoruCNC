@@ -3,9 +3,9 @@ import numpy as np
 import pyqtgraph.opengl as gl
 import cv2
 
-from PySide2.QtUiTools import QUiLoader
-from PySide2.QtWidgets import QLabel, QWidget, QVBoxLayout, QGridLayout, QSlider, QFileDialog
-from PySide2.QtCore import Qt, QFile
+from PySide6.QtUiTools import QUiLoader
+from PySide6.QtWidgets import QLabel, QWidget, QVBoxLayout, QGridLayout, QSlider, QFileDialog
+from PySide6.QtCore import Qt, QFile
 from utils.contour import to_2D_contour
 
 

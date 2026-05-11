@@ -1,11 +1,11 @@
 import sys
 import os
 
-from PySide2 import QtCore, QtGui, QtWidgets
-from PySide2.QtGui import (QBrush, QColor, QConicalGradient, QCursor, QFont, QFontDatabase, QIcon, QKeySequence, QLinearGradient, QPalette, QPainter, QPixmap, QRadialGradient)
-from PySide2.QtWidgets import QGraphicsDropShadowEffect
-from PySide2.QtUiTools import QUiLoader
-from PySide2.QtCore import QFile, QIODevice
+from PySide6 import QtCore, QtGui, QtWidgets
+from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor, QFont, QFontDatabase, QIcon, QKeySequence, QLinearGradient, QPalette, QPainter, QPixmap, QRadialGradient)
+from PySide6.QtWidgets import QGraphicsDropShadowEffect
+from PySide6.QtUiTools import QUiLoader
+from PySide6.QtCore import QFile, QIODevice
 
 
 class SplashScreen():

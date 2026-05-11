@@ -1,0 +1,38 @@
+// Shared column layout — imported by Input/Output/Parameter columns
+@import '@/assets/theme.less';
+
+.column {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-height: 0;
+}
+
+.col-label {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: @muted;
+  text-align: center;
+}
+
+.col-card {
+  flex: 1;
+  background: @surface;
+  border: 1px solid @border;
+  border-radius: @radius;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.placeholder {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: @muted;
+  font-size: 11px;
+}

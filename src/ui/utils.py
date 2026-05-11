@@ -1,5 +1,5 @@
 
-from PySide2.QtCore import Signal, QObject, QEvent
+from PySide6.QtCore import Signal, QObject, QEvent
 
 def clickable(widget):
 

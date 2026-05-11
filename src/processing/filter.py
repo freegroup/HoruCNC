@@ -3,7 +3,7 @@ import sys
 import os
 import inspect
 
-from PySide2.QtCore import Signal, QObject
+from PySide6.QtCore import Signal, QObject
 
 from utils.contour import ensure_3D_contour
 

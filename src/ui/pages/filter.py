@@ -1,8 +1,8 @@
 import os
 
-from PySide2.QtUiTools import QUiLoader
-from PySide2.QtWidgets import QLabel, QWidget, QVBoxLayout, QGridLayout, QSlider
-from PySide2.QtCore import Qt, QFile
+from PySide6.QtUiTools import QUiLoader
+from PySide6.QtWidgets import QLabel, QWidget, QVBoxLayout, QGridLayout, QSlider
+from PySide6.QtCore import Qt, QFile
 
 from ui.widgets.imagewidget import ImageWidget
 

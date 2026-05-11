@@ -1,6 +1,6 @@
-from PySide2 import QtCore
-from PySide2.QtGui import QImage, QIcon, QPixmap
-from PySide2.QtCore import Qt
+from PySide6 import QtCore
+from PySide6.QtGui import QImage, QIcon, QPixmap
+from PySide6.QtCore import Qt
 
 
 class PipelineModel(QtCore.QAbstractListModel):

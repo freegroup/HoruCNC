@@ -1,15 +1,15 @@
-from PySide2.QtWidgets import QLabel
-from PySide2 import QtGui, QtCore
-from PySide2.QtCore import  Qt
+from PySide6.QtWidgets import QLabel
+from PySide6 import QtGui, QtCore, QtWidgets
+from PySide6.QtCore import  Qt
 from utils.image import image_resize
-from PySide2.QtGui import QImage, QPixmap
+from PySide6.QtGui import QImage, QPixmap
 import cv2
 
 class ImageWidget(QLabel):
     def __init__(self):
         super(ImageWidget, self).__init__()
-        self.setFrameStyle(QtGui.QFrame.StyledPanel)
-        self.setSizePolicy(QtGui.QSizePolicy.MinimumExpanding, QtGui.QSizePolicy.MinimumExpanding)
+        self.setFrameStyle(QtWidgets.QFrame.StyledPanel)
+        self.setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.MinimumExpanding)
         self.setAttribute(Qt.WA_NoSystemBackground)
         self.setAttribute(Qt.WA_TranslucentBackground, True)
         self.setAttribute(Qt.WA_NoSystemBackground, True)

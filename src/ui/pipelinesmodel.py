@@ -1,7 +1,7 @@
 from os import listdir
 from os.path import isfile, join, basename, splitext
-from PySide2 import QtCore
-from PySide2.QtCore import Qt
+from PySide6 import QtCore
+from PySide6.QtCore import Qt
 from utils.configuration import Configuration
 
 

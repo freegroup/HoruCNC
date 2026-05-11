@@ -1,10 +1,10 @@
 import sys
 
-from PySide2.QtGui  import QColor
-from PySide2.QtUiTools import QUiLoader
-from PySide2.QtCore import QFile, QIODevice, QPoint, QObject, Qt
-from PySide2.QtWidgets import QVBoxLayout, QFileDialog, QWidget, QMainWindow, QGraphicsDropShadowEffect
-from PySide2 import QtCore
+from PySide6.QtGui  import QColor
+from PySide6.QtUiTools import QUiLoader
+from PySide6.QtCore import QFile, QIODevice, QPoint, QObject, Qt
+from PySide6.QtWidgets import QVBoxLayout, QFileDialog, QWidget, QMainWindow, QGraphicsDropShadowEffect
+from PySide6 import QtCore
 
 from ui.pages.source import SourceWidget
 from ui.pages.filter import FilterWidget

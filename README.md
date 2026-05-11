@@ -16,7 +16,19 @@ Read more on the [Project Page](https://freegroup.github.io/HoruCNC/)
 git clone https://github.com/freegroup/HoruCNC.git HoruCNC
 cd HoruCNC
 
-pip3 install -r requirements.txt
+brew install openblas
+brew install pkg-config
+
+mkdir kivy-deps-build && cd kivy-deps-build
+curl -O https://raw.githubusercontent.com/kivy/kivy/master/tools/build_macos_dependencies.sh -o build_kivy_deps.sh
+
+
+pushd HoruCNC.app/Contents/Resources/venv/bin
+source activate
+source kivy_activate
+popd
+
+pip install -r requirements.txt
 
 python3 ./src/main.py
 
