@@ -13,6 +13,9 @@ const store         = usePipelineStore()
 const camera        = inject('camera', null)
 const cameraDevices = computed(() => camera?.devices.value ?? [])
 
+const cameraLabel = (dev, i) =>
+  (dev.label?.replace(/\s*\([0-9a-f:]+\)\s*$/i, '').trim()) || `Camera ${i + 1}`
+
 // Resolve options — supports static array or function(camera, values)
 function resolveOptions(param) {
   return typeof param.options === 'function'
@@ -72,8 +75,8 @@ function onSelect(param, e) {
         <div class="param-label"><span>{{ param.label }}</span></div>
         <select class="p-select" :value="values[param.key]" @change="onCameraSelect(param.key, $event)">
           <option value="">Default camera</option>
-          <option v-for="dev in cameraDevices" :key="dev.deviceId" :value="dev.deviceId">
-            {{ dev.label || dev.deviceId.slice(0, 12) }}
+          <option v-for="(dev, i) in cameraDevices" :key="dev.deviceId" :value="dev.deviceId">
+            {{ cameraLabel(dev, i) }}
           </option>
         </select>
       </div>

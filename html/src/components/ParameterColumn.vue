@@ -12,6 +12,9 @@ const camera = inject('camera')
 
 const cameraDevices = computed(() => camera?.devices.value ?? [])
 
+const cameraLabel = (dev, i) =>
+  (dev.label?.replace(/\s*\([0-9a-f:]+\)\s*$/i, '').trim()) || `Camera ${i + 1}`
+
 function onRange(key, event) {
   store.updateParam(key, Number(event.target.value))
 }
@@ -83,10 +86,10 @@ function onSelect(param, event) {
             >
               <option value="">Default camera</option>
               <option
-                v-for="dev in cameraDevices"
+                v-for="(dev, i) in cameraDevices"
                 :key="dev.deviceId"
                 :value="dev.deviceId"
-              >{{ dev.label || dev.deviceId.slice(0, 12) }}</option>
+              >{{ cameraLabel(dev, i) }}</option>
             </select>
           </div>
 

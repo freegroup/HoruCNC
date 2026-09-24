@@ -79,19 +79,18 @@ const isCamera = computed(() => plugin.value?.inputType === 'none')
 @import '@/assets/theme.less';
 
 .step-card {
-  width: 214px;
+  min-width: 214px;
+  max-width: 500px;
   flex-shrink: 0;
   display: flex;
   flex-direction: column;
-  background: @surface;
-  border: 1px solid @border;
-  border-left: 3px solid var(--bc, @border);
+  background: #13131e;
+  border: 5px solid var(--bc, #2c2c48);
   border-radius: 10px;
   overflow: hidden;
   transition: opacity 0.15s, border-color 0.15s, box-shadow 0.15s;
-  box-shadow: @card-shadow;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.5), 0 1px 0 rgba(255, 255, 255, 0.04) inset;
 
-  &:hover     { box-shadow: 0 6px 32px rgba(0,0,0,0.6), 0 1px 0 rgba(255,255,255,0.06) inset; }
   &.droptarget { border-color: @accent; }
 }
 
@@ -137,10 +136,7 @@ const isCamera = computed(() => plugin.value?.inputType === 'none')
   text-transform: uppercase;
   letter-spacing: 0.05em;
   white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  flex: 1;
-  min-width: 0;
+  flex-shrink: 0;
 }
 
 .head-space { flex: 1; min-width: 0; }

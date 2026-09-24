@@ -8,8 +8,7 @@ export const skeletonPlugin = {
   inputType:   'image',
   outputType:  'contour',
   params: [
-    { type: 'range', key: 'width',      label: 'Width',       min: 10, max: 500, default: 100, unit: ' mm' },
-    { type: 'range', key: 'minContour', label: 'Min contour', min: 1,  max: 200, default: 5,   unit: ' px' },
+    { type: 'range', key: 'minContour', label: 'Min contour', min: 1, max: 200, default: 5, unit: ' px' },
   ],
   OutputComponent: VectorPreview,
 }

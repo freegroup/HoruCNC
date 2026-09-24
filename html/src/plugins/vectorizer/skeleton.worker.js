@@ -23,6 +23,7 @@ export async function process(prev, params) {
 
   const d      = ctx.getImageData(0, 0, w, h).data
   const minLen = params.minContour ?? 5
+  const z      = 10   // visual height for 3D preview only
 
   const fg = new Uint8Array(w * h)
   for (let i = 0, p = 0; p < d.length; i++, p += 4)
@@ -55,7 +56,7 @@ export async function process(prev, params) {
   const contours = []
 
   function walk(sx, sy) {
-    const path = [[sx, sy, 0]]
+    const path = [[sx, sy, z]]
     visited[sy * w + sx] = 1
     let dx = 0, dy = 0
     let cx = sx, cy = sy
@@ -72,7 +73,7 @@ export async function process(prev, params) {
 
       const [nx, ny, ddx, ddy] = best
       visited[ny * w + nx] = 1
-      path.push([nx, ny, 0])
+      path.push([nx, ny, z])
       dx = ddx; dy = ddy
       cx = nx; cy = ny
     }
@@ -82,7 +83,7 @@ export async function process(prev, params) {
       const [lx, ly] = path[path.length - 1]
       const [fx, fy] = path[0]
       if ((lx !== fx || ly !== fy) && Math.abs(lx - fx) <= 1 && Math.abs(ly - fy) <= 1)
-        path.push([fx, fy, 0])
+        path.push([fx, fy, z])
     }
 
     return path

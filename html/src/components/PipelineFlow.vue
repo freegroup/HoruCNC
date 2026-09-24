@@ -7,6 +7,7 @@ import { BLOCKS, BLOCK_MAP, BLOCK_REGISTRIES, allPlugins } from '@/plugins/index
 import StepCard    from './StepCard.vue'
 import StepPreview from './StepPreview.vue'
 import FlowArrow   from './FlowArrow.vue'
+import BlockArrow  from './BlockArrow.vue'
 
 const store  = usePipelineStore()
 const camera = useCamera()
@@ -58,7 +59,11 @@ async function loop() {
 onMounted(async () => {
   worker.configure(store.workerSteps)
   await camera.enumerateDevices()
-  await camera.start()
+  const savedId = store.steps[0]?.values?.deviceId
+  const firstId = camera.devices.value[0]?.deviceId
+  const useId   = savedId || firstId
+  if (!savedId && firstId) store.steps[0].values.deviceId = firstId
+  await camera.start(useId || undefined)
   rafId = requestAnimationFrame(loop)
 })
 
@@ -150,13 +155,8 @@ function addPlugin(pluginId) {
 
       <template v-for="(block, bi) in BLOCKS" :key="block.id">
 
-        <!-- Between-block arrow -->
-        <div v-if="bi > 0" class="block-arrow">
-          <svg width="22" height="16" viewBox="0 0 22 16" fill="none">
-            <path d="M2 2L8 8L2 14"    stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
-            <path d="M11 2L17 8L11 14" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-        </div>
+        <!-- Between-block chevron (half-tucked under preceding block) -->
+        <BlockArrow v-if="bi > 0" :color="BLOCK_COLORS[BLOCKS[bi - 1].id]" />
 
         <!-- Block zone -->
         <div class="block-zone" :class="block.id">
@@ -268,24 +268,6 @@ function addPlugin(pluginId) {
   &::-webkit-scrollbar-thumb  { background: @border; border-radius: 3px; }
 }
 
-// ── Between-block arrow ───────────────────────────────────────────────────────
-@ba-color: #7878b8;
-
-.block-arrow {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  align-self: center;
-  flex-shrink: 0;
-  width: 48px;
-  height: 28px;
-  border-radius: 8px;
-  background: fade(@ba-color, 14%);
-  border: 1px solid fade(@ba-color, 35%);
-  color: @ba-color;
-  box-shadow: 0 0 12px fade(@ba-color, 20%);
-}
-
 // ── Block zone ────────────────────────────────────────────────────────────────
 .block-zone {
   display: flex;
@@ -295,10 +277,12 @@ function addPlugin(pluginId) {
   padding: 8px 10px 10px;
   flex-shrink: 0;
   backdrop-filter: blur(2px);
+  position: relative;
+  z-index: 1;  /* above BlockArrow so it covers the tucked-in left portion */
 
-  &.image  { border: 1px solid fade(@c-image,  45%); background: fade(@c-image,  7%); box-shadow: 0 0 40px fade(@c-image,  6%) inset; }
-  &.vector { border: 1px solid fade(@c-vector, 45%); background: fade(@c-vector, 7%); box-shadow: 0 0 40px fade(@c-vector, 6%) inset; }
-  &.grbl   { border: 1px solid fade(@c-grbl,   45%); background: fade(@c-grbl,   7%); box-shadow: 0 0 40px fade(@c-grbl,   6%) inset; }
+  &.image  { border: 5px solid fade(@c-image,  45%); background: fade(@c-image,  7%); box-shadow: 0 4px 24px rgba(0,0,0,0.5), 0 0 40px fade(@c-image,  6%) inset; }
+  &.vector { border: 5px solid fade(@c-vector, 45%); background: fade(@c-vector, 7%); box-shadow: 0 4px 24px rgba(0,0,0,0.5), 0 0 40px fade(@c-vector, 6%) inset; }
+  &.grbl   { border: 5px solid fade(@c-grbl,   45%); background: fade(@c-grbl,   7%); box-shadow: 0 4px 24px rgba(0,0,0,0.5), 0 0 40px fade(@c-grbl,   6%) inset; }
 }
 
 .zone-label {

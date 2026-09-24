@@ -1,5 +1,5 @@
 <script setup>
-import { inject, computed, ref, watch } from 'vue'
+import { inject, computed, ref, watch, nextTick } from 'vue'
 import CanvasPreview from './previews/CanvasPreview.vue'
 import StepParams    from './StepParams.vue'
 
@@ -16,6 +16,7 @@ const result      = computed(() => stepResults?.value?.[props.stepIndex] ?? null
 
 const hasHomeBtn    = computed(() => props.plugin?.outputType !== 'gcode')
 const hasParamsBtn  = computed(() => (props.plugin?.params?.length ?? 0) > 0)
+const hasToggle3D   = computed(() => !!(result.value?.contours?.length))
 
 const dimensions = computed(() => {
   const r = result.value
@@ -52,15 +53,19 @@ const previewFsRef = ref(null)
 
 function resetView()   { previewRef.value?.resetView?.() }
 function resetViewFs() { previewFsRef.value?.resetView?.() }
+function toggle3D()    { previewRef.value?.toggleMode?.() }
+function toggle3DFs()  { previewFsRef.value?.toggleMode?.() }
 
 // ── Expand + settings state ───────────────────────────────────────────────────
 const expanded     = ref(false)
 const settingsOpen = ref(false)
 
-watch(expanded, (v) => {
+watch(expanded, async (v) => {
   if (v) {
-    settingsOpen.value = hasParamsBtn.value   // auto-open if step has params
+    settingsOpen.value = hasParamsBtn.value
     document.addEventListener('keydown', onKeydown)
+    await nextTick()
+    if (previewRef.value?.mode === '3d') previewFsRef.value?.toggleMode?.()
   } else {
     settingsOpen.value = false
     document.removeEventListener('keydown', onKeydown)
@@ -74,7 +79,7 @@ function onKeydown(e) {
 
 <template>
   <!-- ── Inline preview ─────────────────────────────────────────────────────── -->
-  <div class="step-preview" :style="{ borderColor: blockColor ? blockColor + '44' : undefined }">
+  <div class="step-preview" :style="blockColor ? { '--bc': blockColor + '88' } : {}">
     <component
       v-if="plugin?.OutputComponent && result"
       ref="previewRef"
@@ -103,6 +108,12 @@ function onKeydown(e) {
       class="step-overlay"
     />
 
+    <button v-if="hasToggle3D" class="preview-btn btn-toggle3d" title="Toggle 2D / 3D" @click="toggle3D">
+      <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+        <path d="M6 1L11 4V8L6 11L1 8V4L6 1Z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/>
+        <path d="M1 4L6 7L11 4M6 7V11" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/>
+      </svg>
+    </button>
     <button v-if="hasHomeBtn" class="preview-btn btn-home" title="Reset view" @click="resetView">⌂</button>
     <button class="preview-btn btn-expand" title="Expand" @click="expanded = true">
       <svg width="11" height="11" viewBox="0 0 11 11" fill="none">
@@ -120,13 +131,19 @@ function onKeydown(e) {
     <div v-if="expanded" class="preview-fs-backdrop" @click.self="expanded = false" />
 
     <div v-if="expanded" class="preview-fs-panel"
-         :style="{ borderColor: blockColor ? blockColor + '88' : undefined }">
+         :style="blockColor ? { '--bc': blockColor + '88' } : {}">
 
       <!-- Toolbar -->
       <div class="fs-toolbar">
         <span class="fs-title">{{ plugin?.label ?? '' }}</span>
 
         <button v-if="hasHomeBtn" class="fs-btn" title="Reset view" @click="resetViewFs">⌂</button>
+        <button v-if="hasToggle3D" class="fs-btn" title="Toggle 2D / 3D" @click="toggle3DFs">
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+            <path d="M6 1L11 4V8L6 11L1 8V4L6 1Z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/>
+            <path d="M1 4L6 7L11 4M6 7V11" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/>
+          </svg>
+        </button>
 
         <button
           v-if="hasParamsBtn"
@@ -204,20 +221,18 @@ function onKeydown(e) {
 
 // ── Inline preview ────────────────────────────────────────────────────────────
 .step-preview {
-  width: 220px;
-  min-height: 160px;
+  min-width: 214px;
+  max-width: 500px;
   flex-shrink: 0;
   display: flex;
   flex-direction: column;
-  background: @surface;
-  border: 1px solid @border;
+  background: #13131e;
+  border: 5px solid var(--bc, #2c2c48);
   border-radius: 10px;
   overflow: hidden;
   position: relative;
-  box-shadow: @card-shadow;
-  transition: box-shadow 0.15s;
-
-  &:hover { box-shadow: 0 6px 32px rgba(0,0,0,0.6), 0 1px 0 rgba(255,255,255,0.06) inset; }
+  transition: opacity 0.15s, border-color 0.15s, box-shadow 0.15s;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.5), 0 1px 0 rgba(255, 255, 255, 0.04) inset;
 }
 
 .step-overlay {
@@ -259,8 +274,9 @@ function onKeydown(e) {
   &:hover { color: @accent; border-color: @accent; }
 }
 
-.btn-home   { right: 44px; }
-.btn-expand { right: 10px; }
+.btn-toggle3d { right: 78px; }
+.btn-home     { right: 44px; }
+.btn-expand   { right: 10px; }
 
 .preview-footer {
   position: absolute;
@@ -297,7 +313,7 @@ function onKeydown(e) {
   inset: 28px;
   z-index: 1101;
   background: @surface;
-  border: 1px solid @border;
+  border: 5px solid var(--bc, #2c2c48);
   border-radius: 12px;
   overflow: hidden;
   display: flex;
@@ -373,7 +389,7 @@ function onKeydown(e) {
 .fs-settings {
   width: 260px;
   flex-shrink: 0;
-  border-right: 1px solid @border;
+  border-right: 1px solid var(--bc, #2c2c48);
   background: @surface2;
   overflow-y: auto;
   padding: 14px 12px;

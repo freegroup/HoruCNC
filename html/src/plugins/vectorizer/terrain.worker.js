@@ -61,7 +61,7 @@ export async function process(prev, params) {
         continue
       }
 
-      const z = -(maxDepth * (threshold - brightness) / threshold)
+      const z = maxDepth * brightness / threshold   // height: bright=tall, dark=low
       segment.push([px, py, z])
     }
 

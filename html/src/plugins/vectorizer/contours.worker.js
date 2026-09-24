@@ -17,6 +17,7 @@ export async function process(prev, params) {
   const d      = ctx.getImageData(0, 0, w, h).data
   const minLen = params.minContour ?? 10
   const invert = params.invertFill ?? false
+  const z        = 10   // visual height for 3D preview only
 
   const fg = new Uint8Array(w * h)
   for (let i = 0, p = 0; p < d.length; i++, p += 4) {
@@ -33,7 +34,7 @@ export async function process(prev, params) {
 
   function traceContour(sx, sy) {
     const maxPts = (w + h) * 4
-    const pts = [[sx, sy, 0]]
+    const pts = [[sx, sy, z]]
     let bx = sx, by = sy - 1
     let cx = sx, cy = sy
 
@@ -57,12 +58,12 @@ export async function process(prev, params) {
       if (nx === -1) break
       if (nx === sx && ny === sy) break
 
-      pts.push([nx, ny, 0])
+      pts.push([nx, ny, z])
       bx = lastBgX; by = lastBgY
       cx = nx; cy = ny
     }
 
-    if (pts.length > 1) pts.push([sx, sy, 0])
+    if (pts.length > 1) pts.push([sx, sy, z])
     return pts
   }
 

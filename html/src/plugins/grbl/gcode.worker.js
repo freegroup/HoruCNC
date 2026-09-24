@@ -41,16 +41,17 @@ export async function process(prev, params) {
     const cncSX = ((sx - minPx) * PX_TO_MM).toFixed(4)
     const cncSY = ((maxPy - sy) * PX_TO_MM).toFixed(4)
 
-    // 3D mode: any contour point has non-zero Z → use per-point Z, single pass
-    const has3D = contour.some(p => (p[2] ?? 0) !== 0)
+    // 3D mode: z values vary across points (e.g. terrain) — use per-point z
+    const z0     = contour[0][2] ?? 0
+    const has3D  = contour.some(p => Math.abs((p[2] ?? 0) - z0) > 0.01)
 
     lines.push(`G00 X${cncSX} Y${cncSY}`)
 
     if (has3D) {
-      // Single-pass 3D toolpath — Z comes from each contour point directly
-      lines.push(`G01 Z${(sz ?? 0).toFixed(4)} F${plungeRate}`)
+      // Single-pass 3D toolpath — height from vector is negated to cutting depth
+      lines.push(`G01 Z${(-(sz ?? 0)).toFixed(4)} F${plungeRate}`)
       for (const [x, y, z] of contour) {
-        lines.push(`G01 X${((x - minPx) * PX_TO_MM).toFixed(4)} Y${((maxPy - y) * PX_TO_MM).toFixed(4)} Z${(z ?? 0).toFixed(4)} F${feedrate}`)
+        lines.push(`G01 X${((x - minPx) * PX_TO_MM).toFixed(4)} Y${((maxPy - y) * PX_TO_MM).toFixed(4)} Z${(-(z ?? 0)).toFixed(4)} F${feedrate}`)
       }
       lines.push(`G00 Z${clearanceZ.toFixed(4)}`)
 
