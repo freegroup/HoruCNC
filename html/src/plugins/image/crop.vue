@@ -1,6 +1,7 @@
 <script setup>
 import { ref, inject, watchEffect, onMounted, onUnmounted } from 'vue'
 import { usePipelineStore } from '@/stores/pipeline.js'
+import { cssColor } from '@/assets/colors.js'
 
 const props = defineProps({
   values:     Object,
@@ -76,7 +77,7 @@ function draw() {
   ctx.setLineDash([5, 4])
   for (const ln of lines) {
     const active = dragKey === ln.key
-    ctx.strokeStyle = active ? '#ffffff' : '#f0a030'
+    ctx.strokeStyle = active ? '#ffffff' : cssColor('accent')
     ctx.lineWidth   = active ? 2.5 : 1.5
     ctx.globalAlpha = active ? 1.0 : 0.8
     ctx.beginPath()
@@ -96,7 +97,7 @@ function draw() {
   ]
   for (const h of handles) {
     const active = dragKey === h.key
-    ctx.fillStyle   = active ? '#ffffff' : '#f0a030'
+    ctx.fillStyle   = active ? '#ffffff' : cssColor('accent')
     ctx.strokeStyle = 'rgba(0,0,0,0.45)'
     ctx.lineWidth   = 1
     ctx.beginPath()

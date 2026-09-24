@@ -23,7 +23,7 @@ export async function process(prev, params) {
 
   const d      = ctx.getImageData(0, 0, w, h).data
   const minLen = params.minContour ?? 5
-  const z      = 10   // visual height for 3D preview only
+  const z      = -(params.depth ?? 1.5)   // cutting depth — machine Z, into the material
 
   const fg = new Uint8Array(w * h)
   for (let i = 0, p = 0; p < d.length; i++, p += 4)

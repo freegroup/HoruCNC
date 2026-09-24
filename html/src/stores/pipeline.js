@@ -43,6 +43,20 @@ function templateToSteps(template) {
   return steps
 }
 
+/**
+ * View state that is not part of the pipeline itself but should survive a reload, like in
+ * PatternMaster: the chosen view per step, the scroll position, the export file name.
+ */
+function sanitizeUi(ui) {
+  const u = ui && typeof ui === 'object' ? ui : {}
+  return {
+    views:     u.views && typeof u.views === 'object' ? u.views : {},
+    split:     Number.isFinite(u.split) ? Math.min(1, Math.max(0, u.split)) : 0.5,   // shared before/after divider
+    scrollTop: Number.isFinite(u.scrollTop) ? u.scrollTop : 0,
+    fileName:  typeof u.fileName === 'string' ? u.fileName : 'horucnc',
+  }
+}
+
 function loadFromStorage() {
   try {
     const raw = localStorage.getItem(STORAGE_KEY)
@@ -52,6 +66,11 @@ function loadFromStorage() {
     if (!Array.isArray(data?.steps) || !data.steps[0]?.instanceId) return null
     // Reject v2 pipelines that still reference the removed 'input' block
     if (data.steps.some(s => s.blockId === 'input')) return null
+    // A plugin may have been removed since — drop its steps
+    data.steps = data.steps.filter(s => allPlugins.has(s.pluginId))
+    // Params added since the project was saved get their defaults
+    for (const step of data.steps) step.values = { ...defaultValues(step.pluginId), ...step.values }
+    data.ui = sanitizeUi(data.ui)
     return data
   } catch {}
   return null
@@ -65,6 +84,7 @@ export const usePipelineStore = defineStore('pipeline', () => {
   // Empty steps = no project → show StartScreen
   const steps        = ref(saved?.steps ?? [])
   const activeIndex  = ref(saved?.activeIndex ?? 0)
+  const ui           = ref(saved?.ui ?? sanitizeUi())
 
   const activeStep   = computed(() => steps.value[activeIndex.value] ?? steps.value[0])
   const activePlugin = computed(() => allPlugins.get(activeStep.value?.pluginId))
@@ -102,13 +122,6 @@ export const usePipelineStore = defineStore('pipeline', () => {
   function toggleCollapsed(instanceId) {
     const step = steps.value.find(s => s.instanceId === instanceId)
     if (step) step.collapsed = !step.collapsed
-  }
-
-  /** Collapse all steps of a block, or expand them all if every one is collapsed already. */
-  function toggleBlockCollapsed(blockId) {
-    const blockSteps = steps.value.filter(s => s.blockId === blockId)
-    const collapse   = !blockSteps.every(s => s.collapsed)
-    for (const s of blockSteps) s.collapsed = collapse
   }
 
   function updateParam(key, value) {
@@ -205,19 +218,39 @@ export const usePipelineStore = defineStore('pipeline', () => {
     activeIndex.value = newIdx
   }
 
+  /**
+   * Drag & drop: put a step before or after another step of the same block.
+   * The block's mandatory first step (e.g. the camera) always stays first.
+   */
+  function moveStepTo(instanceId, targetInstanceId, after) {
+    if (instanceId === targetInstanceId) return
+    const step   = steps.value.find(s => s.instanceId === instanceId)
+    const target = steps.value.find(s => s.instanceId === targetInstanceId)
+    if (!step || !target || step.blockId !== target.blockId) return
+    if (BLOCK_MAP[step.blockId]?.fixed || isMandatoryFirst(instanceId)) return
+    if (isMandatoryFirst(targetInstanceId)) after = true
+    steps.value.splice(steps.value.indexOf(step), 1)
+    const at = steps.value.indexOf(target) + (after ? 1 : 0)
+    steps.value.splice(at, 0, step)
+    activeIndex.value = at
+  }
+
   // ── Templates ────────────────────────────────────────────────────────────────
   function loadTemplate(template) {
     steps.value       = templateToSteps(template)
     activeIndex.value = 0
+    ui.value          = { ...sanitizeUi(), fileName: ui.value.fileName }
   }
 
   // ── Persistence ──────────────────────────────────────────────────────────────
-  watch([steps, activeIndex], () => {
+  // One serialisable state (steps + ui) — every change is saved, a reload restores all of it
+  watch([steps, activeIndex, ui], () => {
     if (steps.value.length === 0) return  // don't persist empty project
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify({
         steps:       steps.value,
         activeIndex: activeIndex.value,
+        ui:          ui.value,
       }))
     } catch {}
   }, { deep: true })
@@ -225,6 +258,7 @@ export const usePipelineStore = defineStore('pipeline', () => {
   return {
     steps,
     activeIndex,
+    ui,
     activeStep,
     activePlugin,
     pipelineParams,
@@ -234,13 +268,13 @@ export const usePipelineStore = defineStore('pipeline', () => {
     updateParam,
     updateStepParam,
     toggleCollapsed,
-    toggleBlockCollapsed,
     isMandatoryFirst,
     addStep,
     addStepBefore,
     removeStep,
     replaceStep,
     moveStep,
+    moveStepTo,
     loadTemplate,
   }
 })

@@ -1,17 +1,27 @@
-// Palette shared with the sister project PatternMaster (css/style.css)
-@bg:       #14171c;
-@surface:  #1c2128;
-@surface2: #232a33;
-@border:   #2e3742;
-@accent:   #f0a54a;
-@accent2:  #c07820;
-@text:     #d6dde6;
-@muted:    #8a96a6;
-@ok:       #4fbf7b;
-@danger:   #e0574b;
-@radius:   8px;
-@font:      -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-@card-shadow: 0 4px 24px rgba(0,0,0,0.5), 0 1px 0 rgba(255,255,255,0.04) inset;
+// Reduced, neutral palette (dark, macOS-like): greys + one accent, no gradients, no glow
+@bg:       #0b0b0c;
+@panel:    #131315;   // section panels on @bg
+@surface:  #161618;
+@surface2: #1f1f22;
+@border:   #2a2a2e;
+@hairline: fade(#fff, 8%);
+// ── The tint colour ─────────────────────────────────────────────────────────
+// HoruCNC's own colour (PatternMaster's sibling is orange). Defined ONLY here — every tone
+// below is computed from it, and global.less hands them to JavaScript as CSS variables.
+@accent:       #64d2ff;
+@accent-dark:  darken(@accent, 18%);
+@accent-light: lighten(@accent, 12%);
+@accent-soft:  fade(@accent, 12%);                      // tinted surfaces (selected, badges)
+@accent-line:  fade(@accent, 55%);                      // tinted borders, hover outlines
+@on-accent:    darken(desaturate(@accent, 30%), 62%);   // text on an accent-coloured surface
+@text:     #f5f5f7;
+@muted:    #8e8e93;
+@ok:       #30d158;
+@danger:   #ff453a;
+@radius:   10px;
+@font:     -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Inter', 'Segoe UI', Roboto, sans-serif;
+@mono:     'SF Mono', ui-monospace, Menlo, 'JetBrains Mono', monospace;
+@card-shadow: none;
 
 * {
   box-sizing: border-box;
@@ -24,6 +34,7 @@ body {
   color: @text;
   font-family: @font;
   font-size: 13px;
+  -webkit-font-smoothing: antialiased;
   height: 100vh;
   overflow: hidden;
   display: flex;
@@ -34,4 +45,32 @@ body {
   height: 100%;
   display: flex;
   flex-direction: column;
+}
+
+// "CNC" in the big headlines: outlined in the tint (like PatternMaster's step numbers),
+// filled with fine hatching — a hint of raster toolpaths milled into the letters.
+// The letters of the system font overlap inside (e.g. the "N"); the outline is therefore
+// painted behind an opaque fill in the ground colour, and the hatching lies on top as a
+// second layer (::after, text from data-text). Sizes in em — scales with the headline.
+.cnc-mark(@ground) {
+  position: relative;
+  display: inline-block;      // the ::after box then matches the line box of the letters
+  font-style: normal;
+  font-weight: 800;
+  letter-spacing: 0;          // outlines of tightly set letters would cross
+  color: @ground;
+  -webkit-text-stroke: 0.044em @accent;
+  paint-order: stroke fill;
+
+  &::after {
+    content: attr(data-text);
+    position: absolute;
+    inset: 0;
+    color: transparent;
+    -webkit-text-stroke: 0;
+    background: repeating-linear-gradient(-30deg, @accent-line 0 0.018em, transparent 0.018em 0.085em);
+    -webkit-background-clip: text;
+    background-clip: text;
+    pointer-events: none;
+  }
 }

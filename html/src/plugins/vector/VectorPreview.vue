@@ -1,5 +1,8 @@
 <script setup>
 import { ref, computed, inject, watchEffect, watch, nextTick, onMounted, onUnmounted } from 'vue'
+import { cssColor } from '@/assets/colors.js'
+import { pathDepth } from '@/plugins/grbl/gcode.worker.js'
+import { sharedCam, fitView, resetCam, attachOrbit, eyeOf } from '@/plugins/grbl/preview/viewCam.js'
 
 const props = defineProps({
   result:    Object,
@@ -11,7 +14,6 @@ const canvasRef    = ref(null)
 const containerRef = ref(null)
 const wrapRef      = ref(null)
 const mode         = ref('2d')
-const lockedSize   = ref(null)
 const stepResults  = inject('stepResults', null)
 
 const activeResult = computed(() => {
@@ -21,15 +23,8 @@ const activeResult = computed(() => {
 })
 
 // ── Z helpers ─────────────────────────────────────────────────────────────────
-function getZMax(contours) {
-  let zMax = 0
-  for (const c of contours)
-    for (const p of c) {
-      const z = p[2]
-      if (Number.isFinite(z) && z > zMax) zMax = z
-    }
-  return zMax
-}
+// Deepest point as a positive depth (z is machine Z: 0 = surface, negative = into the material)
+const getZMax = pathDepth
 
 // Map t ∈ [0,1] (0=surface, 1=max depth) to CSS color string
 function zColorCss(t) {
@@ -44,7 +39,10 @@ const zoom = ref(1)
 const panX = ref(0)
 const panY = ref(0)
 
-function resetView() { zoom.value = 1; panX.value = 0; panY.value = 0; draw() }
+function resetView() {
+  if (mode.value === '3d') { resetCam(cam); fit3D(); return }
+  zoom.value = 1; panX.value = 0; panY.value = 0; draw()
+}
 
 function draw() {
   if (mode.value !== '2d') return
@@ -84,7 +82,7 @@ function draw() {
     if (contour.length < 2) continue
 
     if (!has3D) {
-      ctx.strokeStyle = '#f0a030'
+      ctx.strokeStyle = cssColor('accent')
       ctx.beginPath()
       ctx.moveTo(contour[0][0] - ox, contour[0][1] - oy)
       for (let i = 1; i < contour.length; i++)
@@ -95,8 +93,8 @@ function draw() {
       for (let i = 1; i < contour.length; i++) {
         const x1 = contour[i-1][0] - ox,  y1 = contour[i-1][1] - oy
         const x2 = contour[i][0]   - ox,  y2 = contour[i][1]   - oy
-        const t1 = (contour[i-1][2] ?? 0) / zMax
-        const t2 = (contour[i][2]   ?? 0) / zMax
+        const t1 = -(contour[i-1][2] ?? 0) / zMax
+        const t2 = -(contour[i][2]   ?? 0) / zMax
 
         if (Math.abs(t1 - t2) < 0.01) {
           // Same depth — single color, no gradient needed
@@ -188,54 +186,63 @@ let THREE    = null
 let renderer = null
 let scene    = null
 let camera   = null
-let controls = null
 let animId   = null
 let observer3D = null
 
-const HOME = {
-  direction: { x: -0.17, y: -0.86, z: 0.48 },
-  up:        { x:  0.12, y:  0.97, z: 0.22 },
+// Same orbit camera and controls as the G-code 3D / CAM views (ported from PatternMaster)
+const cam = sharedCam
+let box3D       = null   // [x0,y0,z0,x1,y1,z1] of the paths
+let detachOrbit = null
+
+function fit3D() {
+  if (!box3D || !renderer) return
+  const c = renderer.domElement
+  fitView(cam, c.width / Math.max(1, c.height), box3D)
+  cam.framedFor = 'fitted'
+}
+
+function syncCamera() {
+  camera.position.set(...eyeOf(cam))
+  camera.lookAt(...cam.target)
+  camera.near = cam.dist / 1000
+  camera.far  = cam.dist * 100
+  camera.updateProjectionMatrix()
 }
 
 async function init3D() {
   const el = containerRef.value
   if (!el) return
 
-  const [threeModule, { TrackballControls }] = await Promise.all([
-    import('three'),
-    import('three/addons/controls/TrackballControls.js'),
-  ])
-  THREE = threeModule
+  THREE = await import('three')
 
-  const w = el.clientWidth
-  const h = el.clientHeight
+  // Not laid out yet → start at 1×1, the ResizeObserver below sets the real size
+  const w = el.clientWidth  || 1
+  const h = el.clientHeight || 1
 
   renderer = new THREE.WebGLRenderer({ antialias: true })
   renderer.setPixelRatio(window.devicePixelRatio)
   renderer.setSize(w, h, false)   // false = don't override CSS with explicit px
-  renderer.setClearColor(0x0a0a10)
+  renderer.setClearColor(0x0e0e10)
   Object.assign(renderer.domElement.style, { width: '100%', height: '100%', display: 'block' })
   el.appendChild(renderer.domElement)
 
-  renderer.domElement.addEventListener('wheel', (e) => {
-    if (!e.ctrlKey && !e.metaKey) e.stopImmediatePropagation()
-  }, { capture: false })
-
   scene  = new THREE.Scene()
-  camera = new THREE.PerspectiveCamera(60, w / h, 0.01, 100000)
+  camera = new THREE.PerspectiveCamera(40, w / h, 0.01, 100000)
+  camera.up.set(0, 0, 1)
 
-  controls = new TrackballControls(camera, renderer.domElement)
-  controls.rotateSpeed  = 5
-  controls.zoomSpeed    = 1.2
-  controls.panSpeed     = 0.8
-  controls.staticMoving = true
+  detachOrbit = attachOrbit(renderer.domElement, cam, {
+    span:     () => box3D ? Math.max(box3D[3] - box3D[0], box3D[4] - box3D[1]) : 10,
+    onChange: () => {},
+    onReset:  () => { resetCam(cam); fit3D() },
+  })
 
   build3DScene()
 
   const animate = () => {
     animId = requestAnimationFrame(animate)
-    controls?.update()
-    renderer?.render(scene, camera)
+    if (!renderer) return
+    syncCamera()
+    renderer.render(scene, camera)
   }
   animate()
 
@@ -244,7 +251,6 @@ async function init3D() {
     if (!w || !h) return
     renderer?.setSize(w, h, false)
     if (camera) { camera.aspect = w / h; camera.updateProjectionMatrix() }
-    controls?.handleResize()
   })
   observer3D.observe(el)
 }
@@ -263,10 +269,16 @@ function build3DScene() {
   const contours = result?.contours ?? []
   if (!contours.length) return
 
-  const iw         = result.bitmap?.width  || 640
-  const ih         = result.bitmap?.height || 480
   const mmPerPixel = result.meta?.mmPerPixel ?? 0.264583
   const zMax       = getZMax(contours)
+
+  // G-code coordinates (like gcode.worker.js): mm, origin bottom-left of the paths —
+  // so this view and the G-code 3D / CAM views can share one camera
+  let minPx = Infinity, maxPy = -Infinity
+  for (const c of contours) for (const [px, py] of c) {
+    if (px < minPx) minPx = px
+    if (py > maxPy) maxPy = py
+  }
 
   const group = new THREE.Group()
 
@@ -277,10 +289,10 @@ function build3DScene() {
     const colors    = []
 
     for (const [px, py, pz = 0] of contour) {
-      positions.push(px * mmPerPixel, (ih - py) * mmPerPixel, pz)
+      positions.push((px - minPx) * mmPerPixel, (maxPy - py) * mmPerPixel, pz)
 
       // Vertex color: same hue logic as 2D, Three.js interpolates between vertices
-      const t = (zMax === 0 || !Number.isFinite(pz)) ? 0 : Math.max(0, Math.min(1, pz / zMax))
+      const t = (zMax === 0 || !Number.isFinite(pz)) ? 0 : Math.max(0, Math.min(1, -pz / zMax))
       const color = new THREE.Color().setHSL((30 + 170 * (1 - t)) / 360, 0.9, 0.35 + 0.30 * t)
       colors.push(color.r, color.g, color.b)
     }
@@ -306,45 +318,31 @@ function build3DScene() {
   grid.position.set(center.x, center.y, 0)
   scene.add(grid)
 
-  // Fit camera
-  const fov  = camera.fov * (Math.PI / 180)
-  const dist = (maxLen / 2) / Math.tan(fov / 2) * 1.6
-  camera.near = dist / 100
-  camera.far  = dist * 100
-  camera.updateProjectionMatrix()
-  camera.up.set(HOME.up.x, HOME.up.y, HOME.up.z)
-  camera.position.set(
-    center.x + HOME.direction.x * dist,
-    center.y + HOME.direction.y * dist,
-    center.z + HOME.direction.z * dist,
-  )
-  controls.target.copy(center)
-  controls.update()
+  // Fit once — later results (new snapshot, other parameters) keep the user's view
+  box3D = [box.min.x, box.min.y, box.min.z, box.max.x, box.max.y, box.max.z]
+  if (!cam.framedFor) fit3D()
 }
 
 function dispose3D() {
   cancelAnimationFrame(animId); animId = null
   observer3D?.disconnect(); observer3D = null
-  controls?.dispose()
+  detachOrbit?.(); detachOrbit = null
   scene?.traverse(obj => { obj.geometry?.dispose(); obj.material?.dispose() })
   renderer?.dispose()
   renderer?.domElement?.remove()
-  renderer = null; scene = null; camera = null; controls = null; THREE = null
+  renderer = null; scene = null; camera = null; THREE = null
 }
 
 // ── Mode toggle ───────────────────────────────────────────────────────────────
 async function toggleMode() {
   if (mode.value === '2d') {
     // Lock current pixel size so the container doesn't collapse when the canvas hides
-    const el = wrapRef.value
-    if (el) lockedSize.value = { width: el.offsetWidth + 'px', height: el.offsetHeight + 'px' }
     mode.value = '3d'
     await nextTick()
     await init3D()
   } else {
     dispose3D()
     mode.value = '2d'
-    lockedSize.value = null
     await nextTick()
     draw()
   }
@@ -385,7 +383,7 @@ defineExpose({ resetView, toggleMode, mode })
 </script>
 
 <template>
-  <div ref="wrapRef" class="vector-wrap" :style="lockedSize">
+  <div ref="wrapRef" class="vector-wrap">
     <canvas
       ref="canvasRef"
       class="vector-canvas"
@@ -399,15 +397,18 @@ defineExpose({ resetView, toggleMode, mode })
 <style lang="less" scoped>
 @import '@/assets/theme.less';
 
+// Pinned to the view on all sides — follows it when it grows (fullscreen) without
+// depending on percentage heights, which resolve to 0 here once the 2D canvas is hidden
 .vector-wrap {
-  width: 100%;
-  height: 100%;
-  position: relative;
+  position: absolute;
+  inset: 0;
   overflow: hidden;
 }
 
 .vector-canvas,
 .three-container {
+  position: absolute;
+  inset: 0;
   width: 100%;
   height: 100%;
   display: block;

@@ -1,14 +1,17 @@
 import CameraPreview from './camera.vue'
 
+/** `deviceId` value of the source step when the picture is an uploaded file instead of a webcam */
+export const UPLOAD = 'upload'
+
 /** @type {import('../types').FilterPlugin} */
 export const cameraPlugin = {
   id:          'camera',
-  label:       'Camera',
-  description: 'Choose your camera and adjust size and mirroring',
+  label:       'Source Picture',
+  description: 'Take a snapshot with your webcam or upload an image',
   inputType:   'none',
   outputType:  'image',
   params: [
-    { type: 'camera-select', key: 'deviceId', label: 'Camera', default: '' },
+    { type: 'source-select', key: 'deviceId', label: 'Source', default: '' },
     { type: 'sep' },
     { type: 'preset-select', key: 'dpi', label: 'Resolution', default: 254,
       options: ({ camera, values } = {}) => {

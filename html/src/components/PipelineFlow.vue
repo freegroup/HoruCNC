@@ -1,80 +1,211 @@
 <script setup>
-import { ref, computed, provide, watch, onMounted, onUnmounted } from 'vue'
+import { ref, shallowRef, computed, provide, watch, nextTick, onMounted, onUnmounted } from 'vue'
 import { usePipelineStore }   from '@/stores/pipeline.js'
 import { useCamera }          from '@/composables/useCamera.js'
 import { usePipelineWorker }  from '@/composables/usePipelineWorker.js'
 import { BLOCKS, BLOCK_MAP, BLOCK_REGISTRIES, allPlugins } from '@/plugins/index.js'
 import StepRow from './StepRow.vue'
+import { process as processCamera } from '@/plugins/input/camera.worker.js'
+import { UPLOAD } from '@/plugins/input/camera.js'
+import { storage } from '@/stores/storage.js'
+import FinishStep from './FinishStep.vue'
+
+// The page header is big at the top and compact once scrolled (with hysteresis against flicker)
+const emit = defineEmits(['compact'])
+let compact = false
+let scrollSave = 0
+function onScroll(e) {
+  const y = e.target.scrollTop
+  const next = compact ? y > 8 : y > 60
+  if (next !== compact) emit('compact', compact = next)
+  // Remembered for the next reload (debounced — saving writes the whole state)
+  clearTimeout(scrollSave)
+  scrollSave = setTimeout(() => { store.ui.scrollTop = Math.round(y) }, 250)
+}
 
 const store  = usePipelineStore()
 const camera = useCamera()
 const worker = usePipelineWorker()
 
-// ── Frozen frame ──────────────────────────────────────────────────────────────
+// ── Snapshot ──────────────────────────────────────────────────────────────────
+// The pipeline always works on a snapshot. The first one is taken automatically once the
+// camera has warmed up; "Take snapshot" replaces it. The live picture is only shown in the
+// source step, as the "before" side of its compare view.
+// With the source "Upload image" there is no camera at all: the uploaded file IS the snapshot.
+const WARMUP_FRAMES = 12            // skip the dark first frames of a starting camera
+const SNAPSHOT_KEY  = 'snapshot'
+const MAX_SIDE      = 2048          // uploads are scaled down to this — keeps the stored JPEG small
+const sourceId = computed(() => store.steps[0]?.values?.deviceId ?? '')
+const isUpload = computed(() => sourceId.value === UPLOAD)
 const frozenBitmap = ref(null)
+const liveFrame    = shallowRef(null)   // live picture, through the camera step (crop/mirror/scale)
 let frozenSent = false
+let liveFrames = 0
 
 async function captureSnapshot() {
-  frozenBitmap.value?.close()
-  frozenBitmap.value = await camera.captureFrame()
-  frozenSent = false
+  const bmp = await camera.captureFrame()
+  if (!bmp) return
+  setSnapshot(bmp)
 }
 
-// Camera deviceId change → must go live (different camera source)
-watch(() => store.steps[0]?.values?.deviceId, () => {
+function setSnapshot(bmp) {
+  frozenBitmap.value?.close()
+  frozenBitmap.value = bmp
+  syncNativeRes()
+  frozenSent = false
+  saveSnapshot(bmp)
+}
+
+// The snapshot survives a reload (JPEG in localStorage) — otherwise a reload would take a
+// new picture and every step would suddenly show something else
+async function saveSnapshot(bmp) {
+  try {
+    const c = new OffscreenCanvas(bmp.width, bmp.height)
+    c.getContext('2d').drawImage(bmp, 0, 0)
+    const blob = await c.convertToBlob({ type: 'image/jpeg', quality: 0.9 })
+    const url  = await new Promise(res => { const r = new FileReader(); r.onload = () => res(r.result); r.readAsDataURL(blob) })
+    storage.set(SNAPSHOT_KEY, url)
+  } catch { /* no persistence then */ }
+}
+
+// "Upload image": a file dialog, the chosen picture becomes the snapshot.
+// Must be called from a click (browsers only open file dialogs on a user gesture).
+function pickImage() {
+  const input = document.createElement('input')
+  input.type   = 'file'
+  input.accept = 'image/*'
+  input.onchange = () => { if (input.files?.[0]) useImageFile(input.files[0]) }
+  input.click()
+}
+
+async function useImageFile(file) {
+  try {
+    let bmp = await createImageBitmap(file, { imageOrientation: 'from-image' })
+    const scale = MAX_SIDE / Math.max(bmp.width, bmp.height)
+    if (scale < 1) {
+      const small = await createImageBitmap(bmp, {
+        resizeWidth:  Math.round(bmp.width * scale),
+        resizeHeight: Math.round(bmp.height * scale),
+        resizeQuality: 'high',
+      })
+      bmp.close()
+      bmp = small
+    }
+    setSnapshot(bmp)
+  } catch { /* not a readable image — keep the current one */ }
+}
+
+// The resolution presets are relative to the source's own resolution — for an upload
+// that is the image, not the (stopped) camera
+function syncNativeRes() {
+  const b = frozenBitmap.value
+  if (isUpload.value && b) camera.nativeRes.value = { w: b.width, h: b.height }
+}
+
+async function loadSnapshot() {
+  const url = storage.get(SNAPSHOT_KEY)
+  if (typeof url !== 'string') return
+  try {
+    frozenBitmap.value = await createImageBitmap(await (await fetch(url)).blob())
+    frozenSent = false
+    syncNativeRes()
+  } catch { storage.remove(SNAPSHOT_KEY) }
+}
+
+// Other camera → a fresh first snapshot from it.
+// Switching to "Upload image" keeps the current picture until a file is chosen.
+watch(sourceId, id => {
+  liveFrame.value?.bitmap?.close()
+  liveFrame.value = null
+  if (id === UPLOAD) { camera.stop(); syncNativeRes(); return }
   frozenBitmap.value?.close()
   frozenBitmap.value = null
   frozenSent = false
+  liveFrames = 0
+  storage.remove(SNAPSHOT_KEY)
+  startCamera(id)
 })
+
+async function startCamera(id) {
+  await camera.start(id || undefined)
+  // Devices listed before the permission was granted have no names yet
+  if (camera.isReady.value && camera.devices.value.some(d => !d.deviceId || !d.label)) await camera.enumerateDevices(false)
+}
 
 // Other camera params (dpi, physicalWidth, flipH) → re-run same frozen frame
 // Other step params → also just re-run
 watch(() => store.pipelineParams, () => { frozenSent = false }, { deep: true })
 
+// ── Scroll position — restored once the first results have laid out the rows ──
+const flowRef = ref(null)
+const stopScrollRestore = watch(() => worker.stepResults.value.length, n => {
+  if (!n) return
+  nextTick(() => { if (flowRef.value) flowRef.value.scrollTop = store.ui.scrollTop })
+  stopScrollRestore()
+})
+
 provide('camera',          camera)
 provide('stepResults',     worker.stepResults)
 provide('captureSnapshot', captureSnapshot)
+provide('pickImage',       pickImage)
+provide('isUpload',        isUpload)
 provide('frozenBitmap',    frozenBitmap)
+provide('liveFrame',       liveFrame)
 
 // ── Processing loop ───────────────────────────────────────────────────────────
 let rafId = null
 
 async function loop() {
-  if (frozenBitmap.value) {
-    if (!frozenSent) {
-      const bmp = await createImageBitmap(frozenBitmap.value)
-      worker.sendFrame(bmp, store.pipelineParams)
-      frozenSent = true
+  const bitmap = isUpload.value ? null : await camera.captureFrame()
+  if (bitmap && isUpload.value) bitmap.close()      // switched to upload meanwhile
+  else if (bitmap) {
+    if (!frozenBitmap.value && ++liveFrames >= WARMUP_FRAMES) {
+      setSnapshot(await createImageBitmap(bitmap))
     }
-  } else {
-    const bitmap = await camera.captureFrame()
-    if (bitmap) worker.sendFrame(bitmap, store.pipelineParams)
+    const live = await processCamera({ bitmap }, store.steps[0]?.values ?? {})
+    bitmap.close()
+    liveFrame.value?.bitmap?.close()
+    liveFrame.value = live
+  }
+  // The pipeline only runs again when the snapshot or a parameter changed
+  if (frozenBitmap.value && !frozenSent) {
+    frozenSent = true
+    worker.sendFrame(await createImageBitmap(frozenBitmap.value), store.pipelineParams)
   }
   rafId = requestAnimationFrame(loop)
 }
 
 onMounted(async () => {
   worker.configure(store.workerSteps)
-  await camera.enumerateDevices()
-  const savedId = store.steps[0]?.values?.deviceId
-  const firstId = camera.devices.value[0]?.deviceId
-  const useId   = savedId || firstId
-  if (!savedId && firstId) store.steps[0].values.deviceId = firstId
-  await camera.start(useId || undefined)
+  await loadSnapshot()             // before the camera could take an automatic one
   rafId = requestAnimationFrame(loop)
+  // An uploaded picture needs no camera — list the webcams without asking for permission
+  if (isUpload.value) { await camera.enumerateDevices(false); return }
+  await camera.enumerateDevices()
+  const savedId = sourceId.value
+  const firstId = camera.devices.value[0]?.deviceId
+  if (!savedId && firstId) {
+    store.steps[0].values.deviceId = firstId      // the watcher starts it
+    return
+  }
+  // No webcam (or no permission) and nothing chosen yet → start with an upload instead
+  if (!savedId && !frozenBitmap.value && camera.error.value) {
+    store.steps[0].values.deviceId = UPLOAD
+    return
+  }
+  await startCamera(savedId)
 })
 
 onUnmounted(() => {
   if (rafId) cancelAnimationFrame(rafId)
   camera.stop()
   frozenBitmap.value?.close()
+  liveFrame.value?.bitmap?.close()
 })
 
 watch(() => store.workerSteps, steps => worker.configure(steps))
-watch(() => store.steps[0]?.values?.deviceId, deviceId => camera.start(deviceId || undefined))
 
 // ── Block colours ─────────────────────────────────────────────────────────────
-const BLOCK_COLORS = { image: '#9d7fe0', vector: '#4fbf7b', grbl: '#f0a54a' }
 
 // ── Step helpers ──────────────────────────────────────────────────────────────
 function stepsForBlock(blockId) {
@@ -94,9 +225,37 @@ function mandatoryWhitelist(step) {
   return BLOCK_MAP[step.blockId]?.mandatoryFirst?.whitelist ?? []
 }
 
-function allCollapsed(blockId) {
-  const s = store.steps.filter(st => st.blockId === blockId)
-  return s.length > 0 && s.every(st => st.collapsed)
+// ── Drag & drop reordering (within a block; its first step stays first) ────────
+const drag = ref({ id: null, blockId: null })
+const drop = ref({ id: null, after: false })
+
+function onDragStart(step, e) {
+  // Only the header drags (not e.g. text selected in the parameters)
+  if (!canRemove(step) || !e.target.closest?.('.row-head')) return
+  drag.value = { id: step.instanceId, blockId: step.blockId }
+  e.dataTransfer.effectAllowed = 'move'
+  e.dataTransfer.setData('text/plain', step.instanceId)
+  e.dataTransfer.setDragImage(e.currentTarget, 40, 30)
+}
+
+function onDragOver(step, e) {
+  if (!drag.value.id || step.blockId !== drag.value.blockId) return
+  e.preventDefault()
+  e.dataTransfer.dropEffect = 'move'
+  const r = e.currentTarget.getBoundingClientRect()
+  // Nothing goes in front of the mandatory first step
+  const after = !canRemove(step) || e.clientY > r.top + r.height / 2
+  drop.value = { id: step.instanceId, after }
+}
+
+function onDrop() {
+  if (drag.value.id && drop.value.id) store.moveStepTo(drag.value.id, drop.value.id, drop.value.after)
+  onDragEnd()
+}
+
+function onDragEnd() {
+  drag.value = { id: null, blockId: null }
+  drop.value = { id: null, after: false }
 }
 
 // ── Common row width ──────────────────────────────────────────────────────────
@@ -113,9 +272,9 @@ const rowWidth = computed(() => {
 
 // Plain-language names for the three stages
 const BLOCK_TEXT = {
-  image:  { title: 'Image',   hint: 'Prepare the picture',       add: 'Add another image filter' },
-  vector: { title: 'Vectors', hint: 'Turn it into lines',        add: 'Add another vector filter' },
-  grbl:   { title: 'Machine', hint: 'Create the file for your CNC', add: '' },
+  image:  { title: 'Start',   hint: 'with a picture',           add: 'Add another image filter' },
+  vector: { title: 'Convert', hint: 'to vectors',               add: 'Add another vector filter' },
+  grbl:   { title: 'Manufacture', hint: 'get ready to cut', add: '' },
 }
 
 // ── Plugin picker ─────────────────────────────────────────────────────────────
@@ -130,13 +289,37 @@ const pickerPlugins = computed(() => {
   return reg ? [...reg.values()] : []
 })
 
-const pickerTitle = computed(() => {
-  if (!pickerCtx.value) return ''
-  if (pickerCtx.value.mode === 'replace') {
-    const step = store.steps.find(s => s.instanceId === pickerCtx.value.replaceInstanceId)
-    return `Replace ${allPlugins.get(step?.pluginId)?.label ?? 'step'}`
-  }
-  return `Add ${BLOCKS.find(b => b.id === pickerCtx.value.blockId)?.label ?? ''} Filter`
+// Heading + one sentence that explains what is being chosen
+const PICKER_TEXT = {
+  replace: {
+    vector: { title: 'How should the picture become lines?',
+              text:  'Each method reads the picture in its own way. Pick one, then compare the result with the slider.' },
+    image:  { title: 'Choose a different source',
+              text:  'Where the picture comes from.' },
+  },
+  add: {
+    image:  { title: 'Add an image filter',
+              text:  'Image filters change the picture before it is turned into lines — more contrast, less noise, a smaller area.' },
+    vector: { title: 'Add a vector filter',
+              text:  'Vector filters work on the lines — smooth them, simplify them or put them in a better order for the machine.' },
+  },
+}
+
+const pickerText = computed(() => {
+  const ctx = pickerCtx.value
+  if (!ctx) return null
+  const mode = ctx.mode === 'replace' ? 'replace' : 'add'
+  return PICKER_TEXT[mode][ctx.blockId] ?? { title: mode === 'replace' ? 'Choose a different method' : 'Add a filter', text: '' }
+})
+
+/** The plugin currently in place (replace mode) — marked in the list. */
+const pickerCurrent = computed(() =>
+  store.steps.find(s => s.instanceId === pickerCtx.value?.replaceInstanceId)?.pluginId ?? null)
+
+function onPickerKey(e) { if (e.key === 'Escape') closePicker() }
+watch(pickerCtx, open => {
+  if (open) document.addEventListener('keydown', onPickerKey)
+  else      document.removeEventListener('keydown', onPickerKey)
 })
 
 function closePicker() { pickerCtx.value = null }
@@ -169,16 +352,16 @@ function addPlugin(pluginId) {
 </script>
 
 <template>
-  <div class="pipeline-flow">
+  <div ref="flowRef" class="pipeline-flow" @scroll.passive="onScroll">
     <div class="flow-col" :style="{ '--row-w': rowWidth }">
 
       <template v-for="(block, bi) in BLOCKS" :key="block.id">
-        <section class="block" :class="{ last: bi === BLOCKS.length - 1 }" :style="{ '--bc': BLOCK_COLORS[block.id], '--next': BLOCK_COLORS[BLOCKS[bi + 1]?.id] ?? BLOCK_COLORS[block.id] }">
-          <header class="block-head" @click="store.toggleBlockCollapsed(block.id)">
-            <span class="block-mark" />
-            <span class="block-title">{{ BLOCK_TEXT[block.id].title }}</span>
-            <span class="block-hint">{{ BLOCK_TEXT[block.id].hint }}</span>
-            <span class="block-toggle">{{ allCollapsed(block.id) ? 'Show all' : 'Hide all' }}</span>
+        <section class="block">
+          <header class="block-head">
+            <div class="block-label">
+              <span class="block-title">{{ BLOCK_TEXT[block.id].title }}</span>
+              <span class="block-hint">{{ BLOCK_TEXT[block.id].hint }}</span>
+            </div>
           </header>
 
           <div class="block-steps">
@@ -193,15 +376,28 @@ function addPlugin(pluginId) {
               ><span>+</span></button>
               <div v-else-if="si > 0" class="step-gap" />
 
-              <StepRow
-                :step="step"
-                :block-color="BLOCK_COLORS[block.id]"
-                :can-remove="canRemove(step)"
-                :is-mandatory="store.isMandatoryFirst(step.instanceId) || !!block.fixed"
-                :whitelist="mandatoryWhitelist(step)"
-                @remove="store.removeStep(step.instanceId)"
-                @replace="openReplace(step.instanceId, mandatoryWhitelist(step))"
-              />
+              <div
+                class="drag-wrap"
+                :class="{
+                  dragging:      drag.id === step.instanceId,
+                  'drop-before': drop.id === step.instanceId && !drop.after,
+                  'drop-after':  drop.id === step.instanceId && drop.after,
+                }"
+                @dragstart="onDragStart(step, $event)"
+                @dragover="onDragOver(step, $event)"
+                @drop.prevent="onDrop"
+                @dragend="onDragEnd"
+              >
+                <StepRow
+                  :step="step"
+                  :can-remove="canRemove(step)"
+                  :movable="canRemove(step)"
+                  :is-mandatory="store.isMandatoryFirst(step.instanceId) || !!block.fixed"
+                  :whitelist="mandatoryWhitelist(step)"
+                  @remove="store.removeStep(step.instanceId)"
+                  @replace="openReplace(step.instanceId, mandatoryWhitelist(step))"
+                />
+              </div>
             </template>
 
             <button v-if="!block.fixed" class="add-step" @click="openAppend(block.id)">
@@ -211,28 +407,48 @@ function addPlugin(pluginId) {
         </section>
       </template>
 
-      <div class="timeline-end">
-        <span class="end-node">
-          <svg width="18" height="18" viewBox="0 0 16 16" fill="none"><path d="M3.5 8.5l3 3 6-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        </span>
-        Ready to mill
-      </div>
+      <!-- Finish: looks like a section, but is always open -->
+      <section class="block finish">
+        <header class="block-head">
+          <div class="block-label">
+            <span class="block-title">Export</span>
+            <span class="block-hint">your machine code</span>
+          </div>
+        </header>
+        <div class="block-steps">
+          <div class="finish-row">
+            <span class="finish-node">
+              <svg width="18" height="18" viewBox="0 0 16 16" fill="none"><path d="M8 2v8m0 0l-3.5-3.5M8 10l3.5-3.5M2.5 13.5h11" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </span>
+            <FinishStep />
+          </div>
+        </div>
+      </section>
     </div>
 
     <!-- Plugin picker overlay -->
     <Teleport to="body">
       <div v-if="pickerCtx" class="picker-backdrop" @click="closePicker" />
-      <div v-if="pickerCtx" class="picker-panel">
-        <div class="picker-head">{{ pickerTitle }}</div>
-        <button
-          v-for="p in pickerPlugins"
-          :key="p.id"
-          class="picker-item"
-          @click="addPlugin(p.id)"
-        >
-          <span class="pi-label">{{ p.label }}</span>
-          <span class="pi-desc">{{ p.description }}</span>
-        </button>
+      <div v-if="pickerCtx" class="picker-panel" role="dialog" :aria-label="pickerText.title">
+        <header class="picker-head">
+          <h3>{{ pickerText.title }}</h3>
+          <p v-if="pickerText.text">{{ pickerText.text }}</p>
+          <button class="picker-close" title="Close (Esc)" @click="closePicker">
+            <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+          </button>
+        </header>
+        <div class="picker-list">
+          <button
+            v-for="p in pickerPlugins"
+            :key="p.id"
+            class="picker-item"
+            :class="{ current: p.id === pickerCurrent }"
+            @click="p.id === pickerCurrent ? closePicker() : addPlugin(p.id)"
+          >
+            <span class="pi-label">{{ p.label }}<span v-if="p.id === pickerCurrent" class="pi-badge">In use</span></span>
+            <span class="pi-desc">{{ p.description }}</span>
+          </button>
+        </div>
         <p v-if="pickerPlugins.length === 0" class="picker-empty">No filters available</p>
       </div>
     </Teleport>
@@ -246,7 +462,10 @@ function addPlugin(pluginId) {
 // StepRow places its node centred on it.
 @gutter: 68px;
 @rail-x: 22px;
-@rail-w: 4px;
+@rail-w: 2px;
+@inset:  14px;   // right padding of a section band
+@label-w: 230px;
+@section-gap: 28px;
 
 .pipeline-flow {
   flex: 1;
@@ -256,104 +475,137 @@ function addPlugin(pluginId) {
 }
 
 .flow-col {
-  max-width: 1200px;
+  max-width: 1320px;
   margin: 0 auto;
-  padding: 28px 24px 80px;
+  padding: 36px 24px 80px;
+  // Timeline geometry, also used by StepRow / FinishStep
+  --lw:     @label-w;   // column left of the timeline for the section headings
+  --gutter: @gutter;
+  --rail-x: @rail-x;
+  --inset:  0px;
+
+  @media (max-width: 1000px) { --lw: 0px; }
 }
 
-// ── Block ─────────────────────────────────────────────────────────────────────
+// ── Section ───────────────────────────────────────────────────────────────────
+// One quiet panel per section: heading on the left, the timeline through the middle,
+// the filters on the right — the heading visibly belongs to every step next to it.
 .block {
   position: relative;
-  padding-bottom: 38px;
+  display: grid;
+  grid-template-columns: var(--lw) 1fr;
+  width: min(100%, calc(var(--lw) + @gutter + var(--row-w, 100%) + @inset));
+  margin-bottom: @section-gap;
+  padding: 24px @inset 24px 0;
+  border-radius: 24px;
+  border: 1px solid @hairline;
+  background: @panel;
 
-  // The timeline: block colour, blending into the next block's colour at the bottom
-  &::before,
-  &::after {
+  // The timeline — a thin neutral line that runs on through the gap to the next section
+  &::before {
     content: '';
     position: absolute;
-    left: (@rail-x - (@rail-w / 2));
-    top: 14px;
-    bottom: 0;
+    left: calc(var(--lw) + @rail-x - @rail-w / 2);
+    top: 0;
+    bottom: -@section-gap;
     width: @rail-w;
-    border-radius: @rail-w;
+    background: @border;
   }
+  &:first-child::before { top: 36px; }
 
-  &::before {
-    background: linear-gradient(var(--bc) 0%, var(--bc) calc(100% - 70px), var(--next) 100%);
-    opacity: 0.55;
+  // Finish: the line ends at its node
+  &.finish { margin-bottom: 0; }
+  &.finish::before { bottom: auto; height: 56px; }
+
+  @media (max-width: 1000px) {
+    grid-template-columns: 1fr;
   }
-
-  // Data flowing down the line — the pipeline runs live
-  &::after {
-    background: repeating-linear-gradient(180deg, fade(#fff, 55%) 0 8px, transparent 8px 28px);
-    animation: flow 1.4s linear infinite;
-    opacity: 0.18;
-  }
-
-  &.last { padding-bottom: 0; }
-  // Last block: the line runs on into the end node below
-  &.last::before,
-  &.last::after { bottom: -40px; }
 }
 
-@keyframes flow {
-  from { background-position: 0 0; }
-  to   { background-position: 0 28px; }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .block::after { animation: none; }
-}
-
+// Heading left of the timeline — stays in view while scrolling through the section
 .block-head {
-  position: relative;
-  width: min(100%, calc(var(--row-w, 100%) + @gutter));
+  position: sticky;
+  top: 16px;
+  align-self: start;
   display: flex;
-  align-items: baseline;
-  gap: 12px;
-  padding: 0 0 16px @gutter;
-  cursor: pointer;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 4px 20px 0 28px;
+  text-align: left;
   user-select: none;
 
-  &:hover .block-toggle { color: @text; }
+  @media (max-width: 1000px) {
+    position: static;
+    align-items: flex-start;
+    text-align: left;
+    padding: 4px 0 16px @gutter;
+  }
 }
 
-.block-mark {
-  position: absolute;
-  left: @rail-x - 10px;
-  top: 3px;
-  width: 20px;
-  height: 20px;
-  border-radius: 5px;
-  transform: rotate(45deg);
-  background: var(--bc);
-  box-shadow: 0 0 0 5px @bg, 0 0 22px -2px var(--bc);
-  z-index: 2;
+.block-label {
+  display: grid;
+  row-gap: 4px;
 }
 
 .block-title {
-  font-size: 18px;
+  font-size: 30px;
   font-weight: 700;
+  letter-spacing: -0.025em;
   color: @text;
-  letter-spacing: -0.01em;
+  line-height: 1.05;
 }
 
 .block-hint {
-  flex: 1;
-  font-size: 13px;
+  font-size: 16px;
   color: @muted;
-}
-
-.block-toggle {
-  font-size: 12px;
-  color: @muted;
-  transition: color 0.12s;
+  letter-spacing: -0.01em;
 }
 
 .block-steps {
   display: flex;
   flex-direction: column;
   padding-left: @gutter;
+}
+
+.finish-row { position: relative; }
+
+// Drag & drop: the dragged row fades, a line shows where it will land
+.drag-wrap {
+  position: relative;
+
+  &.dragging { opacity: 0.4; }
+
+  &.drop-before::before,
+  &.drop-after::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    width: min(100%, var(--row-w, 100%));
+    height: 2px;
+    border-radius: 2px;
+    background: @accent;
+    z-index: 3;
+  }
+  &.drop-before::before { top: -6px; }
+  &.drop-after::after   { bottom: -6px; }
+}
+
+// Like a step node (StepRow), filled — the finish is always open
+.finish-node {
+  position: absolute;
+  left: (@rail-x - @gutter - 20px);
+  top: 12px;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: @on-accent;
+  background: @accent;
+  box-shadow: 0 0 0 6px @panel;
+  z-index: 2;
 }
 
 .step-gap { height: 10px; }
@@ -376,7 +628,7 @@ function addPlugin(pluginId) {
     height: 22px;
     border-radius: 50%;
     background: @accent;
-    color: #1a1204;
+    color: @on-accent;
     font-size: 15px;
     font-weight: 700;
     line-height: 22px;
@@ -404,7 +656,7 @@ function addPlugin(pluginId) {
   transition: color 0.12s;
 
   &:hover { color: @text; }
-  &:hover .add-node { border-color: var(--bc); color: var(--bc); }
+  &:hover .add-node { border-color: @text; color: @text; }
 }
 
 // "+" node sitting on the timeline
@@ -416,44 +668,15 @@ function addPlugin(pluginId) {
   width: 28px;
   height: 28px;
   border-radius: 50%;
-  border: 2px dashed fade(@muted, 70%);
-  background: @bg;
+  border: 1.5px solid @border;
+  background: @panel;
   color: @muted;
   font-size: 16px;
-  font-weight: 700;
-  line-height: 24px;
+  font-weight: 400;
+  line-height: 25px;
   text-align: center;
   z-index: 2;
   transition: border-color 0.12s, color 0.12s;
-}
-
-// End of the timeline
-.timeline-end {
-  position: relative;
-  display: flex;
-  align-items: center;
-  height: 44px;
-  margin-top: 26px;
-  padding-left: @gutter;
-  font-size: 13px;
-  font-weight: 600;
-  color: @muted;
-}
-
-.end-node {
-  position: absolute;
-  left: @rail-x - 22px;
-  width: 44px;
-  height: 44px;
-  border-radius: 50%;
-  background: @bg;
-  border: 4px solid @accent;
-  box-shadow: 0 0 22px -4px @accent;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: @accent;
-  z-index: 2;
 }
 </style>
 
@@ -465,6 +688,7 @@ function addPlugin(pluginId) {
   position: fixed;
   inset: 0;
   z-index: 999;
+  background: fade(#000, 45%);
 }
 
 .picker-panel {
@@ -473,36 +697,68 @@ function addPlugin(pluginId) {
   left: 50%;
   transform: translate(-50%, -50%);
   z-index: 1000;
-  background: @surface;
-  border: 1px solid @border;
-  border-radius: 10px;
-  padding: 8px;
-  min-width: 280px;
-  max-height: 70vh;
-  overflow-y: auto;
-  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.7);
+  width: min(560px, calc(100vw - 32px));
+  max-height: min(80vh, 720px);
   display: flex;
   flex-direction: column;
-  gap: 3px;
+  background: @surface;
+  border: 1px solid @hairline;
+  border-radius: 18px;
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.6);
+  overflow: hidden;
 }
 
 .picker-head {
-  font-size: 9px;
-  font-weight: 700;
-  letter-spacing: 0.15em;
-  text-transform: uppercase;
+  position: relative;
+  padding: 22px 56px 16px 24px;
+  border-bottom: 1px solid @hairline;
+
+  h3 {
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: @text;
+  }
+  p {
+    margin-top: 6px;
+    font-size: 14px;
+    line-height: 1.45;
+    color: @muted;
+  }
+}
+
+.picker-close {
+  position: absolute;
+  top: 18px;
+  right: 18px;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  border: none;
+  background: @surface2;
   color: @muted;
-  padding: 4px 8px 7px;
-  border-bottom: 1px solid @border;
-  margin-bottom: 3px;
+  cursor: pointer;
+
+  &:hover { color: @text; }
+}
+
+.picker-list {
+  overflow-y: auto;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
 }
 
 .picker-item {
   display: flex;
   flex-direction: column;
-  gap: 2px;
-  padding: 8px 10px;
-  border-radius: 6px;
+  gap: 4px;
+  padding: 14px 16px;
+  border-radius: 12px;
   background: none;
   border: 1px solid transparent;
   cursor: pointer;
@@ -510,16 +766,41 @@ function addPlugin(pluginId) {
   font-family: inherit;
   transition: background 0.1s, border-color 0.1s;
 
-  &:hover { background: @surface2; border-color: @border; }
+  &:hover { background: @surface2; }
 
-  .pi-label { font-size: 12px; font-weight: 600; color: @text; }
-  .pi-desc  { font-size: 10px; color: @muted; line-height: 1.4; }
+  &.current {
+    border-color: @hairline;
+    background: fade(#fff, 3%);
+  }
+
+  .pi-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 16px;
+    font-weight: 600;
+    color: @text;
+  }
+  .pi-desc {
+    font-size: 13.5px;
+    line-height: 1.45;
+    color: @muted;
+  }
+}
+
+.pi-badge {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: @accent-soft;
+  color: @accent;
 }
 
 .picker-empty {
-  font-size: 11px;
+  font-size: 13px;
   color: @muted;
-  padding: 8px 10px;
+  padding: 16px;
   text-align: center;
 }
 </style>

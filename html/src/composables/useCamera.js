@@ -16,10 +16,13 @@ export function useCamera() {
   captureVideo.playsInline = true
   captureVideo.autoplay   = true
 
-  async function enumerateDevices() {
+  /** `probe` asks for camera permission first — without it the devices come without names */
+  async function enumerateDevices(probe = true) {
     try {
-      const tmp = await navigator.mediaDevices.getUserMedia({ video: true, audio: false })
-      tmp.getTracks().forEach(t => t.stop())
+      if (probe) {
+        const tmp = await navigator.mediaDevices.getUserMedia({ video: true, audio: false })
+        tmp.getTracks().forEach(t => t.stop())
+      }
       const all = await navigator.mediaDevices.enumerateDevices()
       devices.value = all.filter(d => d.kind === 'videoinput')
     } catch (e) {

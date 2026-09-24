@@ -1,16 +1,12 @@
 <script setup>
-import { usePipelineStore } from '@/stores/pipeline.js'
+import { ref } from 'vue'
 import AppHeader    from '@/components/AppHeader.vue'
 import PipelineFlow from '@/components/PipelineFlow.vue'
-import StartScreen  from '@/components/StartScreen.vue'
 
-const store = usePipelineStore()
+const compact = ref(false)
 </script>
 
 <template>
-  <template v-if="store.hasProject">
-    <AppHeader />
-    <PipelineFlow />
-  </template>
-  <StartScreen v-else />
+  <AppHeader :compact="compact" />
+  <PipelineFlow @compact="compact = $event" />
 </template>

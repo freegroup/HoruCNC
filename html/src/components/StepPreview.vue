@@ -359,7 +359,7 @@ function onKeydown(e) {
   flex-shrink: 0;
 
   &:hover        { color: @accent;  border-color: @accent;  }
-  &.active       { color: @accent;  border-color: @accent; background: fade(@accent, 12%); }
+  &.active       { color: @accent;  border-color: @accent; background: @accent-soft; }
   &.close:hover  { color: #e05050; border-color: #e05050; }
 }
 

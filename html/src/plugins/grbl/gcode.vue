@@ -1,377 +1,173 @@
 <script setup>
-import { ref, watch, onMounted, onUnmounted } from 'vue'
+import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
+import { makeRelief }   from './preview/relief.js'
+import { makeCamPaths } from './preview/campaths.js'
+import { sharedCam, fitView, resetCam, attachOrbit } from './preview/viewCam.js'
+import { toolProfile, toolLUT, stockFor } from './preview/simulate.js'
 
-const props = defineProps({ result: Object, values: Object })
+/**
+ * G-code result as PatternMaster shows it:
+ *   3d  — the milled piece (simulated material removal, relief-raymarched)
+ *   cam — the toolpaths (rapids grey, cuts cyan) inside the stock frame
+ * Both share one camera, so switching keeps the view.
+ */
+const props = defineProps({
+  result: Object,
+  values: Object,
+  mode:   { type: String, default: '3d' },
+})
 
-// ── Home view — angle only, distance is computed from bounding box ─────────────
-const HOME = {
-  direction: { x: -0.1687, y: -0.8598, z: 0.4822 },
-  up:        { x:  0.1231, y:  0.9671, z: 0.2226 },
-}
+const CELL_BUDGET = 1.2e6   // height-map cells; like PatternMaster's viewer
 
-const containerRef = ref(null)
+const wrapRef   = ref(null)
+const reliefRef = ref(null)
+const camRef    = ref(null)
+const busy      = ref(false)
+const error     = ref('')
 
-let THREE    = null
-let renderer = null
-let scene    = null
-let camera   = null
-let controls = null
-let animId   = null
+const cam = sharedCam
+let relief = null, paths = null
+let raf = 0, dirty = true, drawnCam = ''
 let observer = null
-let g00Material     = null
-let g01Material     = null
-let retractMaterial = null
+const detach = []
 
-// ── 2D ruler overlay ──────────────────────────────────────────────────────────
-let rulerCanvas = null
-let rulerCtx    = null
-let rulerPoints = []   // { pos: THREE.Vector3, text: string }[]
-
-function drawRulerOverlay() {
-  if (!rulerCtx || !camera || !rulerPoints.length) return
-  const w = rulerCanvas.width, h = rulerCanvas.height
-  rulerCtx.clearRect(0, 0, w, h)
-  rulerCtx.textAlign = 'center'
-
-  const tmp = new THREE.Vector3()
-  for (const { pos, text, bold } of rulerPoints) {
-    tmp.copy(pos).project(camera)
-    if (tmp.z > 1) continue
-    const sx = ( tmp.x * 0.5 + 0.5) * w
-    const sy = (-tmp.y * 0.5 + 0.5) * h
-    if (sx < -50 || sx > w + 50 || sy < -20 || sy > h + 20) continue
-    rulerCtx.font      = bold ? 'bold 9px monospace' : '8px monospace'
-    rulerCtx.fillStyle = bold ? 'rgba(60,200,100,0.85)' : 'rgba(160,160,190,0.65)'
-    rulerCtx.fillText(text, sx, sy)
-  }
-}
-
-// ── Init Three.js scene ───────────────────────────────────────────────────────
-async function init() {
-  const el = containerRef.value
-  if (!el) return
-
-  const [threeModule, { TrackballControls }] = await Promise.all([
-    import('three'),
-    import('three/addons/controls/TrackballControls.js'),
-  ])
-  THREE = threeModule
-
-  g00Material     = new THREE.LineBasicMaterial({ color: 0x888888, transparent: true, opacity: 0.2 })
-  g01Material     = new THREE.LineBasicMaterial({ color: 0xffa030, opacity: 1 })
-  retractMaterial = new THREE.LineBasicMaterial({ color: 0x4488ff, transparent: true, opacity: 0.6 })
-
-  const w = el.clientWidth
-  const h = el.clientHeight
-
-  renderer = new THREE.WebGLRenderer({ antialias: true })
-  renderer.setPixelRatio(window.devicePixelRatio)
-  renderer.setSize(w, h)
-  renderer.setClearColor(0x0a0a10)
-  el.appendChild(renderer.domElement)
-
-  // Intercept wheel: only zoom when Ctrl/Cmd held — otherwise let parent scroll
-  renderer.domElement.addEventListener('wheel', (e) => {
-    if (!e.ctrlKey && !e.metaKey) e.stopImmediatePropagation()
-  }, { capture: false })
-
-  rulerCanvas = document.createElement('canvas')
-  rulerCanvas.width  = w
-  rulerCanvas.height = h
-  rulerCanvas.style.cssText = 'position:absolute;top:0;left:0;pointer-events:none'
-  rulerCtx = rulerCanvas.getContext('2d')
-  el.appendChild(rulerCanvas)
-
-  scene = new THREE.Scene()
-
-  camera = new THREE.PerspectiveCamera(60, w / h, 0.01, 100000)
-  camera.position.set(0, -50, 40)
-
-  controls = new TrackballControls(camera, renderer.domElement)
-  controls.rotateSpeed  = 5
-  controls.zoomSpeed    = 1.2
-  controls.panSpeed     = 0.8
-  controls.staticMoving = true
-
-  renderer.domElement.addEventListener('contextmenu', e => e.preventDefault())
-
-  animate()
-}
-
-function animate() {
-  animId = requestAnimationFrame(animate)
-  controls?.update()
-  renderer?.render(scene, camera)
-  drawRulerOverlay()
-}
-
-// ── Build / rebuild toolpath geometry ────────────────────────────────────────
-let lastGcodeText = null
-let cameraFitted  = false
-
-function clearScene() {
-  rulerPoints = []
-  const shared = new Set([g00Material, g01Material, retractMaterial])
-  let geoCount = 0, matCount = 0
-  scene.traverse(obj => {
-    if (obj.geometry)                              { obj.geometry.dispose(); geoCount++ }
-    if (obj.material && !shared.has(obj.material)) { obj.material.dispose(); matCount++ }
-  })
-  while (scene.children.length) scene.remove(scene.children[0])
-  const info = renderer?.info?.memory
-  console.log(`[GCode3D] clearScene: disposed ${geoCount} geo / ${matCount} mat | renderer: geometries=${info?.geometries ?? '?'} textures=${info?.textures ?? '?'}`)
-}
-
-function buildScene(gcodeText) {
-  if (!scene) return
-  if (gcodeText === lastGcodeText) return
-  lastGcodeText = gcodeText
-
-  clearScene()
-
-  if (!gcodeText?.trim()) return
-
-  const g00Pos     = []
-  const g01Pos     = []
-  const retractPos = []
-
-  let x = 0, y = 0, z = 0, rapid = true
-
-  for (const raw of gcodeText.split('\n')) {
-    const line = raw.replace(/;.*$/, '').trim().toUpperCase()
-    if (!line) continue
-
-    const cmd = line.split(/\s/)[0]
-    if (cmd === 'G0' || cmd === 'G00') rapid = true
-    if (cmd === 'G1' || cmd === 'G01') rapid = false
-
-    const xm = line.match(/X([-\d.]+)/)
-    const ym = line.match(/Y([-\d.]+)/)
-    const zm = line.match(/Z([-\d.]+)/)
-
-    const nx = xm ? +xm[1] : x
-    const ny = ym ? +ym[1] : y
-    const nz = zm ? +zm[1] : z
-
-    if (x !== nx || y !== ny || z !== nz) {
-      const isZOnly = !xm && !ym && zm
-      if (rapid && isZOnly && nz > z) {
-        retractPos.push(x, y, z, nx, ny, nz)
-      } else if (rapid) {
-        g00Pos.push(x, y, z, nx, ny, nz)
-      } else {
-        g01Pos.push(x, y, z, nx, ny, nz)
-      }
-    }
-
-    x = nx; y = ny; z = nz
-  }
-
-  const group = new THREE.Group()
-
-  if (g00Pos.length) {
-    const geo = new THREE.BufferGeometry()
-    geo.setAttribute('position', new THREE.Float32BufferAttribute(g00Pos, 3))
-    group.add(new THREE.LineSegments(geo, g00Material))
-  }
-  if (retractPos.length) {
-    const geo = new THREE.BufferGeometry()
-    geo.setAttribute('position', new THREE.Float32BufferAttribute(retractPos, 3))
-    group.add(new THREE.LineSegments(geo, retractMaterial))
-  }
-  if (g01Pos.length) {
-    const geo = new THREE.BufferGeometry()
-    geo.setAttribute('position', new THREE.Float32BufferAttribute(g01Pos, 3))
-    group.add(new THREE.LineSegments(geo, g01Material))
-  }
-
-  scene.add(group)
-
-  const box    = new THREE.Box3().setFromObject(group)
-  const size   = box.getSize(new THREE.Vector3())
-  const center = box.getCenter(new THREE.Vector3())
-  const maxLen = Math.max(size.x, size.y, size.z, 1)
-
-  // Tight bounding box from cutting moves only — g00 rapid travel from 0/0
-  // pulls the full group bbox to include the origin, which is wrong for display
-  const workBox = new THREE.Box3()
-  if (g01Pos.length) {
-    for (let i = 0; i < g01Pos.length; i += 3) {
-      workBox.expandByPoint(new THREE.Vector3(g01Pos[i], g01Pos[i + 1], g01Pos[i + 2]))
-    }
-  } else {
-    workBox.copy(box)
-  }
-  const workSize   = workBox.getSize(new THREE.Vector3())
-  const workCenter = workBox.getCenter(new THREE.Vector3())
-
-  scene.add(new THREE.AxesHelper(maxLen * 0.5))
-
-  const gridSize = Math.max(workSize.x, workSize.y) * 1.3
-  const grid = new THREE.GridHelper(gridSize, 12, 0x333344, 0x222233)
-  grid.rotation.x = Math.PI / 2
-  grid.position.set(workCenter.x, workCenter.y, workBox.min.z)
-  scene.add(grid)
-
-  // ── Build ruler label positions (drawn each frame via Canvas 2D) ──────────
-  const step    = niceStep(Math.max(workSize.x, workSize.y, 1))
-  const zPlane  = workBox.min.z
-  const tickLen = step * 0.18
-
-  // Tick lines as 3D geometry — same approach as the grid
-  const tickPts = []
-  for (let rx = Math.ceil(workBox.min.x / step) * step; rx <= workBox.max.x + step * 0.1; rx += step) {
-    tickPts.push(rx, workBox.min.y, zPlane,  rx, workBox.min.y - tickLen, zPlane)
-  }
-  for (let ry = Math.ceil(workBox.min.y / step) * step; ry <= workBox.max.y + step * 0.1; ry += step) {
-    tickPts.push(workBox.min.x, ry, zPlane,  workBox.min.x - tickLen, ry, zPlane)
-  }
-  if (tickPts.length) {
-    const tickGeo = new THREE.BufferGeometry()
-    tickGeo.setAttribute('position', new THREE.Float32BufferAttribute(tickPts, 3))
-    scene.add(new THREE.LineSegments(tickGeo, new THREE.LineBasicMaterial({ color: 0x444466 })))
-  }
-
-  // Canvas text labels at tick positions
-  for (let rx = Math.ceil(workBox.min.x / step) * step; rx <= workBox.max.x + step * 0.1; rx += step) {
-    rulerPoints.push({ pos: new THREE.Vector3(rx, workBox.min.y - tickLen * 1.6, zPlane), text: `${rx.toFixed(0)}` })
-  }
-  for (let ry = Math.ceil(workBox.min.y / step) * step; ry <= workBox.max.y + step * 0.1; ry += step) {
-    rulerPoints.push({ pos: new THREE.Vector3(workBox.min.x - tickLen * 1.6, ry, zPlane), text: `${ry.toFixed(0)}` })
-  }
-
-  // ── Green bounding box at ground plane with dimension labels ─────────────
-  const bboxPts = [
-    workBox.min.x, workBox.min.y, zPlane,
-    workBox.max.x, workBox.min.y, zPlane,
-    workBox.max.x, workBox.max.y, zPlane,
-    workBox.min.x, workBox.max.y, zPlane,
-    workBox.min.x, workBox.min.y, zPlane,
-  ]
-  const bboxGeo = new THREE.BufferGeometry()
-  bboxGeo.setAttribute('position', new THREE.Float32BufferAttribute(bboxPts, 3))
-  scene.add(new THREE.Line(bboxGeo, new THREE.LineBasicMaterial({ color: 0x22cc66 })))
-
-  // Dimension text: width along bottom edge, height along left edge
-  rulerPoints.push({
-    pos:  new THREE.Vector3(workCenter.x, workBox.min.y - tickLen * 3.2, zPlane),
-    text: `${workSize.x.toFixed(1)} mm`,
-    bold: true,
-  })
-  rulerPoints.push({
-    pos:  new THREE.Vector3(workBox.min.x - tickLen * 3.2, workCenter.y, zPlane),
-    text: `${workSize.y.toFixed(1)} mm`,
-    bold: true,
-  })
-
-  // Fit camera only on first load
-  if (!cameraFitted) {
-    cameraFitted = true
-    const fov  = camera.fov * (Math.PI / 180)
-    const dist = (maxLen / 2) / Math.tan(fov / 2) * 1.6
-
-    camera.near = dist / 100
-    camera.far  = dist * 100
-    camera.updateProjectionMatrix()
-
-    controls.target.copy(center)
-    camera.up.set(HOME.up.x, HOME.up.y, HOME.up.z)
-    camera.position.set(
-      center.x + HOME.direction.x * dist,
-      center.y + HOME.direction.y * dist,
-      center.z + HOME.direction.z * dist,
-    )
-    controls.update()
-  }
-}
-
-// ── Ruler step — round mm value giving ~5-8 ticks across range ───────────────
-function niceStep(range_mm) {
-  const raw  = range_mm / 6
-  const mag  = Math.pow(10, Math.floor(Math.log10(Math.max(raw, 1))))
-  const norm = raw / mag
-  if (norm < 2) return mag
-  if (norm < 5) return 2 * mag
-  return 5 * mag
-}
-
-// ── Resize ────────────────────────────────────────────────────────────────────
-function onResize() {
-  const el = containerRef.value
-  if (!el || !renderer || !camera) return
-  const w = el.clientWidth, h = el.clientHeight
-  renderer.setSize(w, h)
-  if (rulerCanvas) { rulerCanvas.width = w; rulerCanvas.height = h }
-  camera.aspect = w / h
-  camera.updateProjectionMatrix()
-  controls?.handleResize()
-}
-
-// ── Lifecycle ─────────────────────────────────────────────────────────────────
-watch(() => props.result?.text, (text) => { if (scene) buildScene(text ?? '') }, { flush: 'post' })
-
-onMounted(async () => {
-  await init()
-  buildScene(props.result?.text ?? '')
-
-  observer = new ResizeObserver(onResize)
-  if (containerRef.value) observer.observe(containerRef.value)
+const stock = computed(() => {
+  const r = props.result
+  if (!r?.moves) return null
+  return stockFor(r.moves, (r.tool?.diameter ?? 3) / 2)
 })
 
-onUnmounted(() => {
-  cancelAnimationFrame(animId)
-  observer?.disconnect()
-  controls?.dispose()
-  renderer?.dispose()
-  renderer?.domElement.remove()
-  rulerCanvas?.remove()
-})
+const sizeLabel = computed(() => stock.value
+  ? `${stock.value.w.toFixed(0)} × ${stock.value.h.toFixed(0)} mm stock`
+  : '')
 
-function download() {
-  const text = props.result?.text ?? ''
-  const url  = URL.createObjectURL(new Blob([text], { type: 'text/plain' }))
-  Object.assign(document.createElement('a'), { href: url, download: 'toolpath.gcode' }).click()
-  URL.revokeObjectURL(url)
+const active = () => props.mode === 'cam' ? paths : relief
+
+// ── Simulation (own worker, only while the 3D view is showing) ────────────────
+let simWorker = null, jobId = 0, simFor = null
+
+function simulate() {
+  const r = props.result
+  if (props.mode !== '3d' || !r?.moves || !relief || simFor === r) return
+  simFor = r
+  const tool = toolProfile(r.tool ?? { type: 'flat', diameter: 3 })
+  const s    = stock.value
+  const cell = Math.max(0.02, Math.sqrt(s.w * s.h / CELL_BUDGET))
+  // Latest job wins: a newer result aborts a running stale one
+  if (busy.value) { simWorker?.terminate(); simWorker = null }
+  simWorker ??= newSimWorker()
+  busy.value = true
+  simWorker.postMessage({ id: ++jobId, moves: r.moves, stock: s, cell, radius: tool.radius, lut: toolLUT(tool) })
+}
+
+function newSimWorker() {
+  const w = new Worker(new URL('./preview/sim.worker.js', import.meta.url), { type: 'module' })
+  w.onmessage = ({ data }) => {
+    if (data.id !== jobId) return
+    busy.value = false
+    relief.setSim(data)
+    frame(relief.box)
+    dirty = true
+  }
+  return w
+}
+
+function updatePaths() {
+  const r = props.result
+  if (!r?.moves || !paths) return
+  paths.setPaths(r.moves, stock.value)
+  frame(paths.box)
+  dirty = true
+}
+
+// Fit once per project (and on reset) — a live camera must not make the view jump
+function frame(box) {
+  if (cam.framedFor || !box) return
+  const c = reliefRef.value
+  fitView(cam, c.width / Math.max(1, c.height), box)
+  cam.framedFor = 'fitted'
 }
 
 function resetView() {
-  const box    = new THREE.Box3()
-  scene.children.forEach(c => box.expandByObject(c))
-  if (box.isEmpty()) return
-
-  const size   = box.getSize(new THREE.Vector3())
-  const center = box.getCenter(new THREE.Vector3())
-  const maxLen = Math.max(size.x, size.y, size.z, 1)
-  const fov    = camera.fov * (Math.PI / 180)
-  const dist   = (maxLen / 2) / Math.tan(fov / 2) * 1.6
-
-  camera.near = dist / 100
-  camera.far  = dist * 100
-  camera.updateProjectionMatrix()
-  camera.up.set(HOME.up.x, HOME.up.y, HOME.up.z)
-  camera.position.set(
-    center.x + HOME.direction.x * dist,
-    center.y + HOME.direction.y * dist,
-    center.z + HOME.direction.z * dist,
-  )
-  controls.target.copy(center)
-  controls.update()
+  resetCam(cam)
+  frame(active()?.box)
+  dirty = true
 }
+
+// ── Render loop ───────────────────────────────────────────────────────────────
+function loop() {
+  raf = requestAnimationFrame(loop)
+  const camKey = `${cam.az},${cam.el},${cam.dist},${cam.target}`
+  if (!dirty && camKey === drawnCam) return
+  dirty = false; drawnCam = camKey
+  active()?.draw(cam)
+}
+
+function syncSize() {
+  const el = wrapRef.value
+  if (!el) return
+  const dpr = Math.min(2, window.devicePixelRatio || 1)
+  const w = Math.max(1, Math.round(el.clientWidth * dpr)), h = Math.max(1, Math.round(el.clientHeight * dpr))
+  for (const c of [reliefRef.value, camRef.value]) {
+    if (c.width !== w || c.height !== h) { c.width = w; c.height = h }
+  }
+  dirty = true
+}
+
+watch(() => props.result, () => { updatePaths(); simulate() })
+watch(() => props.mode, () => { simulate(); frame(active()?.box); dirty = true })
+
+onMounted(() => {
+  try {
+    relief = makeRelief(reliefRef.value)
+    paths  = makeCamPaths(camRef.value)
+  } catch (e) {
+    error.value = e.message
+    return
+  }
+  syncSize()
+  observer = new ResizeObserver(syncSize)
+  observer.observe(wrapRef.value)
+  for (const [canvas, r] of [[reliefRef.value, relief], [camRef.value, paths]]) {
+    detach.push(attachOrbit(canvas, cam, {
+      span:     () => { const b = r.box; return b ? Math.max(b[3] - b[0], b[4] - b[1]) : 10 },
+      onChange: () => { dirty = true },
+      onReset:  resetView,
+    }))
+  }
+  updatePaths()
+  simulate()
+  loop()
+})
+
+onUnmounted(() => {
+  cancelAnimationFrame(raf)
+  observer?.disconnect()
+  detach.forEach(fn => fn())
+  simWorker?.terminate()
+  relief?.dispose()
+  paths?.dispose()
+})
 
 defineExpose({ resetView })
 </script>
 
 <template>
   <div class="gcode-preview">
-    <div ref="containerRef" class="viewport" />
+    <div ref="wrapRef" class="viewport">
+      <canvas ref="reliefRef" v-show="mode !== 'cam'" />
+      <canvas ref="camRef"    v-show="mode === 'cam'" />
+      <div v-if="error" class="msg">{{ error }}</div>
+      <div v-else-if="busy && mode !== 'cam'" class="msg busy">Milling…</div>
+    </div>
     <div class="footer">
-      <span class="legend">
-        <span class="line cutting" /> cutting &nbsp;
-        <span class="line retract" /> retract &nbsp;
-        <span class="line rapid"   /> rapid
-        <span class="hint">left: rotate · scroll: zoom · right: pan</span>
+      <span v-if="mode === 'cam'" class="legend">
+        <span class="line cutting" /> cutting
+        <span class="line rapid" /> rapid
+        <span class="line stock" /> stock
       </span>
-      <button class="dl-btn" :disabled="!result" @click="download">↓ Export GCODE</button>
+      <span v-else class="legend">{{ sizeLabel }}</span>
+      <span class="hint">drag: rotate · shift-drag: pan · click, then wheel: zoom · double-click: reset</span>
     </div>
   </div>
 </template>
@@ -384,70 +180,71 @@ defineExpose({ resetView })
   display: flex;
   flex-direction: column;
   min-height: 0;
+  height: 100%;
 }
 
 .viewport {
   flex: 1;
-  width: 100%;
   min-height: 0;
   position: relative;
-  cursor: grab;
-  &:active { cursor: grabbing; }
+  background: #0e0e10;
+
+  canvas {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    display: block;
+    touch-action: none;
+  }
+}
+
+.msg {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: @muted;
+  font-size: 12px;
+  pointer-events: none;
+
+  &.busy {
+    inset: auto 10px 10px auto;
+    padding: 3px 8px;
+    border-radius: 4px;
+    background: fade(@bg, 80%);
+  }
 }
 
 .footer {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 7px 10px;
+  gap: 12px;
+  padding: 6px 10px;
+  font-size: 11px;
+  color: @muted;
   border-top: 1px solid @border;
-  gap: 8px;
-  flex-shrink: 0;
 }
 
 .legend {
   display: flex;
   align-items: center;
   gap: 6px;
-  font-size: 9px;
-  color: @muted;
 }
 
 .line {
   display: inline-block;
-  width: 12px;
-  height: 2px;
-  border-radius: 1px;
-  &.cutting { background: #ffa030; }
-  &.retract { background: #4488ff; }
-  &.rapid   { background: rgba(170,170,170,0.4); }
+  width: 14px;
+  height: 3px;
+  border-radius: 2px;
+  margin-left: 6px;
+
+  &.cutting { background: @accent; }
+  &.rapid   { background: #9ea8b8; }
+  &.stock   { background: #737780; }
 }
 
-.hint {
-  margin-left: 4px;
-  opacity: 0.4;
-  font-size: 8px;
-}
-
-.dl-btn {
-  padding: 6px 12px;
-  background: @accent;
-  color: #111;
-  border: none;
-  border-radius: 5px;
-  font-weight: 700;
-  font-size: 10px;
-  letter-spacing: 0.06em;
-  cursor: pointer;
-  white-space: nowrap;
-  transition: background 0.15s;
-  &:hover:not(:disabled) { background: @accent2; color: #fff; }
-  &:disabled { opacity: 0.35; cursor: default; }
-  &.secondary {
-    background: @surface2;
-    color: @muted;
-    border: 1px solid @border;
-    &:hover { color: @text; border-color: @accent; }
-  }
-}
+.hint { opacity: 0.7; text-align: right; }
 </style>

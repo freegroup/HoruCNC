@@ -14,7 +14,8 @@ export function renderPaths(contours, width, height) {
   ctx.fillStyle = '#0a0a10'
   ctx.fillRect(0, 0, w, h)
 
-  ctx.strokeStyle = '#f0a030'
+  // Runs in the worker — no CSS there, so the preview bitmap is neutral, not tinted
+  ctx.strokeStyle = '#e5e5ea'
   ctx.lineWidth   = 1
   ctx.lineJoin    = 'round'
   ctx.lineCap     = 'round'

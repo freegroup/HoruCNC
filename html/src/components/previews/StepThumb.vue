@@ -11,7 +11,7 @@ watchEffect(() => {
   const bmp    = props.result?.bitmap
   if (!canvas) return
   const ctx = canvas.getContext('2d')
-  ctx.fillStyle = '#0a0c10'
+  ctx.fillStyle = '#0e0e10'
   ctx.fillRect(0, 0, canvas.width, canvas.height)
   if (!bmp) return
   const s  = Math.min(canvas.width / bmp.width, canvas.height / bmp.height)

@@ -53,7 +53,10 @@ export async function process(prev, params) {
         continue
       }
 
-      const brightness = d[(Math.round(py) * w + Math.round(px)) * 4]
+      // Clamp: a point just below the edge (e.g. py = h - 0.3) must not round to row h
+      const ix = Math.min(w - 1, Math.round(px))
+      const iy = Math.min(h - 1, Math.round(py))
+      const brightness = d[(iy * w + ix) * 4]
 
       if (brightness >= threshold) {
         if (segment.length >= 2) { contours.push(segment) }
@@ -61,7 +64,8 @@ export async function process(prev, params) {
         continue
       }
 
-      const z = maxDepth * brightness / threshold   // height: bright=tall, dark=low
+      // Machine Z: black → -maxDepth (deepest), towards the threshold → 0 (surface)
+      const z = -maxDepth * (1 - brightness / threshold)
       segment.push([px, py, z])
     }
 

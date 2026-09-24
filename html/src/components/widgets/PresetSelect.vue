@@ -10,6 +10,8 @@ const emit = defineEmits(['change'])
 const open       = ref(false)
 const triggerRef = ref(null)
 const dropPos    = ref({ top: 0, left: 0, width: 0 })
+// In browser fullscreen only the fullscreen element is visible — the dropdown goes there
+const dropHost   = ref('body')
 
 // Options computed at runtime (e.g. camera DPI) may not hit the stored value exactly —
 // show the nearest one instead of silently falling back to the first.
@@ -25,6 +27,7 @@ function toggle() {
   if (!open.value) {
     const rect = triggerRef.value.getBoundingClientRect()
     dropPos.value = { top: rect.bottom + 4, left: rect.left, width: rect.width }
+    dropHost.value = document.fullscreenElement ?? 'body'
   }
   open.value = !open.value
 }
@@ -51,7 +54,7 @@ onUnmounted(() => document.removeEventListener('click', onDocClick))
       </svg>
     </button>
 
-    <Teleport to="body">
+    <Teleport :to="dropHost">
       <div
         v-if="open"
         class="ps-dropdown"
@@ -137,8 +140,8 @@ onUnmounted(() => document.removeEventListener('click', onDocClick))
   border-bottom: 1px solid @border;
 
   &:last-child { border-bottom: none; }
-  &:hover      { background: fade(@accent, 10%); }
-  &.selected   { background: fade(@accent, 15%); }
+  &:hover      { background: @accent-soft; }
+  &.selected   { background: @accent-soft; }
 }
 
 .ps-opt-label {

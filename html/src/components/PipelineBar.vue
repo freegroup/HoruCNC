@@ -274,8 +274,8 @@ function mandatoryWhitelist(step) {
 
   &.active {
     color: @accent;
-    border-color: fade(@accent, 50%);
-    background: fade(@accent, 10%);
+    border-color: @accent-line;
+    background: @accent-soft;
   }
 
   &.dragging   { opacity: 0.35; }
@@ -378,7 +378,7 @@ function mandatoryWhitelist(step) {
     color: @accent;
     border-color: @accent;
     border-style: solid;
-    background: fade(@accent, 8%);
+    background: @accent-soft;
   }
 }
 </style>

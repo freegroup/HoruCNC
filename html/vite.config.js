@@ -12,6 +12,13 @@ export default defineConfig({
   build: {
     outDir: '../docs',
     emptyOutDir: true,
+    // Two pages, like PatternMaster: start page + designer
+    rollupOptions: {
+      input: {
+        index:    fileURLToPath(new URL('./index.html', import.meta.url)),
+        designer: fileURLToPath(new URL('./designer.html', import.meta.url)),
+      },
+    },
   },
   base: './',
   worker: {
