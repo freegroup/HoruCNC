@@ -11,7 +11,15 @@ const open       = ref(false)
 const triggerRef = ref(null)
 const dropPos    = ref({ top: 0, left: 0, width: 0 })
 
-const current = computed(() => props.options?.find(o => o.value === props.value) ?? props.options?.[0])
+// Options computed at runtime (e.g. camera DPI) may not hit the stored value exactly —
+// show the nearest one instead of silently falling back to the first.
+const current = computed(() => {
+  const opts = props.options
+  if (!opts?.length) return null
+  const exact = opts.find(o => o.value === props.value)
+  if (exact || typeof props.value !== 'number') return exact ?? opts[0]
+  return opts.reduce((a, b) => Math.abs(b.value - props.value) < Math.abs(a.value - props.value) ? b : a)
+})
 
 function toggle() {
   if (!open.value) {

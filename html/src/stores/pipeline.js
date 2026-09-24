@@ -57,7 +57,7 @@ function loadFromStorage() {
   return null
 }
 
-const BLOCK_ORDER = ['input', 'image', 'vector', 'grbl']
+const BLOCK_ORDER = ['image', 'vector', 'grbl']
 
 export const usePipelineStore = defineStore('pipeline', () => {
   const saved = loadFromStorage()
@@ -96,6 +96,19 @@ export const usePipelineStore = defineStore('pipeline', () => {
   // ── Navigation ──────────────────────────────────────────────────────────────
   function setActive(index) {
     activeIndex.value = Math.max(0, Math.min(index, steps.value.length - 1))
+  }
+
+  // ── Collapse state (persisted with the steps) ───────────────────────────────
+  function toggleCollapsed(instanceId) {
+    const step = steps.value.find(s => s.instanceId === instanceId)
+    if (step) step.collapsed = !step.collapsed
+  }
+
+  /** Collapse all steps of a block, or expand them all if every one is collapsed already. */
+  function toggleBlockCollapsed(blockId) {
+    const blockSteps = steps.value.filter(s => s.blockId === blockId)
+    const collapse   = !blockSteps.every(s => s.collapsed)
+    for (const s of blockSteps) s.collapsed = collapse
   }
 
   function updateParam(key, value) {
@@ -220,6 +233,8 @@ export const usePipelineStore = defineStore('pipeline', () => {
     setActive,
     updateParam,
     updateStepParam,
+    toggleCollapsed,
+    toggleBlockCollapsed,
     isMandatoryFirst,
     addStep,
     addStepBefore,

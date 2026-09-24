@@ -4,10 +4,7 @@ import { usePipelineStore }   from '@/stores/pipeline.js'
 import { useCamera }          from '@/composables/useCamera.js'
 import { usePipelineWorker }  from '@/composables/usePipelineWorker.js'
 import { BLOCKS, BLOCK_MAP, BLOCK_REGISTRIES, allPlugins } from '@/plugins/index.js'
-import StepCard    from './StepCard.vue'
-import StepPreview from './StepPreview.vue'
-import FlowArrow   from './FlowArrow.vue'
-import BlockArrow  from './BlockArrow.vue'
+import StepRow from './StepRow.vue'
 
 const store  = usePipelineStore()
 const camera = useCamera()
@@ -77,7 +74,7 @@ watch(() => store.workerSteps, steps => worker.configure(steps))
 watch(() => store.steps[0]?.values?.deviceId, deviceId => camera.start(deviceId || undefined))
 
 // ── Block colours ─────────────────────────────────────────────────────────────
-const BLOCK_COLORS = { image: '#9d7fe0', vector: '#52c97a', grbl: '#f0a030' }
+const BLOCK_COLORS = { image: '#9d7fe0', vector: '#4fbf7b', grbl: '#f0a54a' }
 
 // ── Step helpers ──────────────────────────────────────────────────────────────
 function stepsForBlock(blockId) {
@@ -97,9 +94,28 @@ function mandatoryWhitelist(step) {
   return BLOCK_MAP[step.blockId]?.mandatoryFirst?.whitelist ?? []
 }
 
-// Camera also shows its output preview (the processed/scaled frame)
-function hasPreview(_step) {
-  return true
+function allCollapsed(blockId) {
+  const s = store.steps.filter(st => st.blockId === blockId)
+  return s.length > 0 && s.every(st => st.collapsed)
+}
+
+// ── Common row width ──────────────────────────────────────────────────────────
+// Every step row gets the same width: parameter column + the picture at view height.
+// The picture's aspect comes from the source image, so the view never letterboxes.
+const PARAMS_W = 330
+const VIEW_H   = 440
+
+const rowWidth = computed(() => {
+  const bmp    = worker.stepResults.value[0]?.bitmap
+  const aspect = bmp ? bmp.width / bmp.height : 1
+  return `${Math.round(PARAMS_W + VIEW_H * aspect) + 2}px`
+})
+
+// Plain-language names for the three stages
+const BLOCK_TEXT = {
+  image:  { title: 'Image',   hint: 'Prepare the picture',       add: 'Add another image filter' },
+  vector: { title: 'Vectors', hint: 'Turn it into lines',        add: 'Add another vector filter' },
+  grbl:   { title: 'Machine', hint: 'Create the file for your CNC', add: '' },
 }
 
 // ── Plugin picker ─────────────────────────────────────────────────────────────
@@ -116,7 +132,10 @@ const pickerPlugins = computed(() => {
 
 const pickerTitle = computed(() => {
   if (!pickerCtx.value) return ''
-  if (pickerCtx.value.mode === 'replace') return 'Change Vectorizer'
+  if (pickerCtx.value.mode === 'replace') {
+    const step = store.steps.find(s => s.instanceId === pickerCtx.value.replaceInstanceId)
+    return `Replace ${allPlugins.get(step?.pluginId)?.label ?? 'step'}`
+  }
   return `Add ${BLOCKS.find(b => b.id === pickerCtx.value.blockId)?.label ?? ''} Filter`
 })
 
@@ -151,66 +170,53 @@ function addPlugin(pluginId) {
 
 <template>
   <div class="pipeline-flow">
-    <div class="flow-track">
+    <div class="flow-col" :style="{ '--row-w': rowWidth }">
 
       <template v-for="(block, bi) in BLOCKS" :key="block.id">
+        <section class="block" :class="{ last: bi === BLOCKS.length - 1 }" :style="{ '--bc': BLOCK_COLORS[block.id], '--next': BLOCK_COLORS[BLOCKS[bi + 1]?.id] ?? BLOCK_COLORS[block.id] }">
+          <header class="block-head" @click="store.toggleBlockCollapsed(block.id)">
+            <span class="block-mark" />
+            <span class="block-title">{{ BLOCK_TEXT[block.id].title }}</span>
+            <span class="block-hint">{{ BLOCK_TEXT[block.id].hint }}</span>
+            <span class="block-toggle">{{ allCollapsed(block.id) ? 'Show all' : 'Hide all' }}</span>
+          </header>
 
-        <!-- Between-block chevron (half-tucked under preceding block) -->
-        <BlockArrow v-if="bi > 0" :color="BLOCK_COLORS[BLOCKS[bi - 1].id]" />
-
-        <!-- Block zone -->
-        <div class="block-zone" :class="block.id">
-          <span class="zone-label">{{ block.label }}</span>
-
-          <div class="zone-row">
+          <div class="block-steps">
             <template v-for="(step, si) in stepsForBlock(block.id)" :key="step.instanceId">
 
-              <!-- Insert arrow between steps -->
-              <FlowArrow
-                v-if="si > 0"
-                :size="48"
-                :insertable="canRemove(step)"
-                :color="BLOCK_COLORS[block.id]"
-                @insert="openInsert(block.id, step.instanceId)"
-              />
+              <!-- Insert slot — only in front of freely configurable steps -->
+              <button
+                v-if="si > 0 && canRemove(step)"
+                class="insert-slot"
+                title="Insert a filter here"
+                @click="openInsert(block.id, step.instanceId)"
+              ><span>+</span></button>
+              <div v-else-if="si > 0" class="step-gap" />
 
-              <!-- Step card with params -->
-              <StepCard
+              <StepRow
                 :step="step"
                 :block-color="BLOCK_COLORS[block.id]"
                 :can-remove="canRemove(step)"
-                :is-mandatory="store.isMandatoryFirst(step.instanceId)"
+                :is-mandatory="store.isMandatoryFirst(step.instanceId) || !!block.fixed"
                 :whitelist="mandatoryWhitelist(step)"
                 @remove="store.removeStep(step.instanceId)"
                 @replace="openReplace(step.instanceId, mandatoryWhitelist(step))"
               />
-
-              <!-- Arrow between card and preview -->
-              <FlowArrow v-if="hasPreview(step)" :size="48" :color="BLOCK_COLORS[block.id]" />
-
-              <!-- Output preview (skipped for camera) -->
-              <StepPreview
-                v-if="hasPreview(step)"
-                :step-index="step.index"
-                :instance-id="step.instanceId"
-                :plugin="pluginFor(step)"
-                :values="step.values"
-                :block-color="BLOCK_COLORS[block.id]"
-              />
-
             </template>
 
-            <!-- Append button for non-fixed blocks -->
-            <button
-              v-if="!block.fixed"
-              class="zone-add"
-              :title="`Add ${block.label} filter`"
-              @click="openAppend(block.id)"
-            >+</button>
+            <button v-if="!block.fixed" class="add-step" @click="openAppend(block.id)">
+              <span class="add-node">+</span>{{ BLOCK_TEXT[block.id].add }}
+            </button>
           </div>
-        </div>
-
+        </section>
       </template>
+
+      <div class="timeline-end">
+        <span class="end-node">
+          <svg width="18" height="18" viewBox="0 0 16 16" fill="none"><path d="M3.5 8.5l3 3 6-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </span>
+        Ready to mill
+      </div>
     </div>
 
     <!-- Plugin picker overlay -->
@@ -236,101 +242,218 @@ function addPlugin(pluginId) {
 <style lang="less" scoped>
 @import '@/assets/theme.less';
 
-@c-image:  #9d7fe0;
-@c-vector: #52c97a;
-@c-grbl:   @accent;
+// Geometry of the timeline: the line is centred at @rail-x inside the left gutter,
+// StepRow places its node centred on it.
+@gutter: 68px;
+@rail-x: 22px;
+@rail-w: 4px;
 
-// ── Outer container ───────────────────────────────────────────────────────────
 .pipeline-flow {
   flex: 1;
   min-height: 0;
-  display: flex;
-  flex-direction: column;
+  overflow-y: auto;
   background: @bg;
-  background-image: radial-gradient(circle, fade(@border, 70%) 1px, transparent 1px);
-  background-size: 22px 22px;
 }
 
-// ── Horizontal scrolling track ────────────────────────────────────────────────
-.flow-track {
+.flow-col {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 28px 24px 80px;
+}
+
+// ── Block ─────────────────────────────────────────────────────────────────────
+.block {
+  position: relative;
+  padding-bottom: 38px;
+
+  // The timeline: block colour, blending into the next block's colour at the bottom
+  &::before,
+  &::after {
+    content: '';
+    position: absolute;
+    left: (@rail-x - (@rail-w / 2));
+    top: 14px;
+    bottom: 0;
+    width: @rail-w;
+    border-radius: @rail-w;
+  }
+
+  &::before {
+    background: linear-gradient(var(--bc) 0%, var(--bc) calc(100% - 70px), var(--next) 100%);
+    opacity: 0.55;
+  }
+
+  // Data flowing down the line — the pipeline runs live
+  &::after {
+    background: repeating-linear-gradient(180deg, fade(#fff, 55%) 0 8px, transparent 8px 28px);
+    animation: flow 1.4s linear infinite;
+    opacity: 0.18;
+  }
+
+  &.last { padding-bottom: 0; }
+  // Last block: the line runs on into the end node below
+  &.last::before,
+  &.last::after { bottom: -40px; }
+}
+
+@keyframes flow {
+  from { background-position: 0 0; }
+  to   { background-position: 0 28px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .block::after { animation: none; }
+}
+
+.block-head {
+  position: relative;
+  width: min(100%, calc(var(--row-w, 100%) + @gutter));
   display: flex;
-  flex-direction: row;
-  align-items: stretch;
-  overflow-x: auto;
-  overflow-y: visible;
-  padding: 20px;
-  gap: 10px;
-  scrollbar-width: thin;
-  scrollbar-color: @border transparent;
+  align-items: baseline;
+  gap: 12px;
+  padding: 0 0 16px @gutter;
+  cursor: pointer;
+  user-select: none;
 
-  &::-webkit-scrollbar        { height: 5px; }
-  &::-webkit-scrollbar-track  { background: transparent; }
-  &::-webkit-scrollbar-thumb  { background: @border; border-radius: 3px; }
+  &:hover .block-toggle { color: @text; }
 }
 
-// ── Block zone ────────────────────────────────────────────────────────────────
-.block-zone {
+.block-mark {
+  position: absolute;
+  left: @rail-x - 10px;
+  top: 3px;
+  width: 20px;
+  height: 20px;
+  border-radius: 5px;
+  transform: rotate(45deg);
+  background: var(--bc);
+  box-shadow: 0 0 0 5px @bg, 0 0 22px -2px var(--bc);
+  z-index: 2;
+}
+
+.block-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: @text;
+  letter-spacing: -0.01em;
+}
+
+.block-hint {
+  flex: 1;
+  font-size: 13px;
+  color: @muted;
+}
+
+.block-toggle {
+  font-size: 12px;
+  color: @muted;
+  transition: color 0.12s;
+}
+
+.block-steps {
   display: flex;
   flex-direction: column;
-  gap: 6px;
-  border-radius: 12px;
-  padding: 8px 10px 10px;
-  flex-shrink: 0;
-  backdrop-filter: blur(2px);
-  position: relative;
-  z-index: 1;  /* above BlockArrow so it covers the tucked-in left portion */
-
-  &.image  { border: 5px solid fade(@c-image,  45%); background: fade(@c-image,  7%); box-shadow: 0 4px 24px rgba(0,0,0,0.5), 0 0 40px fade(@c-image,  6%) inset; }
-  &.vector { border: 5px solid fade(@c-vector, 45%); background: fade(@c-vector, 7%); box-shadow: 0 4px 24px rgba(0,0,0,0.5), 0 0 40px fade(@c-vector, 6%) inset; }
-  &.grbl   { border: 5px solid fade(@c-grbl,   45%); background: fade(@c-grbl,   7%); box-shadow: 0 4px 24px rgba(0,0,0,0.5), 0 0 40px fade(@c-grbl,   6%) inset; }
+  padding-left: @gutter;
 }
 
-.zone-label {
-  font-size: 7.5px;
-  font-weight: 800;
-  letter-spacing: 0.22em;
-  text-transform: uppercase;
-  padding: 0 2px;
-  flex-shrink: 0;
+.step-gap { height: 10px; }
 
-  .image  & { color: fade(@c-image,  80%); }
-  .vector & { color: fade(@c-vector, 80%); }
-  .grbl   & { color: fade(@c-grbl,   80%); }
-}
-
-// ── Steps row inside a block ──────────────────────────────────────────────────
-.zone-row {
-  flex: 1;
-  display: flex;
-  flex-direction: row;
-  align-items: stretch;
-  gap: 0;
-}
-
-// ── Append button ─────────────────────────────────────────────────────────────
-.zone-add {
-  align-self: center;
-  width: 26px;
-  height: 26px;
-  border-radius: 50%;
-  border: 1px dashed @border;
+// Gap between rows that turns into an insert button on hover
+.insert-slot {
+  height: 10px;
+  border: none;
   background: none;
+  cursor: pointer;
+  position: relative;
+  padding: 0;
+
+  span {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: @accent;
+    color: #1a1204;
+    font-size: 15px;
+    font-weight: 700;
+    line-height: 22px;
+    opacity: 0;
+    transition: opacity 0.12s;
+    z-index: 5;
+  }
+
+  &:hover span { opacity: 1; }
+}
+
+.add-step {
+  position: relative;
+  align-self: flex-start;
+  display: flex;
+  align-items: center;
+  margin-top: 12px;
+  padding: 6px 12px 6px 0;
+  background: none;
+  border: none;
+  color: @muted;
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+  transition: color 0.12s;
+
+  &:hover { color: @text; }
+  &:hover .add-node { border-color: var(--bc); color: var(--bc); }
+}
+
+// "+" node sitting on the timeline
+.add-node {
+  position: absolute;
+  left: (@rail-x - @gutter - 14px);
+  top: 50%;
+  transform: translateY(-50%);
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 2px dashed fade(@muted, 70%);
+  background: @bg;
   color: @muted;
   font-size: 16px;
-  cursor: pointer;
+  font-weight: 700;
+  line-height: 24px;
+  text-align: center;
+  z-index: 2;
+  transition: border-color 0.12s, color 0.12s;
+}
+
+// End of the timeline
+.timeline-end {
+  position: relative;
+  display: flex;
+  align-items: center;
+  height: 44px;
+  margin-top: 26px;
+  padding-left: @gutter;
+  font-size: 13px;
+  font-weight: 600;
+  color: @muted;
+}
+
+.end-node {
+  position: absolute;
+  left: @rail-x - 22px;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: @bg;
+  border: 4px solid @accent;
+  box-shadow: 0 0 22px -4px @accent;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-family: inherit;
-  flex-shrink: 0;
-  transition: color 0.12s, border-color 0.12s, background 0.12s;
-
-  &:hover {
-    color: @accent;
-    border-color: @accent;
-    border-style: solid;
-    background: fade(@accent, 8%);
-  }
+  color: @accent;
+  z-index: 2;
 }
 </style>
 

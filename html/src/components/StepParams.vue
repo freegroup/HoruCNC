@@ -121,7 +121,7 @@ function onSelect(param, e) {
 .param-label {
   display: flex;
   justify-content: space-between;
-  font-size: 10px;
+  font-size: 12px;
   color: @muted;
 }
 
@@ -152,7 +152,7 @@ input[type='range'] {
   border: 1px solid @border;
   border-radius: 5px;
 
-  .dl { font-size: 10px; color: @muted; }
+  .dl { font-size: 12px; color: @muted; }
   .dv { font-size: 12px; font-weight: 700; color: @accent; font-variant-numeric: tabular-nums; }
 }
 
@@ -160,7 +160,7 @@ input[type='range'] {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  font-size: 10px;
+  font-size: 12px;
   color: @muted;
 }
 
@@ -194,12 +194,12 @@ input[type='range'] {
 
 .p-select {
   width: 100%;
-  background: @surface2;
+  background: @bg;
   color: @text;
   border: 1px solid @border;
-  border-radius: 4px;
+  border-radius: 5px;
   padding: 5px 8px;
-  font-size: 11px;
+  font-size: 12px;
   cursor: pointer;
   outline: none;
   font-family: inherit;
