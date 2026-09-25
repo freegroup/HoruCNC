@@ -1,10 +1,11 @@
 import { viewProj, compileProgram } from './viewCam.js'
 import { cssColor, rgbFloat } from '@/assets/colors.js'
+import { makeDimensionBands } from './dimensions.js'
 
 /**
  * CAM view — toolpath backplot (WebGL2), ported from PatternMaster (js/renderers/cam.js):
  * rapids grey, cuts in the accent colour, XYZ axes at the G-code origin, the stock as a thin grey frame
- * with a floor under it that sets it apart from the background.
+ * with a floor under it that sets it apart from the background, and its size on dimension bands.
  */
 
 const RAPID = [0.62, 0.66, 0.72], WIRE = [0.45, 0.47, 0.52]
@@ -23,6 +24,7 @@ precision mediump float; in vec3 vC; out vec4 o; void main(){ o = vec4(vC,1.0); 
   const uMVP = gl.getUniformLocation(prog, 'uMVP')
   const posB = gl.createBuffer(), colB = gl.createBuffer()
   const fPosB = gl.createBuffer(), fColB = gl.createBuffer()
+  const bands = makeDimensionBands(gl)
   let lineCount = 0, frameCount = 0
   let box = null
 
@@ -93,7 +95,8 @@ precision mediump float; in vec3 vC; out vec4 o; void main(){ o = vec4(vC,1.0); 
       gl.bindBuffer(gl.ARRAY_BUFFER, fColB); gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(fc), gl.STATIC_DRAW)
       frameCount = fp.length / 3
 
-      box = [Math.min(X0, 0), Math.min(Y0, 0), zb, X1, Y1, Math.max(maxZ, 0)]
+      bands.set(stock)
+      box = bands.grow([Math.min(X0, 0), Math.min(Y0, 0), zb, X1, Y1, Math.max(maxZ, 0)])
     },
 
     draw(cam) {
@@ -105,6 +108,7 @@ precision mediump float; in vec3 vC; out vec4 o; void main(){ o = vec4(vC,1.0); 
       gl.uniformMatrix4fv(uMVP, false, new Float32Array(mvp))
       bind(posB, colB); gl.drawArrays(gl.LINES, 0, lineCount)
       bind(fPosB, fColB); gl.drawArrays(gl.TRIANGLES, 0, frameCount)
+      bands.draw(mvp)
     },
 
     dispose() { gl.getExtension('WEBGL_lose_context')?.loseContext() },

@@ -1,8 +1,9 @@
 <script setup>
 import { ref, computed, inject, watchEffect, watch, nextTick, onMounted, onUnmounted } from 'vue'
 import { cssColor } from '@/assets/colors.js'
-import { pathDepth } from '@/plugins/grbl/gcode.worker.js'
+import { pathDepth } from './utils/measure.js'
 import { sharedCam, fitView, resetCam, attachOrbit, eyeOf } from '@/plugins/grbl/preview/viewCam.js'
+import { makeDimensionMeshes, growForDimensions } from '@/plugins/grbl/preview/dimensions.js'
 
 const props = defineProps({
   result:    Object,
@@ -261,7 +262,7 @@ function build3DScene() {
   // Dispose previous objects
   scene.traverse(obj => {
     obj.geometry?.dispose()
-    if (obj.material && !Array.isArray(obj.material)) obj.material.dispose()
+    if (obj.material && !Array.isArray(obj.material)) { obj.material.map?.dispose(); obj.material.dispose() }
   })
   while (scene.children.length) scene.remove(scene.children[0])
 
@@ -318,8 +319,12 @@ function build3DScene() {
   grid.position.set(center.x, center.y, 0)
   scene.add(grid)
 
+  // The size of what gets milled, in mm (from the source's dpi and field width via mmPerPixel)
+  const dims = makeDimensionMeshes(THREE, { x: box.min.x, y: box.min.y, w: size.x, h: size.y })
+  for (const mesh of dims.meshes) scene.add(mesh)
+
   // Fit once — later results (new snapshot, other parameters) keep the user's view
-  box3D = [box.min.x, box.min.y, box.min.z, box.max.x, box.max.y, box.max.z]
+  box3D = growForDimensions([box.min.x, box.min.y, box.min.z, box.max.x, box.max.y, box.max.z], dims.layout)
   if (!cam.framedFor) fit3D()
 }
 
@@ -327,7 +332,7 @@ function dispose3D() {
   cancelAnimationFrame(animId); animId = null
   observer3D?.disconnect(); observer3D = null
   detachOrbit?.(); detachOrbit = null
-  scene?.traverse(obj => { obj.geometry?.dispose(); obj.material?.dispose() })
+  scene?.traverse(obj => { obj.geometry?.dispose(); obj.material?.map?.dispose(); obj.material?.dispose() })
   renderer?.dispose()
   renderer?.domElement?.remove()
   renderer = null; scene = null; camera = null; THREE = null

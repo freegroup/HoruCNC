@@ -5,9 +5,10 @@ import { useCamera }          from '@/composables/useCamera.js'
 import { usePipelineWorker }  from '@/composables/usePipelineWorker.js'
 import { BLOCKS, BLOCK_MAP, BLOCK_REGISTRIES, allPlugins } from '@/plugins/index.js'
 import StepRow from './StepRow.vue'
-import { process as processCamera } from '@/plugins/input/camera.worker.js'
-import { UPLOAD } from '@/plugins/input/camera.js'
-import { storage } from '@/stores/storage.js'
+import { process as processSource } from '@/plugins/input/source.worker.js'
+import { UPLOAD } from '@/plugins/input/source.js'
+import { pickFile }           from '@/utils/files.js'
+import { bitmapToDataUrl, dataUrlToBitmap, fitBitmap } from '@/utils/image.js'
 import FinishStep from './FinishStep.vue'
 
 // The page header is big at the top and compact once scrolled (with hysteresis against flicker)
@@ -32,8 +33,10 @@ const worker = usePipelineWorker()
 // camera has warmed up; "Take snapshot" replaces it. The live picture is only shown in the
 // source step, as the "before" side of its compare view.
 // With the source "Upload image" there is no camera at all: the uploaded file IS the snapshot.
+// The picture itself is a value of the source step (store.sourceImage, a JPEG data URL — also
+// set by opened project files and examples); here it is only decoded into the bitmap the
+// pipeline and the views work on.
 const WARMUP_FRAMES = 12            // skip the dark first frames of a starting camera
-const SNAPSHOT_KEY  = 'snapshot'
 const MAX_SIDE      = 2048          // uploads are scaled down to this — keeps the stored JPEG small
 const sourceId = computed(() => store.steps[0]?.values?.deviceId ?? '')
 const isUpload = computed(() => sourceId.value === UPLOAD)
@@ -41,59 +44,39 @@ const frozenBitmap = ref(null)
 const liveFrame    = shallowRef(null)   // live picture, through the camera step (crop/mirror/scale)
 let frozenSent = false
 let liveFrames = 0
+let snapshotPending = false         // one is being encoded — the warm-up must not take another
 
 async function captureSnapshot() {
   const bmp = await camera.captureFrame()
-  if (!bmp) return
-  setSnapshot(bmp)
+  if (bmp) await takeSnapshot(bmp)
 }
 
-function setSnapshot(bmp) {
+async function takeSnapshot(bmp) {
+  snapshotPending = true
+  try { store.setSourceImage(await bitmapToDataUrl(bmp)) }
+  finally { bmp.close(); snapshotPending = false }
+}
+
+// "Upload image": a file dialog, the chosen picture becomes the snapshot
+async function pickImage() {
+  const file = await pickFile('image/*')
+  if (!file) return
+  try { await takeSnapshot(await fitBitmap(await createImageBitmap(file, { imageOrientation: 'from-image' }), MAX_SIDE)) }
+  catch { /* not a readable image — keep the current one */ }
+}
+
+// The bitmap follows the stored picture, whoever set it
+let decoding = 0
+watch(() => store.sourceImage, async url => {
+  const run = ++decoding
+  const bmp = url ? await dataUrlToBitmap(url).catch(() => null) : null
+  if (run !== decoding) { bmp?.close(); return }          // a newer picture came in meanwhile
+  if (url && !bmp) { store.setSourceImage(null); return } // unreadable — start without one
   frozenBitmap.value?.close()
   frozenBitmap.value = bmp
-  syncNativeRes()
   frozenSent = false
-  saveSnapshot(bmp)
-}
-
-// The snapshot survives a reload (JPEG in localStorage) — otherwise a reload would take a
-// new picture and every step would suddenly show something else
-async function saveSnapshot(bmp) {
-  try {
-    const c = new OffscreenCanvas(bmp.width, bmp.height)
-    c.getContext('2d').drawImage(bmp, 0, 0)
-    const blob = await c.convertToBlob({ type: 'image/jpeg', quality: 0.9 })
-    const url  = await new Promise(res => { const r = new FileReader(); r.onload = () => res(r.result); r.readAsDataURL(blob) })
-    storage.set(SNAPSHOT_KEY, url)
-  } catch { /* no persistence then */ }
-}
-
-// "Upload image": a file dialog, the chosen picture becomes the snapshot.
-// Must be called from a click (browsers only open file dialogs on a user gesture).
-function pickImage() {
-  const input = document.createElement('input')
-  input.type   = 'file'
-  input.accept = 'image/*'
-  input.onchange = () => { if (input.files?.[0]) useImageFile(input.files[0]) }
-  input.click()
-}
-
-async function useImageFile(file) {
-  try {
-    let bmp = await createImageBitmap(file, { imageOrientation: 'from-image' })
-    const scale = MAX_SIDE / Math.max(bmp.width, bmp.height)
-    if (scale < 1) {
-      const small = await createImageBitmap(bmp, {
-        resizeWidth:  Math.round(bmp.width * scale),
-        resizeHeight: Math.round(bmp.height * scale),
-        resizeQuality: 'high',
-      })
-      bmp.close()
-      bmp = small
-    }
-    setSnapshot(bmp)
-  } catch { /* not a readable image — keep the current one */ }
-}
+  syncNativeRes()
+}, { immediate: true })
 
 // The resolution presets are relative to the source's own resolution — for an upload
 // that is the image, not the (stopped) camera
@@ -102,27 +85,14 @@ function syncNativeRes() {
   if (isUpload.value && b) camera.nativeRes.value = { w: b.width, h: b.height }
 }
 
-async function loadSnapshot() {
-  const url = storage.get(SNAPSHOT_KEY)
-  if (typeof url !== 'string') return
-  try {
-    frozenBitmap.value = await createImageBitmap(await (await fetch(url)).blob())
-    frozenSent = false
-    syncNativeRes()
-  } catch { storage.remove(SNAPSHOT_KEY) }
-}
-
 // Other camera → a fresh first snapshot from it.
 // Switching to "Upload image" keeps the current picture until a file is chosen.
 watch(sourceId, id => {
   liveFrame.value?.bitmap?.close()
   liveFrame.value = null
   if (id === UPLOAD) { camera.stop(); syncNativeRes(); return }
-  frozenBitmap.value?.close()
-  frozenBitmap.value = null
-  frozenSent = false
   liveFrames = 0
-  storage.remove(SNAPSHOT_KEY)
+  store.setSourceImage(null)
   startCamera(id)
 })
 
@@ -159,10 +129,10 @@ async function loop() {
   const bitmap = isUpload.value ? null : await camera.captureFrame()
   if (bitmap && isUpload.value) bitmap.close()      // switched to upload meanwhile
   else if (bitmap) {
-    if (!frozenBitmap.value && ++liveFrames >= WARMUP_FRAMES) {
-      setSnapshot(await createImageBitmap(bitmap))
+    if (!store.sourceImage && !snapshotPending && ++liveFrames >= WARMUP_FRAMES) {
+      takeSnapshot(await createImageBitmap(bitmap))
     }
-    const live = await processCamera({ bitmap }, store.steps[0]?.values ?? {})
+    const live = await processSource({ bitmap }, store.steps[0]?.values ?? {})
     bitmap.close()
     liveFrame.value?.bitmap?.close()
     liveFrame.value = live
@@ -177,7 +147,6 @@ async function loop() {
 
 onMounted(async () => {
   worker.configure(store.workerSteps)
-  await loadSnapshot()             // before the camera could take an automatic one
   rafId = requestAnimationFrame(loop)
   // An uploaded picture needs no camera — list the webcams without asking for permission
   if (isUpload.value) { await camera.enumerateDevices(false); return }
@@ -189,7 +158,7 @@ onMounted(async () => {
     return
   }
   // No webcam (or no permission) and nothing chosen yet → start with an upload instead
-  if (!savedId && !frozenBitmap.value && camera.error.value) {
+  if (!savedId && !store.sourceImage && camera.error.value) {
     store.steps[0].values.deviceId = UPLOAD
     return
   }

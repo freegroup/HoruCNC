@@ -1,21 +1,12 @@
+import { pathDepth } from '../vector/utils/measure.js'
+
 /** Even stepdown: as few passes as the max stepdown allows, all equally deep. */
 export const passCount = v => Math.max(1, Math.ceil((v.depth ?? 0) / (v.stepdown || 1) - 1e-9))
 
 // ── Z convention for all vectors ──────────────────────────────────────────────
 // A point's z IS the machine Z: 0 = stock surface, negative = into the material. The depth
 // comes from the converter (Contours / Skeleton: "Depth", Terrain: black → -maxDepth) or a
-// vector filter (Set Z) — Manufacture only decides how many passes it takes to get there.
-const EPS = 0.01
-
-/** Deepest point of all paths, as a positive depth in mm (0 = flat 2D paths). */
-export function pathDepth(contours) {
-  let d = 0
-  for (const c of contours ?? []) for (const p of c) {
-    const z = p[2]
-    if (Number.isFinite(z) && -z > d) d = -z
-  }
-  return d > EPS ? d : 0
-}
+// vector filter (Z depth, Scale) — Manufacture only decides how many passes it takes to get there.
 
 /**
  * Machine paths — the cutter's moves in mm, packed [rapid(1|0), x, y, z] × n.

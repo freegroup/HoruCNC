@@ -1,4 +1,4 @@
-import { process as processCamera }      from '../plugins/input/camera.worker.js'
+import { process as processSource }      from '../plugins/input/source.worker.js'
 import { process as processGrayscale }   from '../plugins/image/grayscale.worker.js'
 import { process as processBlackWhite }  from '../plugins/image/blackwhite.worker.js'
 import { process as processCanny }       from '../plugins/image/canny.worker.js'
@@ -12,10 +12,11 @@ import { process as processSmooth }      from '../plugins/vector/smooth.worker.j
 import { process as processRemoveShort } from '../plugins/vector/removeshort.worker.js'
 import { process as processSortPaths }   from '../plugins/vector/sortpaths.worker.js'
 import { process as processSetZ }        from '../plugins/vector/setz.worker.js'
+import { process as processScale }       from '../plugins/vector/scale.worker.js'
 import { process as processGcode }       from '../plugins/grbl/gcode.worker.js'
 
 const PROCESSORS = {
-  camera:      processCamera,
+  source:      processSource,
   grayscale:   processGrayscale,
   blackwhite:  processBlackWhite,
   canny:       processCanny,
@@ -29,6 +30,7 @@ const PROCESSORS = {
   removeshort: processRemoveShort,
   sortpaths:   processSortPaths,
   setz:        processSetZ,
+  scale:       processScale,
   gcode:       processGcode,
 }
 

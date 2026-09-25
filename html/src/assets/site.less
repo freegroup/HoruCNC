@@ -1,0 +1,81 @@
+// Shared look of the site pages (start page index.html, new project new.html): the page frame,
+// buttons, section headings, the card grid and the HoruCNC wordmark in running text.
+// Imported into each page's scoped styles.
+@import 'theme.less';
+
+.page {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  scroll-behavior: smooth;
+  background: @bg;
+  color: @text;
+  font-size: 17px;
+  line-height: 1.55;
+}
+
+// ── Buttons ───────────────────────────────────────────────────────────────────
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 22px;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  font: inherit;
+  font-size: 15px;
+  font-weight: 600;
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: transform 0.15s, opacity 0.15s, border-color 0.15s;
+
+  &:hover { transform: translateY(-1px); }
+}
+.btn-primary { background: @accent; color: @on-accent; &:hover { opacity: 0.92; } }
+.btn-ghost   { color: @text; border-color: @border; &:hover { border-color: @muted; } }
+.btn-big     { padding: 16px 28px; font-size: 16px; }
+.btn-small   { padding: 8px 16px; font-size: 14px; }
+
+// ── Sections ──────────────────────────────────────────────────────────────────
+main > section {
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: 96px @page-pad;
+}
+.eyebrow {
+  margin-bottom: 14px;
+  font-family: @mono;
+  font-size: 13px;
+  letter-spacing: 0.02em;
+  color: @accent;
+}
+.section-title {
+  font-size: clamp(32px, 4.6vw, 54px);
+  font-weight: 700;
+  line-height: 1.05;
+  letter-spacing: -0.035em;
+
+  span { color: @muted; }
+}
+.section-lead {
+  margin-top: 18px;
+  max-width: 620px;
+  font-size: 19px;
+  color: @muted;
+}
+.note { margin-top: 18px; font-size: 13px; color: @muted; }
+
+// ── Card grid (ChoiceCard) ────────────────────────────────────────────────────
+.cards {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+  margin-top: 44px;
+
+  @media (max-width: 900px) { grid-template-columns: 1fr; }
+}
+
+// ── The wordmark in running text: HoruCNC, "CNC" in the tint ─────────────────
+.brand-cnc    { color: @accent; }
+.brand-inline { color: @text; font-weight: 650; }

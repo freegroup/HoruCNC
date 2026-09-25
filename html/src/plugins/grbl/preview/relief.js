@@ -1,4 +1,5 @@
 import { viewProj, compileProgram } from './viewCam.js'
+import { makeDimensionBands } from './dimensions.js'
 
 /**
  * 3D view — relief raymarching of the simulated height field (WebGL2), ported from
@@ -80,8 +81,9 @@ export function makeRelief(canvas) {
     U[n] = gl.getUniformLocation(prog, n)
 
   const bPos = gl.createBuffer(), bNrm = gl.createBuffer()
+  const bands = makeDimensionBands(gl)
   let boxCount = 0
-  let box = null            // [x0,y0,z0,x1,y1,z1] of the stock in world mm
+  let box = null            // [x0,y0,z0,x1,y1,z1] of the stock in world mm (what the shader marches)
   let cell = 1
 
   const tex = gl.createTexture()
@@ -111,7 +113,8 @@ export function makeRelief(canvas) {
   }
 
   return {
-    get box() { return box },
+    /** The view box: the stock with its dimension bands */
+    get box() { return box && bands.grow(box) },
 
     /** sim: { H, nx, ny, cell, stock: {x, y, w, h} } */
     setSim(sim) {
@@ -126,13 +129,14 @@ export function makeRelief(canvas) {
       cell = sim.cell
       box  = [x, y, zBase, x + w, y + h, 0]
       buildBox(box)
+      bands.set(sim.stock)
     },
 
     draw(cam) {
       gl.viewport(0, 0, canvas.width, canvas.height)
       gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
       if (!boxCount) return
-      const { eye, mvp } = viewProj(cam, canvas.width / canvas.height, box)
+      const { eye, mvp } = viewProj(cam, canvas.width / canvas.height, bands.grow(box))
       gl.useProgram(prog)
       gl.uniformMatrix4fv(U.uMVP, false, new Float32Array(mvp))
       gl.uniform3fv(U.uEye, new Float32Array(eye))
@@ -145,6 +149,7 @@ export function makeRelief(canvas) {
       gl.bindBuffer(gl.ARRAY_BUFFER, bPos); gl.enableVertexAttribArray(aPos); gl.vertexAttribPointer(aPos, 3, gl.FLOAT, false, 0, 0)
       gl.bindBuffer(gl.ARRAY_BUFFER, bNrm); gl.enableVertexAttribArray(aNrm); gl.vertexAttribPointer(aNrm, 3, gl.FLOAT, false, 0, 0)
       gl.drawArrays(gl.TRIANGLES, 0, boxCount)
+      bands.draw(mvp)
     },
 
     dispose() { gl.getExtension('WEBGL_lose_context')?.loseContext() },

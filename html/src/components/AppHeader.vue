@@ -1,7 +1,16 @@
 <script setup>
 import Logo from './Logo.vue'
+import { useProject } from '@/project/useProject.js'
 // Brand + one-line promise. Big at the top of the page, a slim bar once the pipeline scrolls.
+// Open / Save (the project file) sit next to Home and stay visible in the slim bar too.
 defineProps({ compact: Boolean })
+
+const { saveProject, openProject } = useProject()
+
+async function onOpen() {
+  const error = await openProject()
+  if (error) alert(error)
+}
 </script>
 
 <template>
@@ -17,10 +26,20 @@ defineProps({ compact: Boolean })
           <span class="brand-slogan">Camera · Contour · Machine</span>
         </div>
       </a>
-      <a class="home-link" href="index.html">
-        <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M10 3L5 8l5 5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        Home
-      </a>
+      <div class="actions">
+        <button class="pill" title="Open a saved project (.horucnc.json)" @click="onOpen">
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M8 10V2.5M5 5.5l3-3 3 3M3 10v3h10v-3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Open
+        </button>
+        <button class="pill" title="Save pipeline and picture as one file" @click="saveProject">
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M8 2.5V10M5 7l3 3 3-3M3 10v3h10v-3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Save
+        </button>
+        <a class="pill" href="index.html">
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M10 3L5 8l5 5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Home
+        </a>
+      </div>
 
       <div class="hero">
         <div class="hero-body">
@@ -66,24 +85,34 @@ defineProps({ compact: Boolean })
   text-decoration: none;
 }
 
-.home-link {
+.actions {
   position: absolute;
   top: 28px;
   right: 24px;
   display: flex;
+  gap: 8px;
+  transition: top @ease;
+
+  .compact & { top: 9px; }
+}
+
+.pill {
+  display: flex;
   align-items: center;
-  gap: 4px;
-  padding: 6px 12px 6px 8px;
+  gap: 5px;
+  padding: 6px 12px 6px 9px;
   border-radius: 999px;
   border: 1px solid @hairline;
+  background: none;
   color: @muted;
+  font: inherit;
   font-size: 13px;
   font-weight: 500;
   text-decoration: none;
-  transition: color 0.12s, border-color 0.12s, top @ease;
+  cursor: pointer;
+  transition: color 0.12s, border-color 0.12s;
 
   &:hover { color: @text; border-color: @border; }
-  .compact & { top: 9px; }
 }
 
 .brand-icon {

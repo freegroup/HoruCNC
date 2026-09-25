@@ -1,8 +1,8 @@
 /** @type {import('../types').FilterPlugin} */
 export const skeletonizePlugin = {
   id:          'skeletonize',
-  label:       'Skeletonize',
-  description: 'Thin thick shapes to 1px centerlines (Zhang-Suen)',
+  label:       'Line thinning',
+  description: 'Thin thick lines and shapes down to a 1px centerline',
   inputType:   'image',
   outputType:  'image',
   params: [],

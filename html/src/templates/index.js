@@ -1,12 +1,10 @@
-import { edgeEngravingTemplate }       from './edge-engraving.js'
-import { grayscaleEngravingTemplate }  from './grayscale-engraving.js'
-import { reliefTemplate }              from './relief.js'
+import { lineArtTemplate }          from './line-art.js'
+import { grayscaleToLinesTemplate } from './grayscale-to-lines.js'
+import { heightmapTemplate }        from './heightmap.js'
 
-/** All built-in pipeline templates. */
+/** All built-in pipeline templates; the first one is the default for an empty designer. */
 export const DEFAULT_TEMPLATES = [
-  edgeEngravingTemplate,
-  grayscaleEngravingTemplate,
-  reliefTemplate,
+  lineArtTemplate,
+  grayscaleToLinesTemplate,
+  heightmapTemplate,
 ]
-
-export { edgeEngravingTemplate, grayscaleEngravingTemplate, reliefTemplate }

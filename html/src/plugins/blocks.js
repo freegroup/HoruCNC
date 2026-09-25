@@ -10,7 +10,7 @@ export const BLOCKS = [
     id:    'image',
     label: 'IMAGE',
     fixed: false,
-    mandatoryFirst: { whitelist: ['camera'] },
+    mandatoryFirst: { whitelist: ['source'] },
   },
   {
     id:    'vector',

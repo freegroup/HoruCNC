@@ -3,6 +3,7 @@ import { inject, computed } from 'vue'
 import { usePipelineStore } from '@/stores/pipeline.js'
 import { passCount } from '@/plugins/grbl/gcode.worker.js'
 import { POSTS, postById } from '@/plugins/grbl/posts.js'
+import { downloadFile } from '@/utils/files.js'
 
 /**
  * End of the timeline: pick the machine (post-processor), check the job, download the G-code.
@@ -65,10 +66,8 @@ const summary = computed(() => {
 function download() {
   if (!result.value) return
   const text = post.value.emit(result.value, values.value)
-  const url  = URL.createObjectURL(new Blob([text], { type: 'text/plain' }))
   const name = (fileName.value.trim() || 'horucnc').replace(/\.(nc|gcode|ngc|txt)$/i, '')
-  Object.assign(document.createElement('a'), { href: url, download: `${name}.${post.value.ext}` }).click()
-  URL.revokeObjectURL(url)
+  downloadFile(`${name}.${post.value.ext}`, text, 'text/plain')
 }
 </script>
 

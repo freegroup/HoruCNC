@@ -1,28 +1,17 @@
 <script setup>
 import { usePipelineStore } from '@/stores/pipeline.js'
-import HeroPiece from './landing/HeroPiece.vue'
-import Logo      from './Logo.vue'
+import HeroPiece    from './landing/HeroPiece.vue'
+import SiteNav      from './landing/SiteNav.vue'
+import ExampleCards from './landing/ExampleCards.vue'
+import Logo         from './Logo.vue'
 
 /**
- * Start page (index.html) — what HoruCNC does, how it works, and a way in. Modelled on
- * PatternMaster's index.html (hero with a live 3D piece, steps, ideas, reasons, final call).
- * Links go to designer.html; an idea passes its template as `?template=<id>`.
+ * Start page (index.html) — what HoruCNC does, how it works, examples, and a way in. Modelled on
+ * PatternMaster's index.html (hero with a live 3D piece, steps, examples, reasons, final call).
+ * "Start a new project" leads to new.html (continue / template / example); an example card
+ * opens the designer directly.
  */
 const store = usePipelineStore()
-
-// With a stored project the main button continues it, otherwise it starts the first idea
-const primaryHref  = store.hasProject ? 'designer.html' : 'designer.html?template=edge-engraving'
-const primaryLabel = store.hasProject ? 'Back to my project' : 'Start with your camera'
-
-// Plain-language cards for the built-in templates
-const IDEAS = [
-  { id: 'edge-engraving',      title: 'Outlines',
-    text: 'Drawings, logos and lettering become crisp engraved lines.' },
-  { id: 'grayscale-engraving', title: 'Shapes',
-    text: 'Light and dark areas turn into clean closed shapes — great for signs and stencils.' },
-  { id: 'relief',              title: 'Relief',
-    text: 'The brightness of a photo becomes depth. Dark goes deep, light stays high.' },
-]
 
 const STEPS = [
   { n: '1', title: 'Start',       sub: 'with a picture',    text: 'Hold a drawing, a logo or an object in front of your camera and take a snapshot.' },
@@ -40,19 +29,12 @@ const REASONS = [
 </script>
 
 <template>
-  <div class="start">
-    <header class="nav">
-      <a class="brand" href="#top" aria-label="HoruCNC">
-        <Logo class="brand-logo" />HoruCNC
-      </a>
-      <nav class="nav-links">
-        <a href="#how">How it works</a>
-        <a href="#ideas">Ideas</a>
-        <a class="btn btn-primary btn-small" :href="primaryHref">
-          {{ store.hasProject ? 'Back to my project' : 'Open the app' }}
-        </a>
-      </nav>
-    </header>
+  <div class="page">
+    <SiteNav home="#top">
+      <a href="#how">How it works</a>
+      <a href="#examples">Examples</a>
+      <a class="btn btn-primary btn-small" href="new.html">Start a new project</a>
+    </SiteNav>
 
     <main id="top">
       <!-- Hero -->
@@ -62,11 +44,16 @@ const REASONS = [
           <h1>From a picture <span>to a <em class="cnc" data-text="CNC">CNC</em> program.</span></h1>
           <p class="lead">
             Take a snapshot with your camera, pick a few filters and watch the result live.
-            HoruCNC plans the toolpaths and writes the file your machine understands.
+            <span class="brand-inline">Horu<span class="brand-cnc">CNC</span></span> plans the toolpaths and writes the file your machine understands.
             You just press start.
           </p>
+          <p class="horu-gloss">
+            <span class="kanji">彫る</span>
+            <span class="reading">horu</span>
+            <span class="mean">Japanese for <em>to carve · engrave · sculpt</em> — the “Horu” in HoruCNC.</span>
+          </p>
           <div class="cta-row">
-            <a class="btn btn-primary btn-big" :href="primaryHref">{{ primaryLabel }}</a>
+            <a class="btn btn-primary btn-big" href="new.html">Start a new project</a>
             <a class="btn btn-ghost btn-big" href="#how">How it works</a>
           </div>
           <ul class="facts">
@@ -91,39 +78,13 @@ const REASONS = [
         </ol>
       </section>
 
-      <!-- Ideas → templates -->
-      <section id="ideas" class="ideas">
-        <p class="eyebrow">Ideas</p>
+      <!-- Examples -->
+      <section id="examples" class="examples">
+        <p class="eyebrow">Examples</p>
         <h2 class="section-title">What will you make?</h2>
-        <p class="section-lead">Pick a starting point. Each one opens a ready-made pipeline you can change step by step.</p>
-        <div class="cards">
-          <a v-for="idea in IDEAS" :key="idea.id" class="card" :href="`designer.html?template=${idea.id}`">
-            <span class="card-art" :class="idea.id" aria-hidden="true">
-              <!-- Outlines: an engraved star -->
-              <svg v-if="idea.id === 'edge-engraving'" viewBox="0 0 120 80" fill="none" stroke-linejoin="round">
-                <path d="M60 12l7.6 15.4 17 2.5-12.3 12 2.9 16.9L60 50.8l-15.2 8 2.9-16.9-12.3-12 17-2.5z" stroke="currentColor" stroke-width="2.5"/>
-                <path d="M60 22l4.7 9.5 10.5 1.5-7.6 7.4 1.8 10.4L60 45.9l-9.4 4.9 1.8-10.4-7.6-7.4 10.5-1.5z" stroke="currentColor" stroke-width="1.5" opacity=".5"/>
-              </svg>
-              <!-- Shapes: closed filled regions -->
-              <svg v-else-if="idea.id === 'grayscale-engraving'" viewBox="0 0 120 80" fill="none">
-                <path d="M22 60c0-18 12-32 26-32 8 0 12 6 18 6s10-10 20-10c9 0 14 9 14 20 0 10-6 16-6 16z" stroke="currentColor" stroke-width="2.5" stroke-linejoin="round"/>
-                <circle cx="44" cy="48" r="6" stroke="currentColor" stroke-width="2"/>
-                <path d="M70 44h14v10H70z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
-              </svg>
-              <!-- Relief: depth lines -->
-              <svg v-else viewBox="0 0 120 80" fill="none" stroke="currentColor" stroke-linecap="round">
-                <path d="M16 24c14 0 18 6 30 6s18-10 30-10 16 6 28 6" stroke-width="2"/>
-                <path d="M16 34c14 0 18 10 30 10s18-14 30-14 16 8 28 8" stroke-width="2" opacity=".85"/>
-                <path d="M16 44c14 0 18 12 30 12s18-16 30-16 16 8 28 8" stroke-width="2" opacity=".65"/>
-                <path d="M16 54c14 0 18 8 30 8s18-12 30-12 16 6 28 6" stroke-width="2" opacity=".45"/>
-              </svg>
-            </span>
-            <span class="card-title">{{ idea.title }}</span>
-            <span class="card-text">{{ idea.text }}</span>
-            <span class="card-go">Start with this →</span>
-          </a>
-        </div>
-        <p v-if="store.hasProject" class="note">Starting from an idea replaces your current pipeline.</p>
+        <p class="section-lead">Open a finished example — picture and pipeline included — and change it step by step.</p>
+        <ExampleCards />
+        <p v-if="store.hasProject" class="note">Opening an example replaces your current pipeline.</p>
       </section>
 
       <!-- Why -->
@@ -137,120 +98,19 @@ const REASONS = [
       <!-- Final call -->
       <section class="final">
         <h2>Ready for your <span>first piece?</span></h2>
-        <a class="btn btn-primary btn-big" :href="primaryHref">{{ primaryLabel }}</a>
+        <a class="btn btn-primary btn-big" href="new.html">Start a new project</a>
       </section>
     </main>
 
     <footer class="footer">
       <Logo class="footer-logo" />
-      HoruCNC · from a picture to a CNC program, right in your browser
+      <span class="brand-inline">Horu<span class="brand-cnc">CNC</span></span> · from a picture to a CNC program, right in your browser
     </footer>
   </div>
 </template>
 
 <style lang="less" scoped>
-@import '@/assets/theme.less';
-
-@pad: clamp(16px, 4vw, 40px);
-
-.start {
-  flex: 1;
-  min-height: 0;
-  overflow-y: auto;
-  scroll-behavior: smooth;
-  background: @bg;
-  color: @text;
-  font-size: 17px;
-  line-height: 1.55;
-}
-
-// ── Buttons ───────────────────────────────────────────────────────────────────
-.btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 12px 22px;
-  border-radius: 999px;
-  border: 1px solid transparent;
-  font: inherit;
-  font-size: 15px;
-  font-weight: 600;
-  text-decoration: none;
-  white-space: nowrap;
-  cursor: pointer;
-  transition: transform 0.15s, opacity 0.15s, border-color 0.15s;
-
-  &:hover { transform: translateY(-1px); }
-}
-.btn-primary { background: @accent; color: @on-accent; &:hover { opacity: 0.92; } }
-.btn-ghost   { color: @text; border-color: @border; &:hover { border-color: @muted; } }
-.btn-big     { padding: 16px 28px; font-size: 16px; }
-.btn-small   { padding: 8px 16px; font-size: 14px; }
-
-// ── Navigation ────────────────────────────────────────────────────────────────
-.nav {
-  position: sticky;
-  top: 0;
-  z-index: 10;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  padding: 12px @pad;
-  background: fade(@bg, 82%);
-  backdrop-filter: blur(14px);
-  border-bottom: 1px solid @hairline;
-}
-.brand {
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-  font-size: 17px;
-  font-weight: 650;
-  letter-spacing: -0.01em;
-  color: @text;
-  text-decoration: none;
-}
-.brand-logo  { width: 26px; height: 26px; }
-.footer-logo { width: 18px; height: 18px; }
-
-.nav-links {
-  display: flex;
-  align-items: center;
-  gap: 24px;
-
-  > a { color: @muted; text-decoration: none; font-size: 14px; font-weight: 500; &:hover { color: @text; } }
-
-  @media (max-width: 560px) { > a { display: none; } }
-}
-
-// ── Common ────────────────────────────────────────────────────────────────────
-main > section {
-  max-width: 1240px;
-  margin: 0 auto;
-  padding: 96px @pad;
-}
-.eyebrow {
-  margin-bottom: 14px;
-  font-family: @mono;
-  font-size: 13px;
-  letter-spacing: 0.02em;
-  color: @accent;
-}
-.section-title {
-  font-size: clamp(32px, 4.6vw, 54px);
-  font-weight: 700;
-  line-height: 1.05;
-  letter-spacing: -0.035em;
-
-  span { color: @muted; }
-}
-.section-lead {
-  margin-top: 18px;
-  max-width: 620px;
-  font-size: 19px;
-  color: @muted;
-}
+@import '@/assets/site.less';
 
 // ── Hero ──────────────────────────────────────────────────────────────────────
 .hero {
@@ -277,6 +137,19 @@ main > section {
   max-width: 540px;
   font-size: 19px;
   color: @muted;
+}
+.horu-gloss {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 4px 10px;
+  margin-top: 20px;
+  font-size: 15px;
+  color: @muted;
+
+  .kanji   { font-size: 24px; line-height: 1; color: @accent; }
+  .reading { font-family: @mono; font-size: 13px; letter-spacing: 0.04em; color: @accent; }
+  .mean    { em { color: @text; font-style: italic; } }
 }
 .cta-row {
   display: flex;
@@ -337,52 +210,6 @@ main > section {
   color: @muted;
 }
 
-// ── Ideas ─────────────────────────────────────────────────────────────────────
-.cards {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 16px;
-  margin-top: 44px;
-
-  @media (max-width: 900px) { grid-template-columns: 1fr; }
-}
-.card {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 8px;
-  padding: 22px 22px 24px;
-  border-radius: 20px;
-  border: 1px solid @hairline;
-  background: @panel;
-  color: @text;
-  font: inherit;
-  text-align: left;
-  text-decoration: none;
-  cursor: pointer;
-  transition: border-color 0.15s, transform 0.15s;
-
-  &:hover { border-color: @accent-line; transform: translateY(-2px); }
-  &:hover .card-go { color: @accent; }
-}
-.card-art {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-  aspect-ratio: 16 / 9;
-  margin-bottom: 10px;
-  border-radius: 14px;
-  background: #0e0e10;
-  color: @accent;
-
-  svg { width: 58%; height: auto; }
-}
-.card-title { font-size: 22px; font-weight: 700; letter-spacing: -0.02em; }
-.card-text  { font-size: 15px; color: @muted; }
-.card-go    { margin-top: 8px; font-size: 14px; font-weight: 600; color: @text; transition: color 0.15s; }
-.note       { margin-top: 18px; font-size: 13px; color: @muted; }
-
 // ── Why ───────────────────────────────────────────────────────────────────────
 .why {
   display: grid;
@@ -417,9 +244,10 @@ main > section {
   align-items: center;
   justify-content: center;
   gap: 10px;
-  padding: 28px @pad 40px;
+  padding: 28px @page-pad 40px;
   border-top: 1px solid @hairline;
   font-size: 13px;
   color: @muted;
 }
+.footer-logo { width: 18px; height: 18px; }
 </style>

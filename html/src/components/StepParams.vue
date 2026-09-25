@@ -2,7 +2,9 @@
 import { inject, computed } from 'vue'
 import { usePipelineStore } from '@/stores/pipeline.js'
 import PresetSelect from './widgets/PresetSelect.vue'
-import { UPLOAD } from '@/plugins/input/camera.js'
+import SizeInput    from './widgets/SizeInput.vue'
+import { pathSizeMm } from '@/plugins/vector/utils/measure.js'
+import { UPLOAD } from '@/plugins/input/source.js'
 
 const props = defineProps({
   plugin:     Object,
@@ -16,9 +18,16 @@ const camera        = inject('camera', null)
 const cameraDevices = computed(() => (camera?.devices.value ?? []).filter(d => d.deviceId))
 const captureSnapshot = inject('captureSnapshot', null)
 const pickImage       = inject('pickImage', null)
+const stepResults     = inject('stepResults', null)
+
+// What comes into this step: the previous step's result
+const input = computed(() => {
+  const i = store.steps.findIndex(s => s.instanceId === props.instanceId)
+  return i > 0 ? stepResults?.value?.[i - 1] ?? null : null
+})
 
 // Context for a param's `when(values, ctx)` and `compute(values, ctx)`
-const ctx = computed(() => ({ camera }))
+const ctx = computed(() => ({ camera, input: input.value }))
 
 const cameraLabel = (dev, i) =>
   (dev.label?.replace(/\s*\([0-9a-f:]+\)\s*$/i, '').trim()) || `Camera ${i + 1}`
@@ -126,6 +135,14 @@ function onSelect(param, e) {
           <option v-for="opt in param.options" :key="opt.value" :value="opt.value">{{ opt.label }}</option>
         </select>
       </label>
+
+      <div v-else-if="param.type === 'size'" class="param-row">
+        <SizeInput
+          :value="values[param.key]"
+          :current="pathSizeMm(input)"
+          @update="store.updateStepParam(instanceId, param.key, $event)"
+        />
+      </div>
 
       <div v-else-if="param.type === 'preset-select'" class="param-row">
         <div class="param-label"><span>{{ param.label }}</span></div>

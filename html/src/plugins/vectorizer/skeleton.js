@@ -3,8 +3,8 @@ import VectorPreview from '../vector/VectorPreview.vue'
 /** @type {import('../types').FilterPlugin} */
 export const skeletonPlugin = {
   id:          'skeleton',
-  label:       'Skeleton',
-  description: 'Trace thin edge pixels (e.g. Canny) into single-line vector paths',
+  label:       'Centerline',
+  description: 'Trace thin lines into single-line paths down the middle (run Line thinning first for thick lines)',
   inputType:   'image',
   outputType:  'contour',
   params: [

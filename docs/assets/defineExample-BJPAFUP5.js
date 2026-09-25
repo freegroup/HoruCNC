@@ -1,0 +1,1 @@
+import{r as t}from"./projectFile-DdUs6Vd4.js";function p({title:e,text:r="",order:a=100,project:o}){if(!e)throw new Error("An example needs a title");return{title:e,text:r,order:a,project:t(o)}}export{p as d};

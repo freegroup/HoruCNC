@@ -1,9 +1,15 @@
 import { defineStore } from 'pinia'
-import { ref, computed, watch } from 'vue'
+import { ref, computed, watch, toRaw } from 'vue'
 import { allPlugins, BLOCK_MAP } from '@/plugins/index.js'
 import { DEFAULT_TEMPLATES }    from '@/templates/index.js'
+import { UPLOAD }               from '@/plugins/input/source.js'
+import { storage }              from './storage.js'
 
 const STORAGE_KEY = 'horucnc_pipeline_v3'
+const SAVE_DELAY  = 300     // ms — the state carries the picture, so a slider drag must not save every frame
+
+// Plugins renamed since a project could have been saved: old id → new id
+const RENAMED = { camera: 'source' }
 
 /** Build default param values for a plugin. */
 function defaultValues(pluginId) {
@@ -11,7 +17,8 @@ function defaultValues(pluginId) {
   if (!plugin) return {}
   const values = {}
   for (const p of plugin.params ?? []) {
-    if (p.key && 'default' in p) values[p.key] = p.default
+    // Object defaults (e.g. a size) are copied — steps must not share one object
+    if (p.key && 'default' in p) values[p.key] = p.default && typeof p.default === 'object' ? structuredClone(p.default) : p.default
   }
   return values
 }
@@ -23,10 +30,7 @@ function makeInstanceId(pluginId, steps) {
   return `${pluginId}_${n}`
 }
 
-/**
- * Expand a block-based template into a flat step array with instance IDs.
- * @param {import('@/templates/types').PipelineTemplate} template
- */
+/** Expand a block-based template (see templates/defineTemplate.js) into steps with instance IDs. */
 function templateToSteps(template) {
   const steps = []
   for (const block of template.blocks) {
@@ -36,7 +40,7 @@ function templateToSteps(template) {
         instanceId,
         pluginId,
         blockId: block.blockId,
-        values:  defaultValues(pluginId),
+        values:  { ...defaultValues(pluginId), ...template.values?.[pluginId] },
       })
     }
   }
@@ -66,14 +70,33 @@ function loadFromStorage() {
     if (!Array.isArray(data?.steps) || !data.steps[0]?.instanceId) return null
     // Reject v2 pipelines that still reference the removed 'input' block
     if (data.steps.some(s => s.blockId === 'input')) return null
-    // A plugin may have been removed since — drop its steps
-    data.steps = data.steps.filter(s => allPlugins.has(s.pluginId))
-    // Params added since the project was saved get their defaults
-    for (const step of data.steps) step.values = { ...defaultValues(step.pluginId), ...step.values }
+    const renamed = data.steps.some(s => s.pluginId in RENAMED)
+    data.steps = sanitizeSteps(data.steps)
     data.ui = sanitizeUi(data.ui)
+    // An older format is written back right away — the legacy snapshot is gone after this
+    data.migrated = adoptLegacySnapshot(data.steps) || renamed
     return data
   } catch {}
   return null
+}
+
+/** Steps from storage or a project file: works with today's plugins and their params. */
+function sanitizeSteps(steps) {
+  for (const step of steps) step.pluginId = RENAMED[step.pluginId] ?? step.pluginId
+  // A plugin may have been removed since — drop its steps
+  const kept = steps.filter(s => allPlugins.has(s.pluginId))
+  // Params added since the project was saved get their defaults
+  for (const step of kept) step.values = { ...defaultValues(step.pluginId), ...step.values }
+  return kept
+}
+
+// The picture used to be stored on its own, next to the pipeline — move it into the source step
+function adoptLegacySnapshot(steps) {
+  const legacy = storage.get('snapshot')
+  if (typeof legacy !== 'string') return false
+  if (steps[0]?.pluginId === 'source' && !steps[0].values.image) steps[0].values.image = legacy
+  storage.remove('snapshot')
+  return true
 }
 
 const BLOCK_ORDER = ['image', 'vector', 'grbl']
@@ -89,10 +112,20 @@ export const usePipelineStore = defineStore('pipeline', () => {
   const activeStep   = computed(() => steps.value[activeIndex.value] ?? steps.value[0])
   const activePlugin = computed(() => allPlugins.get(activeStep.value?.pluginId))
 
-  /** Sent to the worker as `pipelineParams`. Strips Vue proxies. */
+  // The picture the pipeline works on is a value of its first step, the source
+  const sourceImage  = computed(() => steps.value[0]?.values?.image ?? null)
+  function setSourceImage(url) {
+    if (steps.value[0]) steps.value[0].values.image = url || null
+  }
+
+  /**
+   * Sent to the worker as `pipelineParams`. Strips Vue proxies — per value, so an object value
+   * (a size) can be posted too, while reading through the proxy keeps every value tracked.
+   */
   const pipelineParams = computed(() => {
     const map = {}
-    for (const step of steps.value) map[step.instanceId] = { ...step.values }
+    for (const step of steps.value)
+      map[step.instanceId] = Object.fromEntries(Object.entries(step.values).map(([k, v]) => [k, toRaw(v)]))
     return map
   })
 
@@ -236,24 +269,55 @@ export const usePipelineStore = defineStore('pipeline', () => {
   }
 
   // ── Templates ────────────────────────────────────────────────────────────────
-  function loadTemplate(template) {
-    steps.value       = templateToSteps(template)
+  /**
+   * A new project from a template. The picture of the current project comes along (with its
+   * source settings); only an empty project gets `startPicture` — then from "Upload image".
+   */
+  function loadTemplate(template, startPicture = null) {
+    const source = steps.value[0]?.pluginId === 'source' ? steps.value[0].values : null
+    const next   = templateToSteps(template)
+    if (source?.image)     Object.assign(next[0].values, source)
+    else if (startPicture) Object.assign(next[0].values, { image: startPicture, deviceId: UPLOAD })
+    steps.value       = next
     activeIndex.value = 0
     ui.value          = { ...sanitizeUi(), fileName: ui.value.fileName }
   }
 
+  /** A project file: its picture comes with it, so the source becomes "Upload image". */
+  function loadProject(project) {
+    const next = sanitizeSteps(project.steps)
+    if (next[0]?.pluginId !== 'source' || next.some(s => !BLOCK_MAP[s.blockId]))
+      throw new Error('This project uses steps this version of HoruCNC does not know.')
+    next[0].values.deviceId = UPLOAD
+    steps.value       = next
+    activeIndex.value = 0
+    ui.value          = sanitizeUi(project.ui)
+  }
+
   // ── Persistence ──────────────────────────────────────────────────────────────
-  // One serialisable state (steps + ui) — every change is saved, a reload restores all of it
+  // One serialisable state (steps + ui, the picture included) — every change is saved shortly
+  // after it happens, a reload restores all of it
+  let saveTimer = 0
   watch([steps, activeIndex, ui], () => {
-    if (steps.value.length === 0) return  // don't persist empty project
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify({
-        steps:       steps.value,
-        activeIndex: activeIndex.value,
-        ui:          ui.value,
-      }))
-    } catch {}
+    clearTimeout(saveTimer)
+    saveTimer = setTimeout(save, SAVE_DELAY)
   }, { deep: true })
+  addEventListener('pagehide', () => { if (saveTimer) save() })   // don't lose the last change
+  if (saved?.migrated) save()
+
+  function save() {
+    saveTimer = 0
+    if (steps.value.length === 0) return  // don't persist empty project
+    const state = { steps: steps.value, activeIndex: activeIndex.value, ui: ui.value }
+    if (write(state)) return
+    // Storage full: keep at least the pipeline, a reload then just asks for a new picture
+    write({ ...state, steps: steps.value.map((s, i) => i ? s : { ...s, values: { ...s.values, image: null } }) })
+  }
+
+  function write(state) {
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); return true }
+    catch { return false }
+  }
 
   return {
     steps,
@@ -261,6 +325,8 @@ export const usePipelineStore = defineStore('pipeline', () => {
     ui,
     activeStep,
     activePlugin,
+    sourceImage,
+    setSourceImage,
     pipelineParams,
     workerSteps,
     hasProject,
@@ -276,5 +342,6 @@ export const usePipelineStore = defineStore('pipeline', () => {
     moveStep,
     moveStepTo,
     loadTemplate,
+    loadProject,
   }
 })

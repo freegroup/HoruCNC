@@ -4,7 +4,7 @@ export { vectorRegistry }      from './vector/index.js'
 export { grblRegistry }        from './grbl/index.js'
 export { BLOCKS, BLOCK_MAP }   from './blocks.js'
 
-import { cameraPlugin }         from './input/camera.js'
+import { sourcePlugin }         from './input/source.js'
 import { imageRegistry }       from './image/index.js'
 import { vectorizerRegistry }  from './vectorizer/index.js'
 import { vectorRegistry }      from './vector/index.js'
@@ -12,7 +12,7 @@ import { grblRegistry }        from './grbl/index.js'
 
 /** Unified lookup across all plugins. */
 export const allPlugins = new Map([
-  ['camera', cameraPlugin],
+  ['source', sourcePlugin],
   ...imageRegistry,
   ...vectorizerRegistry,
   ...vectorRegistry,

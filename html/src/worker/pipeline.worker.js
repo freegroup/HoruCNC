@@ -1,7 +1,7 @@
 import { Pipeline } from './Pipeline.js'
 
 let pipeline = new Pipeline([
-  { instanceId: 'camera_1',    pluginId: 'camera'    },
+  { instanceId: 'source_1',    pluginId: 'source'    },
   { instanceId: 'grayscale_1', pluginId: 'grayscale' },
   { instanceId: 'canny_1',     pluginId: 'canny'     },
   { instanceId: 'contours_1',  pluginId: 'contours'  },

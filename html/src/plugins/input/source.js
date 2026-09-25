@@ -1,0 +1,43 @@
+import SourcePreview from './source.vue'
+
+/** `deviceId` value of the source step when the picture is an uploaded file instead of a webcam */
+export const UPLOAD = 'upload'
+
+/** @type {import('../types').FilterPlugin} */
+export const sourcePlugin = {
+  id:          'source',
+  label:       'Source Picture',
+  description: 'Take a snapshot with your webcam or upload an image',
+  inputType:   'none',
+  outputType:  'image',
+  params: [
+    { type: 'source-select', key: 'deviceId', label: 'Source', default: '' },
+    { type: 'sep' },
+    { type: 'preset-select', key: 'dpi', label: 'Resolution', default: 254,
+      options: ({ camera, values } = {}) => {
+        const nr   = camera?.nativeRes?.value
+        const pw   = values?.physicalWidth ?? 100
+        const side = nr ? Math.min(nr.w, nr.h) : Math.round(254 * pw / 25.4)
+
+        return [
+          { frac: 1/8, label: 'Draft'  },
+          { frac: 1/4, label: 'Normal' },
+          { frac: 1/2, label: 'Fine'   },
+          { frac: 3/4, label: 'High'   },
+          { frac: 1,   label: 'Ultra'  },
+        ].map(({ frac, label }) => {
+          const px   = Math.max(16, Math.round(side * frac))
+          const dpi  = Math.round(px * 25.4 / pw)
+          const pxmm = (px / pw).toFixed(1)
+          return { value: dpi, label, desc: `${px} px · ${pxmm} px/mm` }
+        })
+      },
+    },
+    { type: 'toggle', key: 'flipH',         label: 'Flip horizontal', default: false },
+    { type: 'sep' },
+    { type: 'range',  key: 'physicalWidth', label: 'Field width', min: 10, max: 500, default: 100, unit: ' mm', step: 1 },
+    // The picture itself (JPEG data URL): a camera snapshot or an uploaded file
+    { type: 'hidden', key: 'image', default: null },
+  ],
+  InputComponent: SourcePreview,
+}

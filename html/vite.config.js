@@ -12,10 +12,11 @@ export default defineConfig({
   build: {
     outDir: '../docs',
     emptyOutDir: true,
-    // Two pages, like PatternMaster: start page + designer
+    // Pages: start page, new project (continue / template / example) and the designer
     rollupOptions: {
       input: {
         index:    fileURLToPath(new URL('./index.html', import.meta.url)),
+        new:      fileURLToPath(new URL('./new.html', import.meta.url)),
         designer: fileURLToPath(new URL('./designer.html', import.meta.url)),
       },
     },
