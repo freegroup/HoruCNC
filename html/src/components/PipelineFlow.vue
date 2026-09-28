@@ -228,16 +228,11 @@ function onDragEnd() {
 }
 
 // ── Common row width ──────────────────────────────────────────────────────────
-// Every step row gets the same width: parameter column + the picture at view height.
-// The picture's aspect comes from the source image, so the view never letterboxes.
+// Every step row gets the same width: parameter column + a square view, which the picture
+// fits into by its longest side — portrait or landscape, the rows look the same.
 const PARAMS_W = 330
 const VIEW_H   = 440
-
-const rowWidth = computed(() => {
-  const bmp    = worker.stepResults.value[0]?.bitmap
-  const aspect = bmp ? bmp.width / bmp.height : 1
-  return `${Math.round(PARAMS_W + VIEW_H * aspect) + 2}px`
-})
+const rowWidth = `${PARAMS_W + VIEW_H + 2}px`
 
 // Plain-language names for the three stages
 const BLOCK_TEXT = {

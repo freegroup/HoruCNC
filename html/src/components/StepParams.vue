@@ -3,6 +3,7 @@ import { inject, computed } from 'vue'
 import { usePipelineStore } from '@/stores/pipeline.js'
 import PresetSelect from './widgets/PresetSelect.vue'
 import SizeInput    from './widgets/SizeInput.vue'
+import AnnotatedLabel from './widgets/AnnotatedLabel.vue'
 import { pathSizeMm } from '@/plugins/vector/utils/measure.js'
 import { UPLOAD } from '@/plugins/input/source.js'
 
@@ -75,7 +76,7 @@ function onSelect(param, e) {
       <div v-else-if="param.type === 'heading'" class="heading">{{ param.label }}</div>
 
       <label v-else-if="param.type === 'number'" class="field">
-        <span>{{ param.label }}<span v-if="param.unit" class="unit"> ({{ param.unit }})</span></span>
+        <AnnotatedLabel :id="`${plugin.id}.${param.key}`" :text="param.label" :unit="param.unit" />
         <input
           type="number"
           :min="param.min" :max="param.max" :step="param.step ?? 1"
@@ -91,7 +92,7 @@ function onSelect(param, e) {
 
       <div v-else-if="param.type === 'range'" class="param-row">
         <div class="param-label">
-          <span>{{ param.label }}</span>
+          <AnnotatedLabel :id="`${plugin.id}.${param.key}`" :text="param.label" />
           <span class="val">{{ values[param.key] }}{{ param.unit ?? '' }}</span>
         </div>
         <input
@@ -103,14 +104,14 @@ function onSelect(param, e) {
       </div>
 
       <div v-else-if="param.type === 'toggle'" class="toggle-row">
-        <span>{{ param.label }}</span>
+        <AnnotatedLabel :id="`${plugin.id}.${param.key}`" :text="param.label" />
         <div class="switch" :class="{ on: values[param.key] }" @click="onToggle(param.key)" />
       </div>
 
       <!-- Picture source: a webcam or an uploaded file, and the matching action right below -->
       <template v-else-if="param.type === 'source-select'">
         <label class="field">
-          <span>{{ param.label }}</span>
+          <AnnotatedLabel :id="`${plugin.id}.${param.key}`" :text="param.label" />
           <select class="p-select" :value="values[param.key]" @change="onCameraSelect(param.key, $event)">
             <option v-if="!cameraDevices.length" value="">Webcam</option>
             <option v-for="(dev, i) in cameraDevices" :key="dev.deviceId" :value="dev.deviceId">
@@ -130,13 +131,14 @@ function onSelect(param, e) {
       </template>
 
       <label v-else-if="param.type === 'select'" class="field">
-        <span>{{ param.label }}</span>
+        <AnnotatedLabel :id="`${plugin.id}.${param.key}`" :text="param.label" />
         <select class="p-select" :value="values[param.key]" @change="onSelect(param, $event)">
           <option v-for="opt in param.options" :key="opt.value" :value="opt.value">{{ opt.label }}</option>
         </select>
       </label>
 
       <div v-else-if="param.type === 'size'" class="param-row">
+        <div class="param-label"><AnnotatedLabel :id="`${plugin.id}.${param.key}`" :text="param.label" /></div>
         <SizeInput
           :value="values[param.key]"
           :current="pathSizeMm(input)"
@@ -145,7 +147,7 @@ function onSelect(param, e) {
       </div>
 
       <div v-else-if="param.type === 'preset-select'" class="param-row">
-        <div class="param-label"><span>{{ param.label }}</span></div>
+        <div class="param-label"><AnnotatedLabel :id="`${plugin.id}.${param.key}`" :text="param.label" /></div>
         <PresetSelect
           :value="values[param.key]"
           :options="resolveOptions(param)"
@@ -235,8 +237,6 @@ input[type='range'] {
   gap: 6px;
   font-size: 12px;
   color: @muted;
-
-  .unit { opacity: 0.75; }
 
   input[type='number'] {
     width: 100%;

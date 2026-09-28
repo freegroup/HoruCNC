@@ -1,3 +1,4 @@
+import { joinpathsPlugin }   from './joinpaths.js'
 import { simplifyPlugin }    from './simplify.js'
 import { smoothPlugin }      from './smooth.js'
 import { removeshortPlugin } from './removeshort.js'
@@ -7,6 +8,7 @@ import { scalePlugin }       from './scale.js'
 
 /** @type {Map<string, import('../types').FilterPlugin>} */
 export const vectorRegistry = new Map([
+  ['joinpaths',   joinpathsPlugin],
   ['simplify',    simplifyPlugin],
   ['smooth',      smoothPlugin],
   ['removeshort', removeshortPlugin],

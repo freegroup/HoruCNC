@@ -35,9 +35,9 @@ export function useProject() {
     sharedCam.framedFor = ''              // new pipeline → fit the 3D views anew
   }
 
-  /** A new project from a template; its start picture is only fetched for an empty project. */
+  /** A new project from a template, with the template's own picture (the current one otherwise). */
   async function startTemplate(template) {
-    const picture = pipeline.sourceImage ? null : await loadExamplePicture(template.picture)
+    const picture = await loadExamplePicture(template.picture)
     pipeline.loadTemplate(template, picture)
     sharedCam.framedFor = ''
   }

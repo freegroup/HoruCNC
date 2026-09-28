@@ -16,12 +16,13 @@ export const gcodePlugin = {
       { value: 'vee',   label: 'V-bit' },
       { value: 'torus', label: 'Bullnose' },
     ] },
-    { type: 'number', key: 'toolDiameter', label: 'Diameter',       unit: 'mm', min: 0.5, max: 40,  step: 0.5, default: 3 },
-    { type: 'number', key: 'veeAngle',     label: 'Included angle', unit: '°',  min: 10,  max: 170, step: 1,   default: 90, when: v => v.tool === 'vee' },
+    { type: 'number', key: 'toolDiameter', label: 'Diameter',       unit: 'mm', min: 0.5, max: 40,  step: 0.5, default: 3,  when: v => v.tool !== 'vee' },
+    { type: 'number', key: 'veeAngle',     label: 'Angle',          unit: '°',  min: 10,  max: 170, step: 1,   default: 90, when: v => v.tool === 'vee' },
+    { type: 'number', key: 'veeHeight',    label: 'V height',       unit: 'mm', min: 0.1, max: 30,  step: 0.1, default: 3,  when: v => v.tool === 'vee' },
     { type: 'number', key: 'cornerRadius', label: 'Corner radius',  unit: 'mm', min: 0.1, max: 12,  step: 0.1, default: 1,  when: v => v.tool === 'torus' },
 
     { type: 'heading', label: 'Multiple Passes' },
-    { type: 'number',  key: 'stepdown', label: 'Max stepdown / pass',  unit: 'mm', min: 0.05, max: 10,  step: 0.05, default: 0.6 },
+    { type: 'number',  key: 'stepdown', label: 'Max stepdown',  unit: 'mm', min: 0.05, max: 10,  step: 0.05, default: 0.6 },
 
     { type: 'heading', label: 'Feeds & speeds' },
     { type: 'number', key: 'safeZ',   label: 'Safe Z',    unit: 'mm',     min: 0.5, max: 30,    step: 0.5, default: 5 },

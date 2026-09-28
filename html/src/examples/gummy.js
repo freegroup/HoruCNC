@@ -26,7 +26,7 @@ export default defineExample({
         "pluginId": "grayscale",
         "blockId": "image",
         "values": {
-          "invert": false,
+          "invert": true,
           "autoLevels": true
         }
       },
@@ -35,10 +35,11 @@ export default defineExample({
         "pluginId": "terrain",
         "blockId": "vector",
         "values": {
+          "strategy": "meander",
           "maxDepth": 2,
-          "lineStep": 1,
+          "meander.lineStep": 1,
           "threshold": 240,
-          "angle": 0
+          "meander.angle": 0
         }
       },
       {

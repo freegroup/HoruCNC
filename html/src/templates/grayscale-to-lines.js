@@ -9,5 +9,5 @@ export const grayscaleToLinesTemplate = defineTemplate({
     { blockId: 'vector', plugins: ['contours'] },
     { blockId: 'grbl',   plugins: ['gcode'] },
   ],
-  picture: 'mokka',
+  picture: 'sun',
 })

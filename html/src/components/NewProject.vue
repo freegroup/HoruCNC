@@ -50,7 +50,7 @@ const stepLine = computed(() => store.steps.map(s => allPlugins.get(s.pluginId)?
         <h2 class="group-title">Start from a template</h2>
         <p class="group-lead">
           A ready-made pipeline for your kind of picture.
-          {{ store.sourceImage ? 'Your current picture comes along.' : 'It starts with a sample picture — take your own any time.' }}
+          It starts with a fitting sample picture — upload or snap your own any time.
         </p>
         <div class="cards">
           <ChoiceCard

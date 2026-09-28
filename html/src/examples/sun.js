@@ -36,8 +36,7 @@ export default defineExample({
         "blockId": "vector",
         "values": {
           "minContour": 10,
-          "depth": 1.5,
-          "invertFill": false
+          "depth": 1.5
         }
       },
       {

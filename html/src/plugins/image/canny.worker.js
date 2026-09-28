@@ -1,3 +1,5 @@
+import { writeInk } from './utils/ink.js'
+
 export async function process(prev, params) {
   const bitmap = prev.bitmap
   const w = bitmap.width, h = bitmap.height
@@ -86,13 +88,9 @@ export async function process(prev, params) {
     }
   }
 
-  // Output — only confirmed strong edges, all others black
+  // Output — only confirmed strong edges, drawn as ink on paper
   const out = ctx.createImageData(w, h)
-  for (let i = 0; i < w * h; i++) {
-    const v = edges[i] === 255 ? 255 : 0
-    out.data[i*4] = out.data[i*4+1] = out.data[i*4+2] = v
-    out.data[i*4+3] = 255
-  }
+  writeInk(out.data, edges.map(e => e === 255 ? 1 : 0))
 
   ctx.putImageData(out, 0, 0)
   return { pluginId: 'canny', kind: 'image', bitmap: canvas.transferToImageBitmap() }

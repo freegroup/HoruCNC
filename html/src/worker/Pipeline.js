@@ -6,7 +6,8 @@ import { process as processCrop }        from '../plugins/image/crop.worker.js'
 import { process as processSkeletonize } from '../plugins/image/skeletonize.worker.js'
 import { process as processContours }    from '../plugins/vectorizer/contours.worker.js'
 import { process as processSkeleton }    from '../plugins/vectorizer/skeleton.worker.js'
-import { process as processTerrain }     from '../plugins/vectorizer/terrain.worker.js'
+import { process as processTerrain }     from '../plugins/vectorizer/terrain/terrain.worker.js'
+import { process as processJoinPaths }   from '../plugins/vector/joinpaths.worker.js'
 import { process as processSimplify }    from '../plugins/vector/simplify.worker.js'
 import { process as processSmooth }      from '../plugins/vector/smooth.worker.js'
 import { process as processRemoveShort } from '../plugins/vector/removeshort.worker.js'
@@ -25,6 +26,7 @@ const PROCESSORS = {
   contours:    processContours,
   skeleton:    processSkeleton,
   terrain:     processTerrain,
+  joinpaths:   processJoinPaths,
   simplify:    processSimplify,
   smooth:      processSmooth,
   removeshort: processRemoveShort,

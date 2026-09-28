@@ -1,5 +1,7 @@
+import { inkMask, writeInk } from './utils/ink.js'
+
 /**
- * Zhang-Suen Thinning — reduces thick binary foreground regions to a 1px-wide
+ * Zhang-Suen Thinning — reduces thick ink (dark) regions to a 1px-wide
  * skeleton while preserving topology.
  *
  * Use case: thick shapes (text, filled regions) → centerline → Contours/Skeleton
@@ -18,9 +20,7 @@ export async function process(prev, params) {
   const imageData = ctx.getImageData(0, 0, w, h)
   const d = imageData.data
 
-  const fg = new Uint8Array(w * h)
-  for (let i = 0, p = 0; p < d.length; i++, p += 4)
-    fg[i] = d[p] >= 128 ? 1 : 0
+  const fg = inkMask(d)
 
   const toRemove = new Uint8Array(w * h)
 
@@ -73,11 +73,7 @@ export async function process(prev, params) {
     }
   }
 
-  for (let i = 0, p = 0; p < d.length; i++, p += 4) {
-    const v = fg[i] ? 255 : 0
-    d[p] = d[p+1] = d[p+2] = v
-    d[p+3] = 255
-  }
+  writeInk(d, fg)
   ctx.putImageData(imageData, 0, 0)
 
   return { pluginId: 'skeletonize', kind: 'image', bitmap: canvas.transferToImageBitmap() }

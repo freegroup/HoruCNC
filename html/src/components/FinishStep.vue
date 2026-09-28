@@ -58,7 +58,9 @@ const summary = computed(() => {
   return [
     ['Size',     `${(maxX - minX).toFixed(0)} × ${(maxY - minY).toFixed(0)} mm`],
     ['Depth',    `${(-minZ).toFixed(1)} mm · ${passes} ${passes === 1 ? 'pass' : 'passes'}`],
-    ['Tool',     `${TOOL[v.tool] ?? 'End mill'} Ø${v.toolDiameter} mm`],
+    ['Tool',     v.tool === 'vee'
+      ? `V-bit ${v.veeAngle}° · ${v.veeHeight} mm high`
+      : `${TOOL[v.tool] ?? 'End mill'} Ø${v.toolDiameter} mm`],
     ['Run time', `about ${time}`],
   ]
 })

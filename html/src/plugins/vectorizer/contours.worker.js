@@ -1,11 +1,11 @@
 import { renderPaths } from '../vector/utils/renderPaths.js'
+import { inkMask }     from '../image/utils/ink.js'
 
 /**
- * Moore Neighbor Tracing — traces outer boundary of foreground regions as
+ * Moore Neighbor Tracing — traces outer boundary of ink (dark) regions as
  * ordered polylines. Equivalent to OpenCV findContours(CHAIN_APPROX_SIMPLE).
  *
  * Stopping criterion: return to start pixel (simple, works for all closed shapes).
- * invertFill mirrors Python's (255-gray): trace DARK shapes when enabled.
  */
 export async function process(prev, params) {
   const bitmap = prev.bitmap
@@ -16,14 +16,9 @@ export async function process(prev, params) {
 
   const d      = ctx.getImageData(0, 0, w, h).data
   const minLen = params.minContour ?? 10
-  const invert = params.invertFill ?? false
   const z        = -(params.depth ?? 1.5)   // cutting depth — machine Z, into the material
 
-  const fg = new Uint8Array(w * h)
-  for (let i = 0, p = 0; p < d.length; i++, p += 4) {
-    const bright = d[p] >= 128
-    fg[i] = (invert ? !bright : bright) ? 1 : 0
-  }
+  const fg = inkMask(d)
 
   // 8-connected directions, clockwise from North
   const DIRS = [[0,-1],[1,-1],[1,0],[1,1],[0,1],[-1,1],[-1,0],[-1,-1]]

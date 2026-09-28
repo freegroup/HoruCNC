@@ -39,3 +39,9 @@ export function pathSizeMm(result) {
   const mpp = result?.meta?.mmPerPixel
   return b && mpp ? { w: (b.x1 - b.x0) * mpp, h: (b.y1 - b.y0) * mpp, d: pathDepth(contours) } : null
 }
+
+/** A path that stays on one spot seen from above — a plunge straight down (drawn as a dot in 2D). */
+export function isPlunge(contour) {
+  const [x, y] = contour[0]
+  return contour.every(p => p[0] === x && p[1] === y)
+}

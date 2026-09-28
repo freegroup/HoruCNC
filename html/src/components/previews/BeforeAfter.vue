@@ -1,19 +1,23 @@
 <script setup>
-import { ref, watchEffect, onMounted, onUnmounted } from 'vue'
+import { ref, computed, watchEffect, onMounted, onUnmounted } from 'vue'
 import { cssColor } from '@/assets/colors.js'
+import { isPlunge } from '@/plugins/vector/utils/measure.js'
 
 /**
  * Before/after comparison of two step results on one canvas, split by a draggable divider.
- * A side is drawn from its bitmap, or — if the result carries contours — as paths on top of
- * the dimmed source image (`base`), so vector steps show where the paths lie on the photo.
- * Without `before` only the `after` side is shown.
+ * A side is drawn from its bitmap, or — if the result carries contours — as its paths alone
+ * (before light, after in the tint). Without `before` only the `after` side is shown.
  */
 const props = defineProps({
   before: Object,   // step result or null
   after:  Object,   // step result or null
-  base:   Object,   // image result the contours were traced from, or null
   labels: { type: Array, default: () => ['Before', 'After'] },
 })
+
+// Once paths are involved, both sides tell how many they have — a picture has none yet —
+// so steps that make, join, drop or split paths show it
+const countPaths = computed(() => !!(props.before?.contours || props.after?.contours))
+const pathCount  = r => { const n = r?.contours?.length ?? 0; return `${n} ${n === 1 ? 'path' : 'paths'}` }
 
 const containerRef = ref(null)
 const canvasRef    = ref(null)
@@ -47,24 +51,28 @@ function drawSide(ctx, result, cw, ch, pathColor) {
     return
   }
 
-  const baseBmp = props.base?.bitmap
-  if (baseBmp) {
-    ctx.globalAlpha = 0.3
-    ctx.drawImage(baseBmp, r.x, r.y, r.dw, r.dh)
-    ctx.globalAlpha = 1
-  }
-
   ctx.strokeStyle = pathColor
   ctx.lineWidth   = 1.5
   ctx.lineJoin    = 'round'
   ctx.lineCap     = 'round'
   ctx.beginPath()
+  const dots = []
   for (const c of result.contours) {
     if (c.length < 2) continue
+    if (isPlunge(c)) { dots.push(c[0]); continue }
     ctx.moveTo(r.x + c[0][0] * r.s, r.y + c[0][1] * r.s)
     for (let i = 1; i < c.length; i++) ctx.lineTo(r.x + c[i][0] * r.s, r.y + c[i][1] * r.s)
   }
   ctx.stroke()
+
+  // Plunges (straight down) as dots
+  ctx.fillStyle = pathColor
+  ctx.beginPath()
+  for (const [x, y] of dots) {
+    ctx.moveTo(r.x + x * r.s + 1.5, r.y + y * r.s)
+    ctx.arc(r.x + x * r.s, r.y + y * r.s, 1.5, 0, Math.PI * 2)
+  }
+  ctx.fill()
 }
 
 function draw() {
@@ -88,7 +96,7 @@ function draw() {
 
   ctx.save()
   ctx.beginPath(); ctx.rect(0, 0, sx, ch); ctx.clip()
-  drawSide(ctx, props.before, cw, ch, cssColor('muted'))
+  drawSide(ctx, props.before, cw, ch, cssColor('text'))
   ctx.restore()
 
   ctx.save()
@@ -96,13 +104,19 @@ function draw() {
   drawSide(ctx, props.after, cw, ch, cssColor('accent'))
   ctx.restore()
 
-  // Divider with knob
-  ctx.fillStyle = 'rgba(255,255,255,0.9)'
+  // Divider with knob, in the tint — a dark edge keeps it visible on light and dark pictures
+  const edge = 'rgba(11,11,12,0.55)'
+  ctx.fillStyle = edge
+  ctx.fillRect(sx - 2, 0, 4, ch)
+  ctx.fillStyle = cssColor('accent')
   ctx.fillRect(sx - 1, 0, 2, ch)
   ctx.beginPath()
-  ctx.arc(sx, ch / 2, 11, 0, Math.PI * 2)
+  ctx.arc(sx, ch / 2, 12, 0, Math.PI * 2)
   ctx.fill()
-  ctx.fillStyle = '#0e0e10'
+  ctx.lineWidth = 1.5
+  ctx.strokeStyle = edge
+  ctx.stroke()
+  ctx.fillStyle = cssColor('on-accent')
   ctx.beginPath()
   ctx.moveTo(sx - 3, ch / 2 - 5); ctx.lineTo(sx - 8, ch / 2); ctx.lineTo(sx - 3, ch / 2 + 5)
   ctx.moveTo(sx + 3, ch / 2 - 5); ctx.lineTo(sx + 8, ch / 2); ctx.lineTo(sx + 3, ch / 2 + 5)
@@ -197,8 +211,8 @@ defineExpose({ resetView })
       @dblclick="resetView"
     />
     <template v-if="before">
-      <span class="tag before" :style="{ left: `calc(${split * 100}% - 8px)` }">{{ labels[0] }}</span>
-      <span class="tag after"  :style="{ left: `calc(${split * 100}% + 8px)` }">{{ labels[1] }}</span>
+      <span class="tag before">{{ labels[0] }}<span v-if="countPaths" class="count">{{ pathCount(before) }}</span></span>
+      <span class="tag after">{{ labels[1] }}<span v-if="countPaths" class="count">{{ pathCount(after) }}</span></span>
     </template>
   </div>
 </template>
@@ -219,10 +233,10 @@ canvas {
   touch-action: none;
 }
 
-// Labels ride along with the divider
+// Labels in the bottom corners, each on its side — the view's tools sit at the top
 .tag {
   position: absolute;
-  top: 14px;
+  bottom: 12px;
   font-size: 11px;
   font-weight: 600;
   color: #fff;
@@ -233,6 +247,17 @@ canvas {
   pointer-events: none;
   white-space: nowrap;
 
-  &.before { transform: translateX(-100%); }
+  &.before { left: 12px; }
+  &.after  { right: 12px; }
+
+  .count {
+    margin-left: 7px;
+    padding-left: 7px;
+    border-left: 1px solid fade(#fff, 25%);
+    font-family: @mono;
+    font-weight: 500;
+    font-variant-numeric: tabular-nums;
+  }
+  &.after .count { color: @accent; }
 }
 </style>

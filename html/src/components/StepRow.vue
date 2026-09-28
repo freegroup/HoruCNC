@@ -40,21 +40,12 @@ const result     = computed(() => stepResults?.value?.[props.step.index] ?? null
 const prevResult = computed(() => isSource.value ? liveFrame?.value ?? null : stepResults?.value?.[props.step.index - 1] ?? null)
 const compareLabels = computed(() => isSource.value ? ['Live', 'Snapshot'] : ['Before', 'After'])
 
-/** The raster the contours of this step were traced from — backdrop for path views. */
-const baseImage = computed(() => {
-  const rs = stepResults?.value ?? []
-  for (let i = props.step.index; i >= 0; i--) {
-    if (rs[i]?.bitmap && !rs[i].contours) return rs[i]
-  }
-  return null
-})
-
 // ── Views ─────────────────────────────────────────────────────────────────────
 const views = computed(() => {
   const p = plugin.value
   const v = []
   if (p?.OverlayComponent) v.push({ id: 'edit', label: 'Adjust' })
-  if (!isGcode.value)      v.push({ id: 'compare', label: !isSource.value ? 'Before / After' : isUpload.value ? 'Picture' : 'Live / Snapshot' })
+  if (!isGcode.value)      v.push({ id: 'compare', label: !isSource.value ? '2D' : isUpload.value ? 'Picture' : 'Live / Snapshot' })
   // A plugin can offer several looks at its output (G-code: 3D piece / CAM paths) —
   // one tab each, all rendered by the same, kept-alive OutputComponent
   if (p?.outputModes) for (const m of p.outputModes) v.push({ id: `output:${m.id}`, label: m.label })
@@ -111,6 +102,8 @@ function onKeydown(e) {
   if (e.key === 'Escape' && !document.fullscreenElement) fullscreen.value = false
 }
 watch(fullscreen, on => {
+  // Back in the row the 2D view has no reset button — leave it un-zoomed
+  if (!on && view.value === 'compare') viewRef.value?.resetView?.()
   const fn = on ? 'addEventListener' : 'removeEventListener'
   document[fn]('keydown', onKeydown)
   document[fn]('fullscreenchange', onFullscreenChange)
@@ -134,6 +127,7 @@ const dimensions = computed(() => {
   const mpp = r.meta?.mmPerPixel
 
   if (r.contours?.length) {
+    if (view.value === 'compare') return null      // the compare tags count the paths; 3D shows the size
     let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity
     for (const contour of r.contours) {
       for (const [x, y] of contour) {
@@ -144,7 +138,7 @@ const dimensions = computed(() => {
     if (!isFinite(minX)) return null
     const pw = maxX - minX, ph = maxY - minY
     const size = mpp ? `${Math.round(pw * mpp)} × ${Math.round(ph * mpp)} mm` : null
-    const n    = `${r.contours.length} ${r.contours.length === 1 ? 'line' : 'lines'}`
+    const n   = `${r.contours.length} ${r.contours.length === 1 ? 'path' : 'paths'}`
     return size ? `${n} · ${size}` : n
   }
   if (r.bitmap) {
@@ -268,7 +262,6 @@ const collapsed = computed(() => !!props.step.collapsed)
           ref="viewRef"
           :before="prevResult"
           :after="result"
-          :base="baseImage"
           :labels="compareLabels"
           v-model:split="splitPos"
         />
@@ -750,7 +743,7 @@ const collapsed = computed(() => !!props.step.collapsed)
 .dim-chip {
   position: absolute;
   left: 12px;
-  bottom: 12px;
+  top: 12px;
   z-index: 10;
   font-size: 11px;
   font-weight: 500;

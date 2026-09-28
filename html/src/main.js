@@ -9,8 +9,8 @@ import './assets/global.less'
 import { setFavicon } from './assets/logo.js'
 
 // Designer (designer.html). new.html and the start page open it with `?example=<id>` (a complete
-// project with its picture) or `?template=<id>` (a new pipeline — it keeps the current picture,
-// an empty project gets the template's start picture). Without either, the stored project is
+// project with its picture) or `?template=<id>` (a new pipeline with the template's own picture,
+// replacing the stored one). Without either, the stored project is
 // restored; without one, the first template is started.
 const app   = createApp(App).use(createPinia())
 const store = usePipelineStore()

@@ -276,8 +276,8 @@ export const usePipelineStore = defineStore('pipeline', () => {
   function loadTemplate(template, startPicture = null) {
     const source = steps.value[0]?.pluginId === 'source' ? steps.value[0].values : null
     const next   = templateToSteps(template)
-    if (source?.image)     Object.assign(next[0].values, source)
-    else if (startPicture) Object.assign(next[0].values, { image: startPicture, deviceId: UPLOAD })
+    if (startPicture)       Object.assign(next[0].values, { image: startPicture, deviceId: UPLOAD })
+    else if (source?.image) Object.assign(next[0].values, source)
     steps.value       = next
     activeIndex.value = 0
     ui.value          = { ...sanitizeUi(), fileName: ui.value.fileName }

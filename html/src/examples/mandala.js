@@ -22,15 +22,6 @@ export default defineExample({
         }
       },
       {
-        "instanceId": "blackwhite_1",
-        "pluginId": "blackwhite",
-        "blockId": "image",
-        "values": {
-          "threshold": 200,
-          "invert": true
-        }
-      },
-      {
         "instanceId": "skeletonize_1",
         "pluginId": "skeletonize",
         "blockId": "image",
@@ -41,8 +32,8 @@ export default defineExample({
         "pluginId": "skeleton",
         "blockId": "vector",
         "values": {
-          "minContour": 10,
-          "depth": 1
+          "minContour": 1,
+          "depth": 1.5
         }
       },
       {

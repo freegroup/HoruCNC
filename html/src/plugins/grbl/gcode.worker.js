@@ -1,4 +1,5 @@
 import { pathDepth } from '../vector/utils/measure.js'
+import { cutterDiameter } from './tool.js'
 
 /** Even stepdown: as few passes as the max stepdown allows, all equally deep. */
 export const passCount = v => Math.max(1, Math.ceil((v.depth ?? 0) / (v.stepdown || 1) - 1e-9))
@@ -14,7 +15,7 @@ export const passCount = v => Math.max(1, Math.ceil((v.depth ?? 0) / (v.stepdown
  * end of the timeline. Origin (0,0) is the bottom-left of the paths, Z0 the stock surface.
  */
 export async function process(prev, params) {
-  const diameter = params.toolDiameter ?? 3
+  const diameter = cutterDiameter(params)
   const stepdown = params.stepdown     ?? 0.6
   const safeZ    = params.safeZ        ?? 5
 

@@ -9,5 +9,6 @@ export const heightmapTemplate = defineTemplate({
     { blockId: 'vector', plugins: ['terrain'] },
     { blockId: 'grbl',   plugins: ['gcode'] },
   ],
+  values:  { grayscale: { invert: true } },
   picture: 'gummy',
 })

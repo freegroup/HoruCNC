@@ -27,7 +27,7 @@ export default defineExample({
         "blockId": "image",
         "values": {
           "threshold": 128,
-          "invert": true
+          "invert": false
         }
       },
       {

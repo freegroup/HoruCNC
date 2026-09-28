@@ -1,7 +1,7 @@
 <script setup>
 import { ref, computed, inject, watchEffect, watch, nextTick, onMounted, onUnmounted } from 'vue'
 import { cssColor } from '@/assets/colors.js'
-import { pathDepth } from './utils/measure.js'
+import { pathDepth, isPlunge } from './utils/measure.js'
 import { sharedCam, fitView, resetCam, attachOrbit, eyeOf } from '@/plugins/grbl/preview/viewCam.js'
 import { makeDimensionMeshes, growForDimensions } from '@/plugins/grbl/preview/dimensions.js'
 
@@ -81,6 +81,15 @@ function draw() {
 
   for (const contour of contours) {
     if (contour.length < 2) continue
+
+    if (isPlunge(contour)) {                     // straight down: a dot, coloured by its depth
+      const [x, y] = contour[0]
+      ctx.fillStyle = has3D ? zColorCss(-Math.min(...contour.map(p => p[2] ?? 0)) / zMax) : cssColor('accent')
+      ctx.beginPath()
+      ctx.arc(x - ox, y - oy, 1.5 / s, 0, Math.PI * 2)
+      ctx.fill()
+      continue
+    }
 
     if (!has3D) {
       ctx.strokeStyle = cssColor('accent')
