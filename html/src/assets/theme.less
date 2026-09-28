@@ -48,6 +48,19 @@ body {
   flex-direction: column;
 }
 
+// Arrowhead on the pipeline line, just above a node — the work flows from top to bottom.
+// For a pseudo-element of a timeline node (step, export).
+.flow-arrow() {
+  content: '';
+  position: absolute;
+  left: 50%;
+  bottom: calc(100% + 2px);
+  margin-left: -5px;
+  border-style: solid;
+  border-width: 7px 5px 0;
+  border-color: @accent transparent transparent;
+}
+
 // "CNC" in the big headlines: outlined in the tint (like PatternMaster's step numbers),
 // filled with fine hatching — a hint of raster toolpaths milled into the letters.
 // The letters of the system font overlap inside (e.g. the "N"); the outline is therefore

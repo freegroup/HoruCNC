@@ -159,10 +159,10 @@ const collapsed = computed(() => !!props.step.collapsed)
 </script>
 
 <template>
-  <div class="step-row" :class="{ collapsed }">
+  <div class="step-row" :class="{ collapsed, first: step.index === 0 }">
 
     <!-- Node on the pipeline rail (drawn by PipelineFlow) -->
-    <span class="node">{{ step.index + 1 }}</span>
+    <span class="node">{{ String(step.index + 1).padStart(2, '0') }}</span>
 
     <!-- Header — click toggles collapse -->
     <div
@@ -323,43 +323,68 @@ const collapsed = computed(() => !!props.step.collapsed)
 
   // All rows share one width (parameters + picture), set by PipelineFlow as --row-w
   width: min(100%, var(--row-w, 100%));
-  background: @surface2;
-  border: 1px solid @hairline;
+  // A card that stands off the section panel: lighter face, clear edge, a fine light top edge
+  background: linear-gradient(to bottom, #27272b, #222226 64px);
+  border: 1px solid fade(#fff, 13%);
   border-radius: 14px;
+  box-shadow: inset 0 1px 0 fade(#fff, 6%), 0 1px 2px rgba(0, 0, 0, 0.4);
   transition: border-color 0.15s, box-shadow 0.15s;
 
+  &:hover { border-color: fade(#fff, 22%); }
+
   &:not(.collapsed) {
-    border-color: fade(@border, 100%);
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+    box-shadow: inset 0 1px 0 fade(#fff, 6%), 0 12px 32px rgba(0, 0, 0, 0.45);
   }
 }
 
 // ── Rail node — sits on the line PipelineFlow draws left of the steps ─────────
 // Geometry must match PipelineFlow (@gutter 68px, @rail-x 22px)
+@node: 36px;
 .node {
   position: absolute;
-  left: calc(-68px + 22px - 20px - var(--inset, 0px));
-  top: 12px;
-  width: 40px;
-  height: 40px;
+  left: calc(-68px + 22px - @node / 2 - var(--inset, 0px));
+  top: ((64px - @node) / 2);             // centred on the header
+  width: @node;
+  height: @node;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   font-family: @mono;
-  font-size: 13px;
-  font-weight: 500;
-  color: @muted;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  font-variant-numeric: tabular-nums;
+  color: @accent;
   background: @panel;
-  border: 1.5px solid @border;
-  box-shadow: 0 0 0 6px @panel;
+  border: 1.5px solid @accent;
+  box-shadow: 0 0 0 4px @panel;          // a gap in the line around the node
   z-index: 2;
-  transition: background 0.15s, color 0.15s, border-color 0.15s;
+  transition: color 0.15s, border-color 0.15s, box-shadow 0.15s;
 
+  // The line arrives from above (not at the very first step)
+  &::before { .flow-arrow(); }
+  .step-row.first &::before { display: none; }
+
+  // A short branch from the node to its card
+  &::after {
+    content: '';
+    position: absolute;
+    left: 100%;
+    top: 50%;
+    width: calc(68px - 22px - @node / 2 + var(--inset, 0px));
+    height: 1.5px;
+    margin-top: -0.75px;
+    background: fade(@accent, 55%);
+    transition: background 0.15s;
+  }
+
+  // Open step: solid tint, branch in tint — the step you are looking at
   .step-row:not(.collapsed) & {
-    background: @text;
-    border-color: @text;
-    color: @bg;
+    color: @on-accent;
+    background: @accent;
+    border-color: @accent;
+    &::after { background: @accent; }
   }
 }
 

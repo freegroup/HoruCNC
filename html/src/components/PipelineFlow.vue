@@ -432,6 +432,10 @@ function addPlugin(pluginId) {
 @gutter: 68px;
 @rail-x: 22px;
 @rail-w: 2px;
+@tick-step:  8px;    // ruler scale beside the line
+@tick-short: 5px;
+@tick-long:  10px;
+@tick-gap:   5px;
 @inset:  14px;   // right padding of a section band
 @label-w: 230px;
 @section-gap: 28px;
@@ -470,21 +474,34 @@ function addPlugin(pluginId) {
   border: 1px solid @hairline;
   background: @panel;
 
-  // The timeline — a thin neutral line that runs on through the gap to the next section
-  &::before {
+  // The timeline — a ruler: a crisp tinted line with a scale beside it (fine ticks, a longer
+  // one every fifth). It runs on through the gap to the next section.
+  &::before,
+  &::after {
     content: '';
     position: absolute;
-    left: calc(var(--lw) + @rail-x - @rail-w / 2);
     top: 0;
     bottom: -@section-gap;
-    width: @rail-w;
-    background: @border;
   }
-  &:first-child::before { top: 36px; }
+  &::before {
+    left: calc(var(--lw) + @rail-x - @rail-w / 2);
+    width: @rail-w;
+    background: fade(@accent, 55%);
+  }
+  &::after {
+    left: calc(var(--lw) + @rail-x - @rail-w / 2 - @tick-gap - @tick-long);
+    width: @tick-long;
+    background:
+      repeating-linear-gradient(to bottom, fade(#fff, 32%) 0 1px, transparent 1px @tick-step * 5) right / @tick-long 100% no-repeat,
+      repeating-linear-gradient(to bottom, fade(#fff, 13%) 0 1px, transparent 1px @tick-step)     right / @tick-short 100% no-repeat;
+  }
+  &:first-child::before,
+  &:first-child::after { top: 32px; }
 
   // Finish: the line ends at its node
   &.finish { margin-bottom: 0; }
-  &.finish::before { bottom: auto; height: 56px; }
+  &.finish::before,
+  &.finish::after { bottom: auto; height: 56px; }
 
   @media (max-width: 1000px) {
     grid-template-columns: 1fr;
@@ -563,18 +580,20 @@ function addPlugin(pluginId) {
 // Like a step node (StepRow), filled — the finish is always open
 .finish-node {
   position: absolute;
-  left: (@rail-x - @gutter - 20px);
-  top: 12px;
-  width: 40px;
-  height: 40px;
+  left: (@rail-x - @gutter - 18px);
+  top: 14px;
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   color: @on-accent;
   background: @accent;
-  box-shadow: 0 0 0 6px @panel;
+  box-shadow: 0 0 0 4px @panel;
   z-index: 2;
+
+  &::before { .flow-arrow(); }
 }
 
 .step-gap { height: 10px; }
@@ -625,7 +644,7 @@ function addPlugin(pluginId) {
   transition: color 0.12s;
 
   &:hover { color: @text; }
-  &:hover .add-node { border-color: @text; color: @text; }
+  &:hover .add-node { border-color: @accent; border-style: solid; background: @accent-soft; }
 }
 
 // "+" node sitting on the timeline
@@ -637,15 +656,16 @@ function addPlugin(pluginId) {
   width: 28px;
   height: 28px;
   border-radius: 50%;
-  border: 1.5px solid @border;
+  border: 2px dashed fade(@accent, 55%);
   background: @panel;
-  color: @muted;
-  font-size: 16px;
-  font-weight: 400;
-  line-height: 25px;
+  box-shadow: 0 0 0 5px @panel;
+  color: @accent;
+  font-size: 17px;
+  font-weight: 500;
+  line-height: 24px;
   text-align: center;
   z-index: 2;
-  transition: border-color 0.12s, color 0.12s;
+  transition: border-color 0.12s, background 0.12s;
 }
 </style>
 

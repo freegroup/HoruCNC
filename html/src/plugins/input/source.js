@@ -17,7 +17,8 @@ export const sourcePlugin = {
       options: ({ camera, values } = {}) => {
         const nr   = camera?.nativeRes?.value
         const pw   = values?.physicalWidth ?? 100
-        const side = nr ? Math.min(nr.w, nr.h) : Math.round(254 * pw / 25.4)
+        // Relative to the picture's width — the whole picture is used, "Field width" is its width
+        const width = nr ? nr.w : Math.round(254 * pw / 25.4)
 
         return [
           { frac: 1/8, label: 'Draft'  },
@@ -26,7 +27,7 @@ export const sourcePlugin = {
           { frac: 3/4, label: 'High'   },
           { frac: 1,   label: 'Ultra'  },
         ].map(({ frac, label }) => {
-          const px   = Math.max(16, Math.round(side * frac))
+          const px   = Math.max(16, Math.round(width * frac))
           const dpi  = Math.round(px * 25.4 / pw)
           const pxmm = (px / pw).toFixed(1)
           return { value: dpi, label, desc: `${px} px · ${pxmm} px/mm` }
